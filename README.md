@@ -29,7 +29,7 @@ The script of the WinRM shell itself and the documentation will be uploaded pret
 TODO
 
 ## Requirements
-TODO
+TODO  
 $ sudo gem install winrm-fs
 
 ## Documentation
