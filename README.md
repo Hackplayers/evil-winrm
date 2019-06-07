@@ -30,6 +30,7 @@ TODO
 
 ## Requirements
 TODO
+$ sudo gem install winrm-fs
 
 ## Documentation
 TODO
