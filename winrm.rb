@@ -19,49 +19,40 @@ conn = WinRM::Connection.new(
   :no_ssl_peer_verification => true,
 )
 
-# Config for SSL
-# conn = WinRM::Connection.new(
-#   endpoint: 'https://IP:5986/wsman',
-#   transport: :ssl,
-#   client_cert: 'certnew.cer',
-#   client_key: 'client.key',
-#   no_ssl_peer_verification: true,
-# )
-
 file_manager = WinRM::FS::FileManager.new(conn)
 
 def check_directories(path, purpose)
-  if(File.directory?(path))
-  else
-    puts("The directory \"" + path + "\" used for " + purpose + " was not found")
-    abort
-  end
+    if(File.directory?(path))
+    else
+        puts("The directory \"" + path + "\" used for " + purpose + " was not found")
+        abort
+    end
 end
 
 def silent_warnings
-  old_stderr = $stderr
-  $stderr = StringIO.new
-  yield
+    old_stderr = $stderr
+    $stderr = StringIO.new
+    yield
 ensure
-  $stderr = old_stderr
+    $stderr = old_stderr
 end
 
 def read_scripts(args)
-  scripts = args
-  files = Dir.entries( scripts ).select{ |f| File.file? File.join( scripts, f ) }
-  return files
+    scripts = args
+    files = Dir.entries( scripts ).select{ |f| File.file? File.join( scripts, f ) }
+    return files
 end
 
 def read_executables(args)
-  executables = args
-  files = Dir.glob("#{executables}*.exe", File::FNM_DOTMATCH)
-  return files
+    executables = args
+    files = Dir.glob("#{executables}*.exe", File::FNM_DOTMATCH)
+    return files
 end
 
 def rutas(directory)
-  files = Dir.glob("#{directory}*.*",File::FNM_DOTMATCH )
-  directories = Dir.glob("#{directory}*").select {|f| File.directory? f}
-  return files + directories
+    files = Dir.glob("#{directory}*.*", File::FNM_DOTMATCH)
+    directories = Dir.glob("#{directory}*").select {|f| File.directory? f}
+    return files + directories
 end
 
 check_directories(scripts_path, "scripts")
@@ -72,16 +63,16 @@ menu = Base64.decode64("JG1lbnUgPSBAIgoKICAgX19fIF9fIF9fICBfX19fICBfICAgICAgICAg
 
 class String def tokenize
     self.
-      split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/).
-      select {|s| not s.empty? }.
-      map {|s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/,'')}
-  end
+        split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/).
+        select {|s| not s.empty? }.
+        map {|s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/,'')}
+    end
 end
 
 LIST = ['upload', 'download', 'exit', 'menu', 'services'].sort
 
 silent_warnings do
-LIST = LIST + functions
+    LIST = LIST + functions
 end
 
 completion = 
@@ -117,13 +108,13 @@ conn.shell(:powershell) do |shell|
             # If the file to upload exists in current dir, is not needed to set upload name, otherwise must be done
             if upload_command[2].to_s.empty? then upload_command[2] = "." end
             begin
-              puts("Uploading " + upload_command[1] + " to " + upload_command[2] )
-              file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
-              puts("#{bytes_copied} bytes of #{total_bytes} bytes copied")
-              puts("Upload succefully!")
+                puts("Uploading " + upload_command[1] + " to " + upload_command[2] )
+                file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
+                puts("#{bytes_copied} bytes of #{total_bytes} bytes copied")
+                puts("Upload succefully!")
               end
             rescue
-              puts("ERROR: Check file names")
+                puts("ERROR: Check file names")
             end
 
         elsif command.start_with?('download') then
@@ -133,34 +124,33 @@ conn.shell(:powershell) do |shell|
             # If the file to download exists in current dir, is not needed to set download name, otherwise must be done
             if download_command[2].to_s.empty? then download_command[2] = download_command[1] end
             begin
-              puts("Downloading " + download_command[1] + " to " + download_command[2] )
-              file_manager.download(download_command[1], download_command[2])
-              puts("Download succefully!")
+                puts("Downloading " + download_command[1] + " to " + download_command[2] )
+                file_manager.download(download_command[1], download_command[2])
+                puts("Download succefully!")
             rescue
-              puts("ERROR: Check file names")
+                puts("ERROR: Check file names")
             end
 
         elsif command.start_with?('Invoke-Binary') then
             begin
-              invoke_Binary = command.tokenize
-              command = ""
-              load_executable = invoke_Binary[1]
-              load_executable = File.binread(load_executable)
-              load_executable = Base64.strict_encode64(load_executable)
+                invoke_Binary = command.tokenize
+                command = ""
+                load_executable = invoke_Binary[1]
+                load_executable = File.binread(load_executable)
+                load_executable = Base64.strict_encode64(load_executable)
 
-              if !invoke_Binary[4].to_s.empty? && invoke_Binary[5].to_s.empty?
-                output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3] + "," + invoke_Binary[4])
-              elsif !invoke_Binary[3].to_s.empty? && invoke_Binary[4].to_s.empty?
-                output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3])
-              elsif !invoke_Binary[2].to_s.empty? && invoke_Binary[3].to_s.empty?
-                output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2])
-              elsif invoke_Binary[2].to_s.empty?
-                output = shell.run("Invoke-Binary " + load_executable)
-              end
-              print(output.output)
-
+                if !invoke_Binary[4].to_s.empty? && invoke_Binary[5].to_s.empty?
+                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3] + "," + invoke_Binary[4])
+                elsif !invoke_Binary[3].to_s.empty? && invoke_Binary[4].to_s.empty?
+                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3])
+                elsif !invoke_Binary[2].to_s.empty? && invoke_Binary[3].to_s.empty?
+                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2])
+                elsif invoke_Binary[2].to_s.empty?
+                    output = shell.run("Invoke-Binary " + load_executable)
+                end
+                print(output.output)
             rescue
-              puts("ERROR: Check file names")
+                puts("ERROR: Check file names")
             end
 
         elsif command.start_with?('services') then
@@ -170,23 +160,23 @@ conn.shell(:powershell) do |shell|
 
         elsif command.start_with?(*functions) then
             silent_warnings do
-            load_script = scripts + command
-            command = ""
-            load_script = load_script.gsub(" ","")
-            load_script = File.binread(load_script)
-            output = shell.run(load_script)
+                load_script = scripts + command
+                command = ""
+                load_script = load_script.gsub(" ","")
+                load_script = File.binread(load_script)
+                output = shell.run(load_script)
             end
 
         elsif command.start_with?('menu') then
             command = "" 
             silent_warnings do
-            output = shell.run(menu)
-            output = shell.run("Menu")
-            autocomplete = shell.run("auto").output.chomp
-            autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-            LIST2 = autocomplete.split("\n")
-            LIST = LIST + LIST2
-            print(output.output)
+                output = shell.run(menu)
+                output = shell.run("Menu")
+                autocomplete = shell.run("auto").output.chomp
+                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
+                LIST2 = autocomplete.split("\n")
+                LIST = LIST + LIST2
+                print(output.output)
             end
         end
 
