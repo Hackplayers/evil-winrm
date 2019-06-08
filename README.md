@@ -37,9 +37,11 @@ purposes by system administrators as well but the most of its features are focus
 ## Features
 TODO
 
-## Requirements
-TODO  
-$ sudo gem install winrm-fs
+## Requirements & Installation
+
+Some ruby gems are needed: `winrm`, `winrm-fs` and `stringio`.
+
+`~$ sudo gem install winrm winrm-fs stringio`
 
 ## Documentation
 TODO
