@@ -51,11 +51,13 @@ Main author:
 
  - [cybervaca]
 
-Collaborators, documenters and supporters:
+Collaborators, documenters, testers and supporters:
 
  - [OscarAkaElvis]
  - [jarilaos]
  - [vis0r]
+
+Based on the [Alamot]'s original code 
 
 ## Disclaimer
 
@@ -68,3 +70,4 @@ Use it at your own servers and/or with the server owner's permission
 [OscarAkaElvis]: https://github.com/OscarAkaElvis
 [jarilaos]: https://github.com/jarilaos
 [vis0r]: https://github.com/vmotos
+[Alamot]: https://github.com/Alamot

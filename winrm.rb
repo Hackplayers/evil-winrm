@@ -2,7 +2,7 @@
 # -*- encoding : utf-8 -*-
 # Author: CyberVaca
 # Twitter: https://twitter.com/CyberVaca_
-# Based on the Alamot's code.
+# Based on the Alamot's original code
 
 require 'winrm-fs'
 require 'base64'
