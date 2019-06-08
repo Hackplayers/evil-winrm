@@ -111,7 +111,7 @@ conn.shell(:powershell) do |shell|
                 puts("Uploading " + upload_command[1] + " to " + upload_command[2] )
                 file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
                 puts("#{bytes_copied} bytes of #{total_bytes} bytes copied")
-                puts("Upload succefully!")
+                puts("Upload successful!")
               end
             rescue
                 puts("ERROR: Check file names")
@@ -126,7 +126,7 @@ conn.shell(:powershell) do |shell|
             begin
                 puts("Downloading " + download_command[1] + " to " + download_command[2] )
                 file_manager.download(download_command[1], download_command[2])
-                puts("Download succefully!")
+                puts("Download successful!")
             rescue
                 puts("ERROR: Check file names")
             end
