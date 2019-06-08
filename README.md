@@ -1,5 +1,5 @@
 # Evil-WinRM
-The ultimate WinRM shell for hacking
+The ultimate WinRM shell for hacking/pentesting
 
 ```
    ___ __ __  ____  _                  
@@ -22,10 +22,19 @@ The ultimate WinRM shell for hacking
                            By: CyberVaca@HackPlayers
 ```
 
-### Coming soon...
-The script of the WinRM shell itself and the documentation will be uploaded pretty soon...
-
 ## Description & Purpose
+This shell is the ultimate WinRM shell for hacking/pentesting.
+
+WinRM (Windows Remote Management) is the Microsoft implementation of WS-Management Protocol. A standard SOAP based protocol 
+that allows hardware and operating systems from different vendors to interoperate. Microsoft included it in their Operating 
+Systems in order to make life easier to system adminsitrators.
+
+This program can be used on any Microsoft Windows Servers with this feature enabled (usually at port 5985), of course only 
+if you have credentials and permissions to use it. So we can say that it could be used in a post-exploitation hacking/pentesting 
+phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate 
+purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
+
+## Features
 TODO
 
 ## Requirements
