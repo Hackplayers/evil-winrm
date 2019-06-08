@@ -59,7 +59,9 @@ Collaborators, documenters, testers and supporters:
 
 Based on the [Alamot]'s original code 
 
-## Disclaimer
+## Disclaimer & License
+
+This script is licensed under GPLv3+. Direct link to [License](LICENSE)
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
