@@ -38,7 +38,6 @@ purposes by system administrators as well but the most of its features are focus
 TODO
 
 ## Requirements & Installation
-
 Some ruby gems are needed: `winrm`, `winrm-fs` and `stringio`.
 
 `~$ sudo gem install winrm winrm-fs stringio`
@@ -57,6 +56,12 @@ Collaborators, documenters and supporters:
  - [OscarAkaElvis]
  - [jarilaos]
  - [vis0r]
+
+## Disclaimer
+
+Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
+Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
+Use it at your own servers and/or with the server owner's permission
 
 <!-- Github URLs -->
 [cybervaca]: https://github.com/cybervaca
