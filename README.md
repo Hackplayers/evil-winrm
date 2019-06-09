@@ -65,7 +65,7 @@ This script is licensed under GPLv3+. Direct link to [License](LICENSE)
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
-Use it at your own servers and/or with the server owner's permission
+Use it at your own servers and/or with the server owner's permission.
 
 <!-- Github URLs -->
 [cybervaca]: https://github.com/cybervaca
