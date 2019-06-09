@@ -125,96 +125,101 @@ Readline.completion_append_character = ''
 
 command = ""
 
-conn.shell(:powershell) do |shell|
-    until command == "exit" do
+begin
+    conn.shell(:powershell) do |shell|
+        until command == "exit" do
 
-        pwd = shell.run("(get-location).path").output.strip
-        command = Readline.readline("PS "+pwd+"> ", true) #true for command history
-        
-        if command.start_with?('upload') then
-            upload_command = command.tokenize
-            command = ""
+            pwd = shell.run("(get-location).path").output.strip
+            command = Readline.readline("PS "+pwd+"> ", true) #true for command history
 
-            # If the file to upload exists in current dir, is not needed to set upload name, otherwise must be done
-            if upload_command[2].to_s.empty? then upload_command[2] = "." end
-            begin
-                puts("Uploading " + upload_command[1] + " to " + upload_command[2] )
-                file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
-                puts("#{bytes_copied} bytes of #{total_bytes} bytes copied")
-                puts("Upload successful!")
-              end
-            rescue
-                puts("ERROR: Check file names")
-            end
-
-        elsif command.start_with?('download') then
-            download_command = command.tokenize
-            command = ""
-
-            # If the file to download exists in current dir, is not needed to set download name, otherwise must be done
-            if download_command[2].to_s.empty? then download_command[2] = download_command[1] end
-            begin
-                puts("Downloading " + download_command[1] + " to " + download_command[2] )
-                file_manager.download(download_command[1], download_command[2])
-                puts("Download successful!")
-            rescue
-                puts("ERROR: Check file names")
-            end
-
-        elsif command.start_with?('Invoke-Binary') then
-            begin
-                invoke_Binary = command.tokenize
+            if command.start_with?('upload') then
+                upload_command = command.tokenize
                 command = ""
-                load_executable = invoke_Binary[1]
-                load_executable = File.binread(load_executable)
-                load_executable = Base64.strict_encode64(load_executable)
 
-                if !invoke_Binary[4].to_s.empty? && invoke_Binary[5].to_s.empty?
-                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3] + "," + invoke_Binary[4])
-                elsif !invoke_Binary[3].to_s.empty? && invoke_Binary[4].to_s.empty?
-                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3])
-                elsif !invoke_Binary[2].to_s.empty? && invoke_Binary[3].to_s.empty?
-                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2])
-                elsif invoke_Binary[2].to_s.empty?
-                    output = shell.run("Invoke-Binary " + load_executable)
+                # If the file to upload exists in current dir, is not needed to set upload name, otherwise must be done
+                if upload_command[2].to_s.empty? then upload_command[2] = "." end
+                begin
+                    puts("Uploading " + upload_command[1] + " to " + upload_command[2] )
+                    file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
+                    puts("#{bytes_copied} bytes of #{total_bytes} bytes copied")
+                    puts("Upload successful!")
+                  end
+                rescue
+                    puts("ERROR: Check file names")
                 end
-                print(output.output)
-            rescue
-                puts("ERROR: Check file names")
-            end
 
-        elsif command.start_with?('services') then
-            command = ""
-            output = shell.run('Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath | fl')
-            print(output.output.chomp)
-
-        elsif command.start_with?(*functions) then
-            silent_warnings do
-                load_script = scripts_path + command
+            elsif command.start_with?('download') then
+                download_command = command.tokenize
                 command = ""
-                load_script = load_script.gsub(" ","")
-                load_script = File.binread(load_script)
-                output = shell.run(load_script)
+
+                # If the file to download exists in current dir, is not needed to set download name, otherwise must be done
+                if download_command[2].to_s.empty? then download_command[2] = download_command[1] end
+                begin
+                    puts("Downloading " + download_command[1] + " to " + download_command[2] )
+                    file_manager.download(download_command[1], download_command[2])
+                    puts("Download successful!")
+                rescue
+                    puts("ERROR: Check file names")
+                end
+
+            elsif command.start_with?('Invoke-Binary') then
+                begin
+                    invoke_Binary = command.tokenize
+                    command = ""
+                    load_executable = invoke_Binary[1]
+                    load_executable = File.binread(load_executable)
+                    load_executable = Base64.strict_encode64(load_executable)
+
+                    if !invoke_Binary[4].to_s.empty? && invoke_Binary[5].to_s.empty?
+                        output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3] + "," + invoke_Binary[4])
+                    elsif !invoke_Binary[3].to_s.empty? && invoke_Binary[4].to_s.empty?
+                        output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3])
+                    elsif !invoke_Binary[2].to_s.empty? && invoke_Binary[3].to_s.empty?
+                        output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2])
+                    elsif invoke_Binary[2].to_s.empty?
+                        output = shell.run("Invoke-Binary " + load_executable)
+                    end
+                    print(output.output)
+                rescue
+                    puts("ERROR: Check file names")
+                end
+
+            elsif command.start_with?('services') then
+                command = ""
+                output = shell.run('Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath | fl')
+                print(output.output.chomp)
+
+            elsif command.start_with?(*functions) then
+                silent_warnings do
+                    load_script = scripts_path + command
+                    command = ""
+                    load_script = load_script.gsub(" ","")
+                    load_script = File.binread(load_script)
+                    output = shell.run(load_script)
+                end
+
+            elsif command.start_with?('menu') then
+                command = ""
+                silent_warnings do
+                    output = shell.run(menu)
+                    output = shell.run("Menu")
+                    autocomplete = shell.run("auto").output.chomp
+                    autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
+                    LIST2 = autocomplete.split("\n")
+                    LIST = LIST + LIST2
+                    print(output.output)
+                end
             end
 
-        elsif command.start_with?('menu') then
-            command = "" 
-            silent_warnings do
-                output = shell.run(menu)
-                output = shell.run("Menu")
-                autocomplete = shell.run("auto").output.chomp
-                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-                LIST2 = autocomplete.split("\n")
-                LIST = LIST + LIST2
-                print(output.output)
+            output = shell.run(command) do |stdout, stderr|
+                STDOUT.print(stdout)
+                STDERR.print(stderr)
             end
         end
 
-        output = shell.run(command) do |stdout, stderr|
-            STDOUT.print(stdout)
-            STDERR.print(stderr)
-        end
+        custom_exit(0)
     end
-
-    custom_exit(0)
+rescue
+    puts("ERROR: Can't establish connection. Check connection params")
+    custom_exit(1)
 end
