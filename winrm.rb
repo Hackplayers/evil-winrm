@@ -13,19 +13,24 @@ scripts_path = ""
 executables_path = ""
 
 conn = WinRM::Connection.new(
-  endpoint: 'http://IP:5985/wsman',
-  user: 'USER',
-  password: 'PASSWORD',
-  :no_ssl_peer_verification => true,
-  # Below, config for SSL, uncomment if needed
-  # transport: :ssl,
-  # client_cert: 'certnew.cer',
-  # client_key: 'client.key',
+    endpoint: 'http://IP:5985/wsman',
+    user: 'USER',
+    password: 'PASSWORD',
+    :no_ssl_peer_verification => true,
+    # Below, config for SSL, uncomment if needed
+    # transport: :ssl,
+    # client_cert: 'certnew.cer',
+    # client_key: 'client.key',
 )
 
 file_manager = WinRM::FS::FileManager.new(conn)
 
 def check_directories(path, purpose)
+    if path == "" then
+        puts("The directory used for " + purpose + " can't be empty. Please edit the script and set a path")
+        abort
+    end
+
     if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil then
         # Windows
         if path[-1] != "\\" then
@@ -38,7 +43,7 @@ def check_directories(path, purpose)
         end
     end
 
-    if !File.directory?(path)
+    if !File.directory?(path) then
         puts("The directory \"" + path + "\" used for " + purpose + " was not found")
         abort
     end
