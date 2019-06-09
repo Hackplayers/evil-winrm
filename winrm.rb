@@ -28,7 +28,7 @@ file_manager = WinRM::FS::FileManager.new(conn)
 def check_directories(path, purpose)
     if path == "" then
         puts("The directory used for " + purpose + " can't be empty. Please edit the script and set a path")
-        abort
+        custom_exit(1)
     end
 
     if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil then
@@ -45,7 +45,7 @@ def check_directories(path, purpose)
 
     if !File.directory?(path) then
         puts("The directory \"" + path + "\" used for " + purpose + " was not found")
-        abort
+        custom_exit(1)
     end
 
     if purpose == "scripts" then
@@ -78,6 +78,11 @@ def paths(directory)
     files = Dir.glob("#{directory}*.*", File::FNM_DOTMATCH)
     directories = Dir.glob("#{directory}*").select {|f| File.directory? f}
     return files + directories
+end
+
+def custom_exit(exit_code = 0)
+    puts("Exiting with code " + exit_code.to_s)
+    exit(exit_code)
 end
 
 check_directories(scripts_path, "scripts")
@@ -210,5 +215,6 @@ conn.shell(:powershell) do |shell|
             STDERR.print(stderr)
         end
     end
-    puts("Exiting with code #{output.exitcode}")
+
+    custom_exit(0)
 end
