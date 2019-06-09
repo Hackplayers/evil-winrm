@@ -44,9 +44,9 @@ purposes by system administrators as well but the most of its features are focus
  - Load in memory C# (C Sharp) compiled exe files
 
 ## Requirements & Installation
-Some ruby gems are needed: `winrm`, `winrm-fs` and `stringio`.
+Some ruby gems are needed: `winrm`, `winrm-fs`, `colorize` and `stringio`.
 
-`~$ sudo gem install winrm winrm-fs stringio`
+`~$ sudo gem install winrm winrm-fs colorize stringio`
 
 ## Documentation
 TODO

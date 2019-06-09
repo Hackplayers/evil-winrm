@@ -8,6 +8,13 @@ require 'winrm-fs'
 require 'base64'
 require 'readline'
 require 'stringio'
+require 'colorize'
+
+# Constants
+TYPE_INFO = 0
+TYPE_ERROR = 1
+TYPE_WARNING = 2
+TYPE_DATA = 3
 
 scripts_path = ""
 executables_path = ""
@@ -25,9 +32,37 @@ conn = WinRM::Connection.new(
 
 file_manager = WinRM::FS::FileManager.new(conn)
 
+def colorize(text, color = "default")
+    colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
+    color_code = colors[color]
+    return "\033[0;#{color_code}m#{text}\033[0m"
+end
+
+def print_message(msg, msg_type)
+    if msg_type == TYPE_INFO then
+        msg_prefix = "Info: "
+        color = "blue"
+    elsif msg_type == TYPE_WARNING then
+        msg_prefix = "Warning: "
+        color = "yellow"
+    elsif msg_type == TYPE_ERROR then
+        msg_prefix = "Error: "
+        color = "red"
+    elsif msg_type == TYPE_DATA then
+        msg_prefix = "Data: "
+        color = 'magenta'
+    else
+        msg_prefix = "Error"
+        color = "red"
+    end
+
+    puts "#{colorize(msg_prefix + msg, color)}"
+    puts()
+end
+
 def check_directories(path, purpose)
     if path == "" then
-        puts("The directory used for " + purpose + " can't be empty. Please edit the script and set a path")
+        print_message("The directory used for " + purpose + " can't be empty. Please edit the script and set a path", TYPE_ERROR)
         custom_exit(1)
     end
 
@@ -44,7 +79,7 @@ def check_directories(path, purpose)
     end
 
     if !File.directory?(path) then
-        puts("The directory \"" + path + "\" used for " + purpose + " was not found")
+        print_message("The directory \"" + path + "\" used for " + purpose + " was not found", TYPE_ERROR)
         custom_exit(1)
     end
 
@@ -85,6 +120,8 @@ def custom_exit(exit_code = 0)
     exit(exit_code)
 end
 
+puts()
+print_message("Starting Evil-WinRM shell", TYPE_INFO)
 check_directories(scripts_path, "scripts")
 check_directories(executables_path, "executables")
 functions = read_scripts(scripts_path)
@@ -139,13 +176,13 @@ begin
                 # If the file to upload exists in current dir, is not needed to set upload name, otherwise must be done
                 if upload_command[2].to_s.empty? then upload_command[2] = "." end
                 begin
-                    puts("Uploading " + upload_command[1] + " to " + upload_command[2] )
+                    print_message("Uploading " + upload_command[1] + " to " + upload_command[2], TYPE_INFO)
                     file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
-                    puts("#{bytes_copied} bytes of #{total_bytes} bytes copied")
-                    puts("Upload successful!")
+                    print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
+                    print_message("Upload successful!", TYPE_INFO)
                   end
                 rescue
-                    puts("ERROR: Check file names")
+                    print_message("Upload failed. Check file names", TYPE_ERROR)
                 end
 
             elsif command.start_with?('download') then
@@ -155,11 +192,11 @@ begin
                 # If the file to download exists in current dir, is not needed to set download name, otherwise must be done
                 if download_command[2].to_s.empty? then download_command[2] = download_command[1] end
                 begin
-                    puts("Downloading " + download_command[1] + " to " + download_command[2] )
+                    print_message("Downloading " + download_command[1] + " to " + download_command[2], TYPE_INFO)
                     file_manager.download(download_command[1], download_command[2])
-                    puts("Download successful!")
+                    print_message("Download successful!", TYPE_INFO)
                 rescue
-                    puts("ERROR: Check file names")
+                    print_message("Download failed. Check file names", TYPE_ERROR)
                 end
 
             elsif command.start_with?('Invoke-Binary') then
@@ -181,7 +218,7 @@ begin
                     end
                     print(output.output)
                 rescue
-                    puts("ERROR: Check file names")
+                    print_message("Check file names", TYPE_ERROR)
                 end
 
             elsif command.start_with?('services') then
@@ -220,6 +257,6 @@ begin
         custom_exit(0)
     end
 rescue
-    puts("ERROR: Can't establish connection. Check connection params")
+    print_message("Can't establish connection. Check connection params", TYPE_ERROR)
     custom_exit(1)
 end
