@@ -16,6 +16,10 @@ TYPE_ERROR = 1
 TYPE_WARNING = 2
 TYPE_DATA = 3
 
+# Global vars
+# Set this to false to disable colors
+$colors_enabled = true
+
 scripts_path = ""
 executables_path = ""
 
@@ -56,7 +60,11 @@ def print_message(msg, msg_type)
         color = "red"
     end
 
-    puts "#{colorize(msg_prefix + msg, color)}"
+    if $colors_enabled then
+        puts("#{colorize(msg_prefix + msg, color)}")
+    else
+        puts(msg_prefix + msg)
+    end
     puts()
 end
 

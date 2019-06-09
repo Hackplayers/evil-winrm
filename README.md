@@ -42,6 +42,7 @@ purposes by system administrators as well but the most of its features are focus
  - Load Powershell scripts
  - Load dll files in memory
  - Load in memory C# (C Sharp) compiled exe files
+ - Colorization on output messages (can be disabled optionally)
 
 ## Requirements & Installation
 Some ruby gems are needed: `winrm`, `winrm-fs`, `colorize` and `stringio`.
@@ -65,7 +66,6 @@ Collaborators, documenters, testers and supporters:
 Based on the [Alamot]'s original code 
 
 ## Disclaimer & License
-
 This script is licensed under GPLv3+. Direct link to [License](LICENSE)
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
