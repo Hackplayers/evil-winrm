@@ -17,6 +17,10 @@ conn = WinRM::Connection.new(
   user: 'USER',
   password: 'PASSWORD',
   :no_ssl_peer_verification => true,
+  # Below, config for SSL, uncomment if needed
+  # transport: :ssl,
+  # client_cert: 'certnew.cer',
+  # client_key: 'client.key',
 )
 
 file_manager = WinRM::FS::FileManager.new(conn)
