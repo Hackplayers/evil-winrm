@@ -1,4 +1,4 @@
-# Evil-WinRM
+# Evil-WinRM [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/)
 The ultimate WinRM shell for hacking/pentesting
 
 ```
@@ -45,7 +45,7 @@ purposes by system administrators as well but the most of its features are focus
  - Colorization on output messages (can be disabled optionally)
 
 ## Requirements & Installation
-Some ruby gems are needed: `winrm`, `winrm-fs`, `colorize` and `stringio`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm`, `winrm-fs`, `colorize` and `stringio`.
 
 `~$ sudo gem install winrm winrm-fs colorize stringio`
 
@@ -101,3 +101,6 @@ Use it at your own servers and/or with the server owner's permission.
 [jarilaos]: https://github.com/jarilaos
 [vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
+
+<!-- Badges URLs -->
+[Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
