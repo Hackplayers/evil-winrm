@@ -50,8 +50,8 @@ Some ruby gems are needed: `winrm`, `winrm-fs`, `colorize` and `stringio`.
 `~$ sudo gem install winrm winrm-fs colorize stringio`
 
 ## Quick Start
-Step 1. Edit the connection parameters to point correctly to your endpoint and set the right paths to your script and executable files.
-Step 2. Ready. Just launch it! `~$ ruby winrm.rb`
+ - Step 1. Edit the connection parameters to point correctly to your endpoint and set the right paths to your script and executable files.
+ - Step 2. Ready. Just launch it! `~$ ruby winrm.rb`
 
 Example:
 ```
