@@ -22,8 +22,7 @@ conn = WinRM::Connection.new(
 file_manager = WinRM::FS::FileManager.new(conn)
 
 def check_directories(path, purpose)
-    if(File.directory?(path))
-    else
+    if !File.directory?(path)
         puts("The directory \"" + path + "\" used for " + purpose + " was not found")
         abort
     end
@@ -37,9 +36,8 @@ ensure
     $stderr = old_stderr
 end
 
-def read_scripts(args)
-    scripts = args
-    files = Dir.entries( scripts ).select{ |f| File.file? File.join( scripts, f ) }
+def read_scripts(scripts)
+    files = Dir.entries(scripts).select{ |f| File.file? File.join( scripts, f ) }
     return files
 end
 
