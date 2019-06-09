@@ -23,12 +23,13 @@ $colors_enabled = true
 $scripts_path = ""
 $executables_path = ""
 
+# Connection parameters, set your ip address or hostname, your user and password
 conn = WinRM::Connection.new(
     endpoint: 'http://IP:5985/wsman',
     user: 'USER',
     password: 'PASSWORD',
     :no_ssl_peer_verification => true,
-    # Below, config for SSL, uncomment if needed
+    # Below, config for SSL, uncomment if needed and set cert files
     # transport: :ssl,
     # client_cert: 'certnew.cer',
     # client_key: 'client.key',

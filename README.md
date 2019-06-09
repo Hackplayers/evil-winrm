@@ -49,6 +49,29 @@ Some ruby gems are needed: `winrm`, `winrm-fs`, `colorize` and `stringio`.
 
 `~$ sudo gem install winrm winrm-fs colorize stringio`
 
+## Quick Start
+Step 1. Edit the connection parameters to point correctly to your endpoint and set the right paths to your script and executable files.
+Step 2. Ready. Just launch it! `~$ ruby winrm.rb`
+
+Example:
+```
+# Set the path for your scripts (ps1 files) and your executables (exe files)
+$scripts_path = "/home/foo/ps1_scripts/"
+$executables_path = "/home/foo/exe_files/"
+
+# Connection parameters, set your ip address or hostname, your user and password
+conn = WinRM::Connection.new(
+    endpoint: 'http://192.168.1.100:5985/wsman',
+    user: 'testdomain\Administrator',
+    password: 'MySuperSecr3tPass123!',
+    :no_ssl_peer_verification => true,
+    # Below, config for SSL, uncomment if needed and set cert files
+    # transport: :ssl,
+    # client_cert: 'certnew.cer',
+    # client_key: 'client.key',
+)
+```
+
 ## Documentation
 TODO
 
@@ -63,10 +86,10 @@ Collaborators, documenters, testers and supporters:
  - [jarilaos]
  - [vis0r]
 
-Based on the [Alamot]'s original code 
+Based on the [Alamot]'s original code.
 
 ## Disclaimer & License
-This script is licensed under GPLv3+. Direct link to [License](LICENSE)
+This script is licensed under GPLv3+. Direct link to [License](LICENSE).
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
