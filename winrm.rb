@@ -74,7 +74,7 @@ def read_executables(args)
     return files
 end
 
-def rutas(directory)
+def paths(directory)
     files = Dir.glob("#{directory}*.*", File::FNM_DOTMATCH)
     directories = Dir.glob("#{directory}*").select {|f| File.directory? f}
     return files + directories
@@ -108,7 +108,7 @@ completion =
       when Readline.line_buffer =~ /Invoke-Binary.*/i
         executables.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
       when Readline.line_buffer =~ /upload.*/i
-        paths = rutas(str)
+        paths = paths(str)
         paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
       else 
         LIST.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
