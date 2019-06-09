@@ -35,7 +35,13 @@ phase. The purpose of this program is to provide nice and easy-to-use features f
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
 ## Features
-TODO
+ - Command History (pressing up arrow)
+ - Command completion (pressing tab)
+ - Upload and download files
+ - List remote machine services
+ - Load Powershell scripts
+ - Load dll files in memory
+ - Load in memory C# (C Sharp) compiled exe files
 
 ## Requirements & Installation
 Some ruby gems are needed: `winrm`, `winrm-fs` and `stringio`.
@@ -46,7 +52,6 @@ Some ruby gems are needed: `winrm`, `winrm-fs` and `stringio`.
 TODO
 
 ## Credits:
-
 Main author:
 
  - [cybervaca]
@@ -65,7 +70,7 @@ This script is licensed under GPLv3+. Direct link to [License](LICENSE)
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
-Use it at your own servers and/or with the server owner's permission
+Use it at your own servers and/or with the server owner's permission.
 
 <!-- Github URLs -->
 [cybervaca]: https://github.com/cybervaca
