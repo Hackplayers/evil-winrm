@@ -158,7 +158,7 @@ conn.shell(:powershell) do |shell|
 
         elsif command.start_with?(*functions) then
             silent_warnings do
-                load_script = scripts + command
+                load_script = scripts_path + command
                 command = ""
                 load_script = load_script.gsub(" ","")
                 load_script = File.binread(load_script)
