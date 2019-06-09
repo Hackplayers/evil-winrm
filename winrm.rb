@@ -116,7 +116,14 @@ def paths(directory)
 end
 
 def custom_exit(exit_code = 0)
-    puts("Exiting with code " + exit_code.to_s)
+    if exit_code == 0 then
+        puts()
+        print_message("Exiting with code " + exit_code.to_s, TYPE_INFO)
+    elsif exit_code == 1 then
+        print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
+    else
+        print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
+    end
     exit(exit_code)
 end
 
