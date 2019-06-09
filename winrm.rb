@@ -22,9 +22,27 @@ conn = WinRM::Connection.new(
 file_manager = WinRM::FS::FileManager.new(conn)
 
 def check_directories(path, purpose)
+    if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil then
+        # Windows
+        if path[-1] != "\\" then
+            path.concat("\\")
+        end
+    else
+        # Unix
+        if path[-1] != "/" then
+            path.concat("/")
+        end
+    end
+
     if !File.directory?(path)
         puts("The directory \"" + path + "\" used for " + purpose + " was not found")
         abort
+    end
+
+    if purpose == "scripts" then
+        scripts_path = path
+    elsif purpose == "executables" then
+        executables_path = path
     end
 end
 
