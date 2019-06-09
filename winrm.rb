@@ -184,7 +184,7 @@ begin
         until command == "exit" do
 
             pwd = shell.run("(get-location).path").output.strip
-            command = Readline.readline("PS "+pwd+"> ", true) #true for command history
+            command = Readline.readline("*Evil-WinRM*".red + " PS ".yellow + pwd + "> ", true) # True for command history
 
             if command.start_with?('upload') then
                 upload_command = command.tokenize
