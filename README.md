@@ -35,13 +35,15 @@ phase. The purpose of this program is to provide nice and easy-to-use features f
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
 ## Features
- - Command History (pressing up arrow)
- - Command completion (pressing tab)
+ - Command History
+ - WinRM command completion
+ - Local files completion
  - Upload and download files
  - List remote machine services
+ - FullLanguage Powershell language mode
  - Load Powershell scripts
- - Load dll files in memory
- - Load in memory C# (C Sharp) compiled exe files
+ - Load in memory dll files bypassing some AVs
+ - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
  - Colorization on output messages (can be disabled optionally)
 
 ## Requirements & Installation
