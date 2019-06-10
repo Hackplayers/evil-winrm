@@ -15,6 +15,7 @@ TYPE_INFO = 0
 TYPE_ERROR = 1
 TYPE_WARNING = 2
 TYPE_DATA = 3
+SCRIPT_VERSION = '1.0'
 
 # Global vars
 # Set this to false to disable colors
@@ -137,7 +138,7 @@ def custom_exit(exit_code = 0)
 end
 
 puts()
-print_message("Starting Evil-WinRM shell", TYPE_INFO)
+print_message("Starting Evil-WinRM shell v" + SCRIPT_VERSION, TYPE_INFO)
 check_directories($scripts_path, "scripts")
 check_directories($executables_path, "executables")
 functions = read_scripts($scripts_path)
