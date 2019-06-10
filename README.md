@@ -1,4 +1,4 @@
-# Evil-WinRM [![Version-shield]](winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/)
+# Evil-WinRM [![Version-shield]](winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![License-shield]](LICENSE)
 The ultimate WinRM shell for hacking/pentesting
 
 ```
@@ -89,7 +89,7 @@ Collaborators, documenters, testers and supporters:
 Based on the [Alamot]'s original code.
 
 ## Disclaimer & License
-This script is licensed under GPLv3+. Direct link to [License](LICENSE).
+This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
@@ -105,3 +105,4 @@ Use it at your own servers and/or with the server owner's permission.
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
+[License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
