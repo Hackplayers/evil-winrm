@@ -1,4 +1,4 @@
-# Evil-WinRM [![Version-shield]](winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![License-shield]](LICENSE)
+# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![License-shield]](LICENSE)
 The ultimate WinRM shell for hacking/pentesting
 
 ```
@@ -53,7 +53,7 @@ Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm`, `winrm
 
 ## Quick Start
  - Step 1. Edit the connection parameters to point correctly to your endpoint and set the right paths to your script and executable files.
- - Step 2. Ready. Just launch it! `~$ ruby winrm.rb`
+ - Step 2. Ready. Just launch it! `~$ ruby evil-winrm.rb`
 
 Example:
 ```
