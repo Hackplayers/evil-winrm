@@ -90,6 +90,8 @@ Collaborators, documenters, testers and supporters:
 
 Based on the [Alamot]'s original code.
 
+Thanks to [3v4Si0N] for his awesome dll loader.
+
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
 
@@ -103,6 +105,7 @@ Use it at your own servers and/or with the server owner's permission.
 [jarilaos]: https://github.com/jarilaos
 [vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
+[3v4Si0N]: https://github.com/3v4Si0N/
 
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
