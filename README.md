@@ -73,39 +73,39 @@ conn = WinRM::Connection.new(
     # client_key: 'client.key',
 )
 ```
-To use IPv6 the address must be added to /etc/hosts.
+To use IPv6, the address must be added to /etc/hosts.
 
 ## Documentation
 
 #### Basic commands
 
- - upload: local files can be tabulated. It is not necessary to put a remote_path if the local file is in the current directory of the evil-winrm. 
+ - **upload**: local files can be auto-completed using tab key. It is not needed to put a remote_path if the local file is in the same directory as evil-winrm.rb file. 
    - usage: `upload local_path remote_path`
- - download: it is not necessary to set local_path if the remote file is in the current directory.
+ - **download**: it is not needed to set local_path if the remote file is in the current directory.
    - usage: `download remote_path local_path`
- - services: list all services even without administrator permissions.
- - menu:  load the Invoke-Binary and l04d3r-LoadDll functions that we will explain below. When a ps1 is loaded all functions appear.
+ - **services**: list all services. No administrator permissions needed.
+ - **menu**: load the `Invoke-Binary` and `l04d3r-LoadDll` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
  
    ![menu](resources/image2.png)
 
 
 #### Load powershell scripts
 
- - To load a ps1 you just have to type the name (tabs allowed). The scripts must be in the path setted in the `$scripts_path` variable. Type menu again and see the loaded functions.
+ - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `$scripts_path` variable. Type menu again and see the loaded functions.
  
    ![ps1](resources/image7.png)
 
 
 #### Advanced commands
 
- - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be tabulated and allows up to 3 parameters. The executables must be in the path setted in the `$executables_path` variable.
+ - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `$executables_path` variable.
  
    ![Invoke-Binary](resources/image3.png)
  
  
- - l04d3r-LoadDll: allows loading dll's in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
+ - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
  
-   The dll can be hosted by smb, http or locally.
+   The dll file can be hosted by smb, http or locally.
    
    ![l04d3r-LoadDll1](resources/image4.png)
    ![l04d3r-LoadDll2](resources/image5.png)
