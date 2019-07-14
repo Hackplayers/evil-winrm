@@ -1,4 +1,4 @@
-# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![License-shield]](LICENSE)
+# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem Version](https://badge.fury.io/rb/evil-winrm.svg)](https://badge.fury.io/rb/evil-winrm) [![License-shield]](LICENSE)
 The ultimate WinRM shell for hacking/pentesting
 
 ```
@@ -46,16 +46,17 @@ purposes by system administrators as well but the most of its features are focus
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
  - Colorization on output messages (can be disabled optionally)
 
-## Requirements & Installation
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm`, `winrm-fs`, `colorize` and `stringio`.
+## Requirements
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
 
 `~$ sudo gem install winrm winrm-fs colorize stringio`
 
-## Quick Start
- - Step 1. Edit the connection parameters to point correctly to your endpoint and set the right paths to your script and executable files.
- - Step 2. Ready. Just launch it! `~$ ruby evil-winrm.rb`
+## Installation & Quick Start
+ - Step 1. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
+ - Step 2. Edit the connection parameters (in evil-winrm.rb file) to point correctly to your endpoint and set the right paths to your script and executable files.
+ - Step 3. Ready. Just launch it! `~$ ruby evil-winrm.rb`
 
-Example:
+Configuration example:
 ```
 # Set the path for your scripts (ps1 files) and your executables (exe files)
 $scripts_path = "/home/foo/ps1_scripts/"
@@ -73,7 +74,12 @@ conn = WinRM::Connection.new(
     # client_key: 'client.key',
 )
 ```
+
 To use IPv6, the address must be added to /etc/hosts.
+
+##### Alternative (experimental yet) installation method
+
+ - Install it as ruby gem: `gem install evil-winrm`
 
 ## Documentation
 
