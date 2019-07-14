@@ -1,4 +1,4 @@
-# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem Version](https://badge.fury.io/rb/evil-winrm.svg)](https://badge.fury.io/rb/evil-winrm) [![License-shield]](LICENSE)
+# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://badge.fury.io/rb/evil-winrm) [![License-shield]](LICENSE)
 The ultimate WinRM shell for hacking/pentesting
 
 ```
@@ -77,9 +77,11 @@ conn = WinRM::Connection.new(
 
 To use IPv6, the address must be added to /etc/hosts.
 
-##### Alternative (experimental yet) installation method
+##### Alternative installation method
 
- - Install it as ruby gem: `gem install evil-winrm`
+ - Step 1. Install it as ruby gem: `gem install evil-winrm`
+ - Step 2. Edit the connection parameters. You should locate your `/path/to/your/ruby/gems/evil-winrm-<version>/lib/evil-winrm.rb` file.
+ - Step 3. Ready. Just launch it! `~$ evil-winrm`
 
 ## Documentation
 
@@ -145,6 +147,7 @@ Use it at your own servers and/or with the server owner's permission.
 [3v4Si0N]: https://github.com/3v4Si0N/
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-1.3-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-1.4-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
+[Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"

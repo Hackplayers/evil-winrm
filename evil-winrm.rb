@@ -16,7 +16,7 @@ TYPE_INFO = 0
 TYPE_ERROR = 1
 TYPE_WARNING = 2
 TYPE_DATA = 3
-SCRIPT_VERSION = '1.3'
+SCRIPT_VERSION = '1.4'
 
 # Global vars
 # Set this to false to disable colors
