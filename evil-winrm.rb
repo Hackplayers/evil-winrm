@@ -125,8 +125,7 @@ class EvilWinRM
         return files
     end
 
-    def read_executables(args)
-        executables = args
+    def read_executables(executables)
         files = Dir.glob("#{executables}*.exe", File::FNM_DOTMATCH)
         return files
     end
