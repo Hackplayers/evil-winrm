@@ -149,14 +149,6 @@ class EvilWinRM
         exit(exit_code)
     end
 
-    class String def tokenize
-        self.
-            split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/).
-            select {|s| not s.empty? }.
-            map {|s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/,'')}
-        end
-    end
-
     # Main function
     def main
         self.connection_initialization()
@@ -292,6 +284,14 @@ class EvilWinRM
             self.print_message("Can't establish connection. Check connection params", TYPE_ERROR)
             self.custom_exit(1)
         end
+    end
+end
+
+class String def tokenize
+    self.
+        split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/).
+        select {|s| not s.empty? }.
+        map {|s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/,'')}
     end
 end
 
