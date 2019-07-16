@@ -24,20 +24,29 @@ $colors_enabled = true
 # Set the path for your scripts (ps1 files) and your executables (exe files)
 $scripts_path = ""
 $executables_path = ""
+# Connection vars initialization, set your ip-address/hostname, port, username and password
+$host = "IP"
+$port = "5985"
+$user = "USER"
+$password = "PASSWORD"
 
-# Connection parameters, set your ip address or hostname, your user and password
-conn = WinRM::Connection.new(
-    endpoint: 'http://IP:5985/wsman',
-    user: 'USER',
-    password: 'PASSWORD',
-    :no_ssl_peer_verification => true,
-    # Below, config for SSL, uncomment if needed and set cert files
-    # transport: :ssl,
-    # client_cert: 'certnew.cer',
-    # client_key: 'client.key',
-)
+def connection_initialization()
+    # Connection parameters
+    puts($host)
+    $conn = WinRM::Connection.new(
+        endpoint: "http://" + $host + ":" + $port + "/wsman",
+        user: $user,
+        password: $password,
+        :no_ssl_peer_verification => true,
+        # Below, config for SSL, uncomment if needed and set cert files
+        # transport: :ssl,
+        # client_cert: 'certnew.cer',
+        # client_key: 'client.key',
+    )
+end
 
-file_manager = WinRM::FS::FileManager.new(conn)
+connection_initialization()
+file_manager = WinRM::FS::FileManager.new($conn)
 
 def colorize(text, color = "default")
     colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
@@ -182,7 +191,7 @@ command = ""
 
 begin
     print_message("Establishing connection to remote endpoint", TYPE_INFO)
-    conn.shell(:powershell) do |shell|
+    $conn.shell(:powershell) do |shell|
         until command == "exit" do
 
             pwd = shell.run("(get-location).path").output.strip
