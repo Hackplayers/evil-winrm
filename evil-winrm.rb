@@ -50,12 +50,14 @@ class EvilWinRM
         )
     end
 
+    # Define colors
     def colorize(text, color = "default")
         colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
         color_code = colors[color]
         return "\033[0;#{color_code}m#{text}\033[0m"
     end
 
+    # Messsage printing
     def print_message(msg, msg_type)
         if msg_type == TYPE_INFO then
             msg_prefix = "Info: "
@@ -82,6 +84,7 @@ class EvilWinRM
         puts()
     end
 
+    # Directories validation
     def check_directories(path, purpose)
         if path == "" then
             self.print_message("The directory used for " + purpose + " can't be empty. Please edit the script and set a path", TYPE_ERROR)
@@ -112,6 +115,7 @@ class EvilWinRM
         end
     end
 
+    # Silent warnings
     def silent_warnings
         old_stderr = $stderr
         $stderr = StringIO.new
@@ -120,22 +124,26 @@ class EvilWinRM
         $stderr = old_stderr
     end
 
+    # Read powershell script files
     def read_scripts(scripts)
         files = Dir.entries(scripts).select{ |f| File.file? File.join(scripts, f) }
         return files
     end
 
+    # Read executable files
     def read_executables(executables)
         files = Dir.glob("#{executables}*.exe", File::FNM_DOTMATCH)
         return files
     end
 
+    # Read local files and directories names
     def paths(directory)
         files = Dir.glob("#{directory}*.*", File::FNM_DOTMATCH)
         directories = Dir.glob("#{directory}*").select {|f| File.directory? f}
         return files + directories
     end
 
+    # Custom exit
     def custom_exit(exit_code = 0)
         if exit_code == 0 then
             puts()
@@ -286,6 +294,7 @@ class EvilWinRM
     end
 end
 
+# Class to create array (tokenize) from a string
 class String def tokenize
     self.
         split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/).
