@@ -12,6 +12,9 @@ require 'readline'
 require 'stringio'
 require 'colorize'
 
+require 'optionparser'
+require 'io/console'
+
 # Constants
 TYPE_INFO = 0
 TYPE_ERROR = 1
@@ -28,14 +31,54 @@ $colors_enabled = true
 $scripts_path = ""
 $executables_path = ""
 # Connection vars initialization, set your ip-address/hostname, port, username and password
-$host = "IP"
+$host = ""
 $port = "5985"
-$user = "USER"
-$password = "PASSWORD"
+$user = ""
+$password = ""
 
 
 # Class creation
 class EvilWinRM
+    def arguments()
+        options = {port:"5985"}
+        optparse = OptionParser.new do |opts|
+            opts.banner = "Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH"
+            opts.on("-i", "--ip IP", "Remote host IP or hostname (required)") { |val| options[:ip] = val }
+            opts.on("-P", "--port PORT",  "Remote host port (default 5985)") { |val| options[:port] = val }
+            opts.on("-u", "--user USER",  "Username (required)") { |val| options[:user] = val}
+            opts.on("-p", "--password PASS",  "Password") { |val| options[:password] = val}
+            opts.on("-s", "--scripts SCRIPTS_PATH",  "Powershell scripts path (required)") { |val| options[:scripts] = val}
+            opts.on("-e", "--executables EXE_PATH",  "C# executables path (required)") { |val| options[:executables] = val}
+            opts.on('-h', '--help', 'Display this screen') do
+                puts opts
+                exit
+            end
+        end
+
+        begin
+            optparse.parse!
+            mandatory = [:ip, :user, :scripts, :executables]      
+            missing = mandatory.select{ |param| options[param].nil? }
+            unless missing.empty?
+                raise OptionParser::MissingArgument.new(missing.join(', '))
+            end
+        rescue OptionParser::InvalidOption, OptionParser::MissingArgument
+            puts $!.to_s
+            puts optparse
+            exit
+        end
+
+        $host = options[:ip]
+        $user = options[:user]
+        if options[:password] == nil
+            options[:password] = STDIN.getpass(prompt='Enter Password: ')
+        end
+        $password = options[:password]
+        $port = options[:port]
+        $scripts_path = options[:scripts]
+        $executables_path = options[:executables]
+    end
+
     def connection_initialization()
         # Connection parameters
         $conn = WinRM::Connection.new(
@@ -158,6 +201,7 @@ class EvilWinRM
 
     # Main function
     def main
+        self.arguments()
         self.connection_initialization()
         file_manager = WinRM::FS::FileManager.new($conn)
         puts()
