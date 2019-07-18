@@ -7,31 +7,38 @@
 # Dependencies
 require 'winrm'
 require 'winrm-fs'
-require 'base64'
-require 'readline'
 require 'stringio'
 require 'colorize'
-
+require 'base64'
+require 'readline'
 require 'optionparser'
 require 'io/console'
 
 # Constants
+
+# Version
+VERSION = '1.5'
+
+# Msg types
 TYPE_INFO = 0
 TYPE_ERROR = 1
 TYPE_WARNING = 2
 TYPE_DATA = 3
-VERSION = '1.5'
 
 # Global vars
+
 # Available commands
 $LIST = ['upload', 'download', 'exit', 'menu', 'services'].sort
 $LISTASSEM = [''].sort
-# Set this to false to disable colors
+
+# Colors. Set this to false to disable colors
 $colors_enabled = true
-# Set the path for your scripts (ps1 files) and your executables (exe files)
+
+# Path for ps1 scripts and exec files
 $scripts_path = ""
 $executables_path = ""
-# Connection vars initialization, set your ip-address/hostname, port, username and password
+
+# Connection vars initialization
 $host = ""
 $port = "5985"
 $user = ""
