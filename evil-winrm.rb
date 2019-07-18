@@ -63,7 +63,7 @@ class EvilWinRM
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
             opts.on('-h', '--help', 'Display this help message') do
                 puts()
-                self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO)
+                self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
                 puts(opts)
                 puts()
                 exit(0)
@@ -79,7 +79,7 @@ class EvilWinRM
             end
         rescue OptionParser::InvalidOption, OptionParser::MissingArgument
             puts()
-            self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO)
+            self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
             self.print_message($!.to_s, TYPE_ERROR)
             puts(optparse)
             puts()
@@ -120,7 +120,7 @@ class EvilWinRM
     end
 
     # Messsage printing
-    def print_message(msg, msg_type)
+    def print_message(msg, msg_type, prefix_print=true)
         if msg_type == TYPE_INFO then
             msg_prefix = "Info: "
             color = "blue"
@@ -136,6 +136,10 @@ class EvilWinRM
         else
             msg_prefix = ""
             color = "default"
+        end
+
+        if !prefix_print then
+            msg_prefix = ""
         end
 
         if $colors_enabled then
