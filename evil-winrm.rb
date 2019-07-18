@@ -56,11 +56,15 @@ class EvilWinRM
             opts.banner = "Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH [-P PORT] [-p PASS] [-U URL]"
             opts.on("-i", "--ip IP", "Remote host IP or hostname (required)") { |val| options[:ip] = val }
             opts.on("-P", "--port PORT", "Remote host port (default 5985)") { |val| options[:port] = val }
-            opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val}
-            opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val}
-            opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts path (required)") { |val| options[:scripts] = val}
-            opts.on("-e", "--executables EXES_PATH", "C# executables path (required)") { |val| options[:executables] = val}
+            opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
+            opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
+            opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts path (required)") { |val| options[:scripts] = val }
+            opts.on("-e", "--executables EXES_PATH", "C# executables path (required)") { |val| options[:executables] = val }
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
+            opts.on("-V", "--version", "Show version") do |val|
+                puts("v" + VERSION)
+                custom_exit(0, false)
+            end
             opts.on('-h', '--help', 'Display this help message') do
                 puts()
                 self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
