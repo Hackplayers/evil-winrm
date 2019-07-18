@@ -62,7 +62,10 @@ class EvilWinRM
             opts.on("-e", "--executables EXES_PATH", "C# executables path (required)") { |val| options[:executables] = val}
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
             opts.on('-h', '--help', 'Display this help message') do
+                puts()
+                self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO)
                 puts(opts)
+                puts()
                 exit
             end
         end
@@ -75,8 +78,11 @@ class EvilWinRM
                 raise OptionParser::MissingArgument.new(missing.join(', '))
             end
         rescue OptionParser::InvalidOption, OptionParser::MissingArgument
-            puts $!.to_s
-            puts optparse
+            puts()
+            self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO)
+            self.print_message($!.to_s, TYPE_ERROR)
+            puts(optparse)
+            puts()
             exit
         end
 
