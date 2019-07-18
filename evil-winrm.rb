@@ -43,22 +43,24 @@ $host = ""
 $port = "5985"
 $user = ""
 $password = ""
+$url = "/wsman"
 
 
 # Class creation
 class EvilWinRM
     def arguments()
-        options = {port:"5985"}
+        options = { port:$port, url:$url }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH"
+            opts.banner = "Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH [-P PORT] [-p PASS] [-U URL]"
             opts.on("-i", "--ip IP", "Remote host IP or hostname (required)") { |val| options[:ip] = val }
-            opts.on("-P", "--port PORT",  "Remote host port (default 5985)") { |val| options[:port] = val }
-            opts.on("-u", "--user USER",  "Username (required)") { |val| options[:user] = val}
-            opts.on("-p", "--password PASS",  "Password") { |val| options[:password] = val}
-            opts.on("-s", "--scripts SCRIPTS_PATH",  "Powershell scripts path (required)") { |val| options[:scripts] = val}
-            opts.on("-e", "--executables EXE_PATH",  "C# executables path (required)") { |val| options[:executables] = val}
-            opts.on('-h', '--help', 'Display this screen') do
-                puts opts
+            opts.on("-P", "--port PORT", "Remote host port (default 5985)") { |val| options[:port] = val }
+            opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val}
+            opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val}
+            opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts path (required)") { |val| options[:scripts] = val}
+            opts.on("-e", "--executables EXES_PATH", "C# executables path (required)") { |val| options[:executables] = val}
+            opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
+            opts.on('-h', '--help', 'Display this help message') do
+                puts(opts)
                 exit
             end
         end
@@ -85,12 +87,13 @@ class EvilWinRM
         $port = options[:port]
         $scripts_path = options[:scripts]
         $executables_path = options[:executables]
+        $url = options[:url]
     end
 
     def connection_initialization()
         # Connection parameters
         $conn = WinRM::Connection.new(
-            endpoint: "http://" + $host + ":" + $port + "/wsman",
+            endpoint: "http://" + $host + ":" + $port + $url,
             user: $user,
             password: $password,
             :no_ssl_peer_verification => true,
