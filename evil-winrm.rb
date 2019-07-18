@@ -48,6 +48,8 @@ $url = "/wsman"
 
 # Class creation
 class EvilWinRM
+
+    # Arguments
     def arguments()
         options = { port:$port, url:$url }
         optparse = OptionParser.new do |opts|
@@ -67,7 +69,7 @@ class EvilWinRM
 
         begin
             optparse.parse!
-            mandatory = [:ip, :user, :scripts, :executables]      
+            mandatory = [:ip, :user, :scripts, :executables]
             missing = mandatory.select{ |param| options[param].nil? }
             unless missing.empty?
                 raise OptionParser::MissingArgument.new(missing.join(', '))
