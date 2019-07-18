@@ -121,15 +121,16 @@ Main author:
 
  - [cybervaca]
 
-Collaborators, documenters, testers and supporters:
+Collaborators, developers, documenters, testers and supporters:
 
  - [OscarAkaElvis]
  - [jarilaos]
  - [vis0r]
 
-Based on the [Alamot]'s original code.
+Hat tip to:
 
-Thanks to [3v4Si0N] for his awesome dll loader.
+ - [Alamot] for his original code.
+ - [3v4Si0N] for his awesome dll loader.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
