@@ -66,7 +66,7 @@ class EvilWinRM
                 self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO)
                 puts(opts)
                 puts()
-                exit
+                exit(0)
             end
         end
 
@@ -83,7 +83,7 @@ class EvilWinRM
             self.print_message($!.to_s, TYPE_ERROR)
             puts(optparse)
             puts()
-            exit
+            exit(1)
         end
 
         $host = options[:ip]
