@@ -20,7 +20,7 @@ TYPE_INFO = 0
 TYPE_ERROR = 1
 TYPE_WARNING = 2
 TYPE_DATA = 3
-SCRIPT_VERSION = '1.5'
+VERSION = '1.5'
 
 # Global vars
 # Available commands
@@ -205,7 +205,7 @@ class EvilWinRM
         self.connection_initialization()
         file_manager = WinRM::FS::FileManager.new($conn)
         puts()
-        self.print_message("Starting Evil-WinRM shell v" + SCRIPT_VERSION, TYPE_INFO)
+        self.print_message("Starting Evil-WinRM shell v" + VERSION, TYPE_INFO)
         self.check_directories($scripts_path, "scripts")
         self.check_directories($executables_path, "executables")
         functions = self.read_scripts($scripts_path)
