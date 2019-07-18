@@ -210,14 +210,16 @@ class EvilWinRM
     end
 
     # Custom exit
-    def custom_exit(exit_code = 0)
-        if exit_code == 0 then
-            puts()
-            self.print_message("Exiting with code " + exit_code.to_s, TYPE_INFO)
-        elsif exit_code == 1 then
-            self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
-        else
-            self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
+    def custom_exit(exit_code = 0, message_print=true)
+        if message_print then
+            if exit_code == 0 then
+                puts()
+                self.print_message("Exiting with code " + exit_code.to_s, TYPE_INFO)
+            elsif exit_code == 1 then
+                self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
+            else
+                self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
+            end
         end
         exit(exit_code)
     end
