@@ -46,6 +46,21 @@ purposes by system administrators as well but the most of its features are focus
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
  - Colorization on output messages (can be disabled optionally)
 
+## Help
+
+```
+Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH [-P PORT] [-p PASS] [-U URL]
+    -i, --ip IP                      Remote host IP or hostname (required)
+    -P, --port PORT                  Remote host port (default 5985)
+    -u, --user USER                  Username (required)
+    -p, --password PASS              Password
+    -s, --scripts PS_SCRIPTS_PATH    Powershell scripts path (required)
+    -e, --executables EXES_PATH      C# executables path (required)
+    -U, --url URL                    Remote url endpoint (default /wsman)
+    -V, --version                    Show version
+    -h, --help                       Display this help message
+```
+
 ## Requirements
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
 
@@ -53,35 +68,16 @@ Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`
 
 ## Installation & Quick Start
  - Step 1. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
- - Step 2. Edit the connection parameters (in evil-winrm.rb file) to point correctly to your endpoint and set the right paths to your script and executable files.
- - Step 3. Ready. Just launch it! `~$ ruby evil-winrm.rb`
+ - Step 2. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
-Configuration example:
-```
-# Set the path for your scripts (ps1 files) and your executables (exe files)
-$scripts_path = "/home/foo/ps1_scripts/"
-$executables_path = "/home/foo/exe_files/"
-
-# Connection parameters, set your ip address or hostname, your user and password
-conn = WinRM::Connection.new(
-    endpoint: 'http://192.168.1.100:5985/wsman',
-    user: 'testdomain\Administrator',
-    password: 'MySuperSecr3tPass123!',
-    :no_ssl_peer_verification => true,
-    # Below, config for SSL, uncomment if needed and set cert files
-    # transport: :ssl,
-    # client_cert: 'certnew.cer',
-    # client_key: 'client.key',
-)
-```
+If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted avoiding to be shown.
 
 To use IPv6, the address must be added to /etc/hosts.
 
-##### Alternative installation method
+##### Alternative installation method as ruby gem
 
- - Step 1. Install it as ruby gem: `gem install evil-winrm`
- - Step 2. Edit the connection parameters. You should locate your `/path/to/your/ruby/gems/evil-winrm-<version>/lib/evil-winrm.rb` file.
- - Step 3. Ready. Just launch it! `~$ evil-winrm`
+ - Step 1. Install it: `gem install evil-winrm`
+ - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ## Documentation
 
