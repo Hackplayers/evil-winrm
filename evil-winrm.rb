@@ -123,8 +123,8 @@ class EvilWinRM
             msg_prefix = "Data: "
             color = 'magenta'
         else
-            msg_prefix = "Error"
-            color = "red"
+            msg_prefix = ""
+            color = "default"
         end
 
         if $colors_enabled then
