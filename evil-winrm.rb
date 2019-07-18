@@ -246,7 +246,7 @@ class EvilWinRM
         command = ""
 
         begin
-            print_message("Establishing connection to remote endpoint", TYPE_INFO)
+            self.print_message("Establishing connection to remote endpoint", TYPE_INFO)
             $conn.shell(:powershell) do |shell|
                 until command == "exit" do
 
