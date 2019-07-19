@@ -103,11 +103,10 @@ To use IPv6, the address must be added to /etc/hosts.
 
  - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
-   The dll file can be hosted by smb, http or locally.
+   The dll file can be hosted by smb, http or locally. Once it is loaded type `menu`, then it is possible to autocomplete all functions.
    
    ![l04d3r-LoadDll1](resources/image4.png)
    ![l04d3r-LoadDll2](resources/image5.png)
-   ![l04d3r-LoadDll3](resources/image6.png)
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
