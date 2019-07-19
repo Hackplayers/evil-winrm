@@ -70,7 +70,7 @@ Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`
  - Step 1. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 2. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
-If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted avoiding to be shown.
+If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted preventing to be shown.
 
 To use IPv6, the address must be added to /etc/hosts.
 
