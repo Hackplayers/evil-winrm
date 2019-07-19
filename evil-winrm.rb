@@ -249,7 +249,7 @@ class EvilWinRM
               case
               when Readline.line_buffer =~ /help.*/i
                 puts("#{$LIST.join("\t")}")
-              when Readline.line_buffer =~ /\[*/i
+              when Readline.line_buffer =~ /\[.*/i
                 $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?              
               when Readline.line_buffer =~ /Invoke-Binary.*/i
                 executables.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
