@@ -92,12 +92,12 @@ To use IPv6, the address must be added to /etc/hosts.
    ![menu](resources/image2.png)
 
 #### Load powershell scripts
- - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `$scripts_path` variable. Type menu again and see the loaded functions.
+ - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions.
 
    ![ps1](resources/image7.png)
 
 #### Advanced commands
- - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `$executables_path` variable.
+ - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](resources/image3.png)
 
