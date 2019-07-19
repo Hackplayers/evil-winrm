@@ -221,6 +221,9 @@ class EvilWinRM
                 self.print_message("Exiting with code " + exit_code.to_s, TYPE_INFO)
             elsif exit_code == 1 then
                 self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
+            elsif exit_code == 130 then
+                puts()
+                self.print_message("Exiting...", TYPE_INFO)                
             else
                 self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
             end
@@ -367,6 +370,8 @@ class EvilWinRM
 
                 self.custom_exit(0)
             end
+        rescue SignalException
+            self.custom_exit(130)
         rescue
             self.print_message("Can't establish connection. Check connection params", TYPE_ERROR)
             self.custom_exit(1)
