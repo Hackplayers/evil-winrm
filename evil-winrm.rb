@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # -*- encoding : utf-8 -*-
 # Author: CyberVaca
 # Twitter: https://twitter.com/CyberVaca_
