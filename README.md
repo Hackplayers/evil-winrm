@@ -40,7 +40,6 @@ purposes by system administrators as well but the most of its features are focus
  - Local files completion
  - Upload and download files
  - List remote machine services
- - FullLanguage Powershell language mode
  - Load Powershell scripts
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
