@@ -287,30 +287,30 @@ class EvilWinRM
                         upload_command = command.tokenize
                         command = ""
 
-                        # If the file to upload exists in current dir, is not needed to set upload name, otherwise must be done
                         if upload_command[2].to_s.empty? then upload_command[2] = "." end
                         begin
                             self.print_message("Uploading " + upload_command[1] + " to " + upload_command[2], TYPE_INFO)
                             file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
-                            self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
-                            self.print_message("Upload successful!", TYPE_INFO)
+                            if bytes_copied == total_bytes then
+                                self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
+                                self.print_message("Upload successful!", TYPE_INFO)
+                            end
                           end
                         rescue
-                            self.print_message("Upload failed. Check file names", TYPE_ERROR)
+                            self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
                         end
 
                     elsif command.start_with?('download') then
                         download_command = command.tokenize
                         command = ""
 
-                        # If the file to download exists in current dir, is not needed to set download name, otherwise must be done
                         if download_command[2].to_s.empty? then download_command[2] = download_command[1] end
                         begin
                             self.print_message("Downloading " + download_command[1] + " to " + download_command[2], TYPE_INFO)
                             file_manager.download(download_command[1], download_command[2])
                             self.print_message("Download successful!", TYPE_INFO)
                         rescue
-                            self.print_message("Download failed. Check file names", TYPE_ERROR)
+                            self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
                         end
 
                     elsif command.start_with?('Invoke-Binary') then
