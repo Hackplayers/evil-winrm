@@ -53,8 +53,8 @@ Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH [-P PORT] [-p PASS]
     -P, --port PORT                  Remote host port (default 5985)
     -u, --user USER                  Username (required)
     -p, --password PASS              Password
-    -s, --scripts PS_SCRIPTS_PATH    Powershell scripts path (required)
-    -e, --executables EXES_PATH      C# executables path (required)
+    -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
+    -e, --executables EXES_PATH      C# executables local path
     -U, --url URL                    Remote url endpoint (default /wsman)
     -V, --version                    Show version
     -h, --help                       Display this help message
