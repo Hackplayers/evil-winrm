@@ -44,12 +44,15 @@ purposes by system administrators as well but the most of its features are focus
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
  - Colorization on output messages (can be disabled optionally)
+ - SSL and certificates support
 
 ## Help
 
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S]
-    -S, --ssl                        Enable ssl
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
+    -S, --ssl                        Enable SSL
+    -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
+    -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
     -e, --executables EXES_PATH      C# executables local path
     -i, --ip IP                      Remote host IP or hostname (required)

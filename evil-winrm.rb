@@ -53,11 +53,13 @@ class EvilWinRM
     def arguments()
         options = { port:$port, url:$url }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S]"
+            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
                 $ssl = true
                 options[:port] = "5986"
             end
+            opts.on("-c", "--pub-key PUBLIC_KEY_PATH", "Local path to public key certificate") { |val| options[:pub_key] = val }
+            opts.on("-k", "--priv-key PRIVATE_KEY_PATH", "Local path to private key certificate") { |val| options[:priv_key] = val }
             opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts local path") { |val| options[:scripts] = val }
             opts.on("-e", "--executables EXES_PATH", "C# executables local path") { |val| options[:executables] = val }
             opts.on("-i", "--ip IP", "Remote host IP or hostname (required)") { |val| options[:ip] = val }
@@ -104,20 +106,32 @@ class EvilWinRM
         $scripts_path = options[:scripts]
         $executables_path = options[:executables]
         $url = options[:url]
+        $pub_key = options[:pub_key]
+        $priv_key = options[:priv_key]
     end
 
     # Generate connection object
     def connection_initialization()
         if $ssl then
-            $conn = WinRM::Connection.new(
-                endpoint: "https://" + $host + ":" + $port + $url,
-                user: $user,
-                password: $password,
-                :no_ssl_peer_verification => true,
-                transport: :ssl,
-                # client_cert: 'certnew.cer',
-                # client_key: 'elvis.key',
-            )
+            if $pub_key and $priv_key then
+                $conn = WinRM::Connection.new(
+                    endpoint: "https://" + $host + ":" + $port + $url,
+                    user: $user,
+                    password: $password,
+                    :no_ssl_peer_verification => true,
+                    transport: :ssl,
+                    client_cert: $pub_key,
+                    client_key: $priv_key,
+                )
+            else
+                $conn = WinRM::Connection.new(
+                    endpoint: "https://" + $host + ":" + $port + $url,
+                    user: $user,
+                    password: $password,
+                    :no_ssl_peer_verification => true,
+                    transport: :ssl,
+                )
+            end
         else
             $conn = WinRM::Connection.new(
                 endpoint: "http://" + $host + ":" + $port + $url,
@@ -164,6 +178,19 @@ class EvilWinRM
             puts(msg_prefix + msg)
         end
         puts()
+    end
+
+    # Certificates validation
+    def check_certs(pub_key, priv_key)
+         if !File.file?(pub_key) then
+            self.print_message("Path to provided public certificate file \"" + pub_key + "\" can't be found. Check filename or path", TYPE_ERROR)
+            self.custom_exit(1)
+        end
+
+        if !File.file?($priv_key) then
+            self.print_message("Path to provided private certificate file \"" + priv_key + "\" can't be found. Check filename or path", TYPE_ERROR)
+            self.custom_exit(1)
+        end
     end
 
     # Directories validation
@@ -235,7 +262,7 @@ class EvilWinRM
                 self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
             elsif exit_code == 130 then
                 puts()
-                self.print_message("Exiting...", TYPE_INFO)                
+                self.print_message("Exiting...", TYPE_INFO)
             else
                 self.print_message("Exiting with code " + exit_code.to_s, TYPE_ERROR)
             end
@@ -250,6 +277,16 @@ class EvilWinRM
         file_manager = WinRM::FS::FileManager.new($conn)
         puts()
         self.print_message("Starting Evil-WinRM shell v" + VERSION, TYPE_INFO)
+
+        if !$ssl and ($pub_key or $priv_key) then
+            self.print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING)
+        elsif $ssl
+            self.print_message("SSL enabled", TYPE_WARNING)
+        end
+
+        if $ssl and ($pub_key or $priv_key) then
+            self.check_certs($pub_key, $priv_key)
+        end
 
         if $scripts_path != nil then
             self.check_directories($scripts_path, "scripts")
