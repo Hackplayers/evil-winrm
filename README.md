@@ -48,14 +48,15 @@ purposes by system administrators as well but the most of its features are focus
 ## Help
 
 ```
-Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH [-P PORT] [-p PASS] [-U URL]
-    -i, --ip IP                      Remote host IP or hostname (required)
-    -P, --port PORT                  Remote host port (default 5985)
-    -u, --user USER                  Username (required)
-    -p, --password PASS              Password
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S]
+    -S, --ssl                        Enable ssl
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
     -e, --executables EXES_PATH      C# executables local path
+    -i, --ip IP                      Remote host IP or hostname (required)
     -U, --url URL                    Remote url endpoint (default /wsman)
+    -u, --user USER                  Username (required)
+    -p, --password PASS              Password
+    -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -h, --help                       Display this help message
 ```
