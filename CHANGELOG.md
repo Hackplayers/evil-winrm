@@ -2,7 +2,8 @@
  - Added SSL and certificates support
  - Upload/download messages improved
  - Updated documentation
- - Removed scripts and executables dir as mandatory arguments 
+ - Removed scripts and executables dir as mandatory arguments
+ - Added logo
 
 ### 1.5
  - Refactor to class

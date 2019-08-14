@@ -1,26 +1,7 @@
 # Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE)
 The ultimate WinRM shell for hacking/pentesting
 
-```
-   ___ __ __  ____  _                  
-  /  _]  |  ||    || |                 
- /  [_|  |  | |  | | |                 
-|    _]  |  | |  | | |___              
-|   [_|  :  | |  | |     |             
-|     |\   /  |  | |     |             
-|_____| \_/  |____||_____|             
-                                       
- __    __  ____  ____   ____   ___ ___ 
-|  |__|  ||    ||    \ |    \ |   |   |
-|  |  |  | |  | |  _  ||  D  )| _   _ |
-|  |  |  | |  | |  |  ||    / |  \_/  |
-|  `  '  | |  | |  |  ||    \ |   |   |
- \      /  |  | |  |  ||  .  \|   |   |
-  \_/\_/  |____||__|__||__|\_||___|___|
-                                       
-
-                           By: CyberVaca@HackPlayers
-```
+![Banner](resources/evil-winrm_logo.png)
 
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
