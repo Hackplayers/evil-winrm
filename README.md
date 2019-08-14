@@ -120,6 +120,9 @@ To use IPv6, the address must be added to /etc/hosts.
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
 
+## Changelog:
+Changelog and project changes can be checked here: [CHANGELOG.md](CHANGELOG.md)
+
 ## Credits:
 Main author:
 
