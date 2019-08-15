@@ -1,26 +1,7 @@
 # Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE)
 The ultimate WinRM shell for hacking/pentesting
 
-```
-   ___ __ __  ____  _                  
-  /  _]  |  ||    || |                 
- /  [_|  |  | |  | | |                 
-|    _]  |  | |  | | |___              
-|   [_|  :  | |  | |     |             
-|     |\   /  |  | |     |             
-|_____| \_/  |____||_____|             
-                                       
- __    __  ____  ____   ____   ___ ___ 
-|  |__|  ||    ||    \ |    \ |   |   |
-|  |  |  | |  | |  _  ||  D  )| _   _ |
-|  |  |  | |  | |  |  ||    / |  \_/  |
-|  `  '  | |  | |  |  ||    \ |   |   |
- \      /  |  | |  |  ||  .  \|   |   |
-  \_/\_/  |____||__|__||__|\_||___|___|
-                                       
-
-                           By: CyberVaca@HackPlayers
-```
+![Banner](resources/evil-winrm_logo.png)
 
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
@@ -44,18 +25,22 @@ purposes by system administrators as well but the most of its features are focus
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
  - Colorization on output messages (can be disabled optionally)
+ - SSL and certificates support
 
 ## Help
 
 ```
-Usage: evil-winrm -i IP -u USER -s SCRIPTS_PATH -e EXES_PATH [-P PORT] [-p PASS] [-U URL]
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
+    -S, --ssl                        Enable SSL
+    -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
+    -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
+    -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
+    -e, --executables EXES_PATH      C# executables local path
     -i, --ip IP                      Remote host IP or hostname (required)
-    -P, --port PORT                  Remote host port (default 5985)
+    -U, --url URL                    Remote url endpoint (default /wsman)
     -u, --user USER                  Username (required)
     -p, --password PASS              Password
-    -s, --scripts PS_SCRIPTS_PATH    Powershell scripts path (required)
-    -e, --executables EXES_PATH      C# executables path (required)
-    -U, --url URL                    Remote url endpoint (default /wsman)
+    -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -h, --help                       Display this help message
 ```
@@ -81,10 +66,16 @@ To use IPv6, the address must be added to /etc/hosts.
 ## Documentation
 
 #### Basic commands
- - **upload**: local files can be auto-completed using tab key. It is not needed to put a remote_path if the local file is in the same directory as evil-winrm.rb file. 
-   - usage: `upload local_path remote_path`
- - **download**: it is not needed to set local_path if the remote file is in the current directory.
-   - usage: `download remote_path local_path`
+ - **upload**: local files can be auto-completed using tab key. It is recommended to use absolute path for destination to avoid errors. Otherwise you could get uncontrolled errors due Winrm-fs limitations. 
+   - usage: `upload local_path remote_absolute_path`
+ - **download**: It is recommended to use absolute paths to avoid errors. Otherwise you could get uncontrolled errors due Winrm-fs limitations.
+   - usage: `download remote_absolute_path local_path`
+   
+ __Note about paths (upload/download)__:
+   If the file to download is in the initial remote dir, absolute path on first parameter can be avoided in order to use simple file name.
+   Relative paths are not recommended to use and can cause errors on download/upload.
+   Second argument (destination for upload/download) can be blank and in that case it will be uploaded/downloaded to current local dir or initial (landing dir once connected) remote dir.
+    
  - **services**: list all services. No administrator permissions needed.
  - **menu**: load the `Invoke-Binary` and `l04d3r-LoadDll` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
@@ -109,6 +100,9 @@ To use IPv6, the address must be added to /etc/hosts.
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
+
+## Changelog:
+Changelog and project changes can be checked here: [CHANGELOG.md](CHANGELOG.md)
 
 ## Credits:
 Main author:
@@ -142,7 +136,7 @@ Use it at your own servers and/or with the server owner's permission.
 [3v4Si0N]: https://github.com/3v4Si0N/
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-1.5-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-1.6-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
