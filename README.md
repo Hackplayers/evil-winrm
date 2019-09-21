@@ -8,7 +8,7 @@ This shell is the ultimate WinRM shell for hacking/pentesting.
 
 WinRM (Windows Remote Management) is the Microsoft implementation of WS-Management Protocol. A standard SOAP based protocol 
 that allows hardware and operating systems from different vendors to interoperate. Microsoft included it in their Operating 
-Systems in order to make life easier to system adminsitrators.
+Systems in order to make life easier to system administrators.
 
 This program can be used on any Microsoft Windows Servers with this feature enabled (usually at port 5985), of course only 
 if you have credentials and permissions to use it. So we can say that it could be used in a post-exploitation hacking/pentesting 
