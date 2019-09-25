@@ -17,7 +17,7 @@ require 'io/console'
 # Constants
 
 # Version
-VERSION = '1.6'
+VERSION = '1.7'
 
 # Msg types
 TYPE_INFO = 0
