@@ -154,7 +154,7 @@ Use it at your own servers and/or with the server owner's permission.
 [donut]: https://github.com/TheWover/donut
 [donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r
-[WinRM]: https://github.com/WinRb/WinRM/graphs/contributors
+[WinRb]: https://github.com/WinRb/WinRM/graphs/contributors
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.7-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
