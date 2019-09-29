@@ -87,9 +87,11 @@ To use IPv6, the address must be added to /etc/hosts.
    ![ps1](resources/image7.png)
 
 #### Advanced commands
- - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
+
+- Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](resources/image3.png)
+
 
  - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
@@ -97,6 +99,11 @@ To use IPv6, the address must be added to /etc/hosts.
    
    ![l04d3r-LoadDll1](resources/image4.png)
    ![l04d3r-LoadDll2](resources/image5.png)
+
+
+ - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
+ 
+   ![Donut-Loader](resources/image8.png)
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
@@ -134,6 +141,7 @@ Use it at your own servers and/or with the server owner's permission.
 [vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N/
+[donut]: https://github.com/TheWover/donut
 
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.7-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
