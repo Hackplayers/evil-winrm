@@ -24,6 +24,7 @@ purposes by system administrators as well but the most of its features are focus
  - Load Powershell scripts
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
+ - Load x64 payloads generated with awesome [donut] technique
  - Colorization on output messages (can be disabled optionally)
  - SSL and certificates support
 
@@ -105,6 +106,14 @@ To use IPv6, the address must be added to /etc/hosts.
  
    ![Donut-Loader](resources/image8.png)
 
+    You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
+    This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed with pip: 
+  
+      `pip3 install donut-shellcode`
+   
+      ![donuts](resources/image10.png)
+
+
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
 
@@ -142,6 +151,8 @@ Use it at your own servers and/or with the server owner's permission.
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N/
 [donut]: https://github.com/TheWover/donut
+[donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
+[byt3bl33d3r]: https://twitter.com/byt3bl33d3r
 
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.7-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
