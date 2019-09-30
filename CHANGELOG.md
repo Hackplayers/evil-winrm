@@ -1,3 +1,6 @@
+### 1.7
+ - Added x64 compatibility to use Donut payloads
+
 ### 1.6
  - Added SSL and certificates support
  - Upload/download messages improved
