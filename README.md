@@ -24,6 +24,7 @@ purposes by system administrators as well but the most of its features are focus
  - Load Powershell scripts
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
+ - Load x64 payloads generated with awesome [donut] technique
  - Colorization on output messages (can be disabled optionally)
  - SSL and certificates support
 
@@ -87,9 +88,11 @@ To use IPv6, the address must be added to /etc/hosts.
    ![ps1](resources/image7.png)
 
 #### Advanced commands
- - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
+
+- Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](resources/image3.png)
+
 
  - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
@@ -97,6 +100,19 @@ To use IPv6, the address must be added to /etc/hosts.
    
    ![l04d3r-LoadDll1](resources/image4.png)
    ![l04d3r-LoadDll2](resources/image5.png)
+
+
+ - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
+ 
+   ![Donut-Loader](resources/image8.png)
+
+    You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
+    This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: 
+  
+      `pip3 install donut-shellcode`
+   
+      ![donuts](resources/image10.png)
+
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
@@ -119,6 +135,9 @@ Hat tip to:
 
  - [Alamot] for his original code.
  - [3v4Si0N] for his awesome dll loader.
+ - [WinRb] All contributors of ruby library.
+ - [TheWover] for his awesome donut tool.
+ - [byt3bl33d3r] for his python library to create donut payloads.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
@@ -133,10 +152,14 @@ Use it at your own servers and/or with the server owner's permission.
 [jarilaos]: https://github.com/jarilaos
 [vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
-[3v4Si0N]: https://github.com/3v4Si0N/
-
+[3v4Si0N]: https://github.com/3v4Si0N
+[donut]: https://github.com/TheWover/donut
+[donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
+[byt3bl33d3r]: https://twitter.com/byt3bl33d3r
+[WinRb]: https://github.com/WinRb/WinRM/graphs/contributors
+[TheWover]: https://github.com/TheWover
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-1.6-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-1.7-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
