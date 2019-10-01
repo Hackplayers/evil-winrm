@@ -55,7 +55,7 @@ class EvilWinRM
     def arguments()
         options = { port:$port, url:$url }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]"
+            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
                 $ssl = true
                 options[:port] = "5986"
