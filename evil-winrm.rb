@@ -68,6 +68,13 @@ class EvilWinRM
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
+            opts.on("-H", "--hash HASH", "NTLM hash") do |val| 
+                if !val.match /^[a-fA-F0-9]{32}$/
+                    puts("Invalid hash format")
+                    custom_exit(0, false)
+                end
+                options[:password] = "00000000000000000000000000000000:"+val
+            end
             opts.on("-P", "--port PORT", "Remote host port (default 5985)") { |val| options[:port] = val }
             opts.on("-V", "--version", "Show version") do |val|
                 puts("v" + VERSION)
