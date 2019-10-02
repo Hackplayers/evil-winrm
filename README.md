@@ -140,6 +140,7 @@ Hat tip to:
  - [WinRb] All contributors of ruby library.
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
+ - [Sh11td0wn] for inspiration about new features.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
@@ -160,6 +161,7 @@ Use it at your own servers and/or with the server owner's permission.
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r
 [WinRb]: https://github.com/WinRb/WinRM/graphs/contributors
 [TheWover]: https://github.com/TheWover
+[Sh11td0wn]: https://github.com/Sh11td0wn
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.8-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
