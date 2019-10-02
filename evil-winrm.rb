@@ -69,9 +69,10 @@ class EvilWinRM
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
             opts.on("-H", "--hash HASH", "NTLM hash") do |val|
+                self.print_header()
                 if !val.match /^[a-fA-F0-9]{32}$/
-                    puts("Invalid hash format")
-                    self.custom_exit(1)
+                    self.print_message("Invalid hash format", TYPE_ERROR)
+                    self.custom_exit(1, false)
                 end
                 options[:password] = "00000000000000000000000000000000:" + val
             end
@@ -81,8 +82,7 @@ class EvilWinRM
                 self.custom_exit(0, false)
             end
             opts.on('-h', '--help', 'Display this help message') do
-                puts()
-                self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+                self.print_header()
                 puts(opts)
                 puts()
                 self.custom_exit(0, false)
@@ -97,8 +97,7 @@ class EvilWinRM
                 raise OptionParser::MissingArgument.new(missing.join(', '))
             end
         rescue OptionParser::InvalidOption, OptionParser::MissingArgument
-            puts()
-            self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+            self.print_header()
             self.print_message($!.to_s, TYPE_ERROR)
             puts(optparse)
             puts()
@@ -118,6 +117,12 @@ class EvilWinRM
         $pub_key = options[:pub_key]
         $priv_key = options[:priv_key]
     end
+
+    # Print script header
+    def print_header()
+         puts()
+         self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+     end
 
     # Generate connection object
     def connection_initialization()
@@ -284,8 +289,7 @@ class EvilWinRM
         self.arguments()
         self.connection_initialization()
         file_manager = WinRM::FS::FileManager.new($conn)
-        puts()
-        self.print_message("Starting Evil-WinRM shell v" + VERSION, TYPE_INFO)
+        self.print_header()
 
         if !$ssl and ($pub_key or $priv_key) then
             self.print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING)
