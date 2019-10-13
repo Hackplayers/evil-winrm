@@ -69,12 +69,13 @@ class EvilWinRM
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
             opts.on("-H", "--hash HASH", "NTLM hash") do |val|
-                self.print_header()
                 if  options[:password] != nil and val != nil
+                    self.print_header()
                     self.print_message("You must choose either password or hash auth. Both at the same time are not allowed", TYPE_ERROR)
                     self.custom_exit(1, false)
                 end
                 if !val.match /^[a-fA-F0-9]{32}$/
+                    self.print_header()
                     self.print_message("Invalid hash format", TYPE_ERROR)
                     self.custom_exit(1, false)
                 end
