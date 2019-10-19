@@ -7,3 +7,5 @@ Thumbs.db
 desktop.ini
 .dropbox*
 .idea
+vendor/
+.bundle/
