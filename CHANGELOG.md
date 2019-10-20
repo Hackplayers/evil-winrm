@@ -1,3 +1,7 @@
+### 1.8
+ - Added pass-the-hash feature
+ - Added bundler installation method
+ 
 ### 1.7
  - Added x64 compatibility to use Donut payloads
 
