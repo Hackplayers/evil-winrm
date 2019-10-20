@@ -30,7 +30,6 @@ purposes by system administrators as well but the most of its features are focus
  - Pass-the-hash support
 
 ## Help
-
 ```
 Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
     -S, --ssl                        Enable ssl
@@ -50,30 +49,31 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 
 ## Requirements
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
+Depending of your installation method (3 availables) the installation of them could be required to be done manually.
 
-`~$ sudo gem install winrm winrm-fs colorize stringio`
+## Installation & Quick Start (3 methods)
 
-or using bundler with the Gemfile (Installation & Quick Start - Using bundler)
+### Method 1. Git clone and install dependencies on your system manually
+ - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs colorize stringio`
+ - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
+ - Step 3. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
-## Installation & Quick Start
- - Step 1. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
- - Step 2. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+### Method 2. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
+ - Step 1. Install bundler: `gem install bundler:2.0.2`
+ - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
+ - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
-### Using bundler
- - Step 1. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
- - Step 2. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
-
-
-If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted preventing to be shown.
-
-To use IPv6, the address must be added to /etc/hosts.
-
-##### Alternative installation method as ruby gem
-
- - Step 1. Install it: `gem install evil-winrm`
+## Method 3. Installation directly as ruby gem (dependencies will be installed automatically on your system)
+ - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
  - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ## Documentation
+
+#### Clear text password
+If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted preventing to be shown.
+
+#### Ipv6
+To use IPv6, the address must be added to /etc/hosts. Just put the already set name of the host after `-i` argument instead of an IP address.
 
 #### Basic commands
  - **upload**: local files can be auto-completed using tab key. It is recommended to use absolute path for destination to avoid errors. Otherwise you could get uncontrolled errors due Winrm-fs limitations. 
@@ -97,7 +97,6 @@ To use IPv6, the address must be added to /etc/hosts.
    ![ps1](resources/image7.png)
 
 #### Advanced commands
-
 - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](resources/image3.png)
