@@ -17,7 +17,7 @@ require 'io/console'
 # Constants
 
 # Version
-VERSION = '1.7'
+VERSION = '1.8'
 
 # Msg types
 TYPE_INFO = 0
@@ -55,7 +55,7 @@ class EvilWinRM
     def arguments()
         options = { port:$port, url:$url }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]"
+            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
                 $ssl = true
                 options[:port] = "5986"
@@ -68,17 +68,29 @@ class EvilWinRM
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
+            opts.on("-H", "--hash HASH", "NTLM hash") do |val|
+                if  options[:password] != nil and val != nil
+                    self.print_header()
+                    self.print_message("You must choose either password or hash auth. Both at the same time are not allowed", TYPE_ERROR)
+                    self.custom_exit(1, false)
+                end
+                if !val.match /^[a-fA-F0-9]{32}$/
+                    self.print_header()
+                    self.print_message("Invalid hash format", TYPE_ERROR)
+                    self.custom_exit(1, false)
+                end
+                options[:password] = "00000000000000000000000000000000:" + val
+            end
             opts.on("-P", "--port PORT", "Remote host port (default 5985)") { |val| options[:port] = val }
             opts.on("-V", "--version", "Show version") do |val|
                 puts("v" + VERSION)
-                custom_exit(0, false)
+                self.custom_exit(0, false)
             end
             opts.on('-h', '--help', 'Display this help message') do
-                puts()
-                self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+                self.print_header()
                 puts(opts)
                 puts()
-                custom_exit(0, false)
+                self.custom_exit(0, false)
             end
         end
 
@@ -90,8 +102,7 @@ class EvilWinRM
                 raise OptionParser::MissingArgument.new(missing.join(', '))
             end
         rescue OptionParser::InvalidOption, OptionParser::MissingArgument
-            puts()
-            self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+            self.print_header()
             self.print_message($!.to_s, TYPE_ERROR)
             puts(optparse)
             puts()
@@ -111,6 +122,12 @@ class EvilWinRM
         $pub_key = options[:pub_key]
         $priv_key = options[:priv_key]
     end
+
+    # Print script header
+    def print_header()
+         puts()
+         self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+     end
 
     # Generate connection object
     def connection_initialization()
@@ -277,8 +294,7 @@ class EvilWinRM
         self.arguments()
         self.connection_initialization()
         file_manager = WinRM::FS::FileManager.new($conn)
-        puts()
-        self.print_message("Starting Evil-WinRM shell v" + VERSION, TYPE_INFO)
+        self.print_header()
 
         if !$ssl and ($pub_key or $priv_key) then
             self.print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING)

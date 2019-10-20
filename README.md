@@ -27,12 +27,13 @@ purposes by system administrators as well but the most of its features are focus
  - Load x64 payloads generated with awesome [donut] technique
  - Colorization on output messages (can be disabled optionally)
  - SSL and certificates support
+ - Pass-the-hash support
 
 ## Help
 
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
-    -S, --ssl                        Enable SSL
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
+    -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
@@ -41,6 +42,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -U, --url URL                    Remote url endpoint (default /wsman)
     -u, --user USER                  Username (required)
     -p, --password PASS              Password
+    -H, --hash HASH                  NTLM hash
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -h, --help                       Display this help message
@@ -138,6 +140,7 @@ Hat tip to:
  - [WinRb] All contributors of ruby library.
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
+ - [Sh11td0wn] for inspiration about new features.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
@@ -158,8 +161,9 @@ Use it at your own servers and/or with the server owner's permission.
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r
 [WinRb]: https://github.com/WinRb/WinRM/graphs/contributors
 [TheWover]: https://github.com/TheWover
+[Sh11td0wn]: https://github.com/Sh11td0wn
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-1.7-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-1.8-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
