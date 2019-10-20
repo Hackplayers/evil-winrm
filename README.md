@@ -53,9 +53,16 @@ Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`
 
 `~$ sudo gem install winrm winrm-fs colorize stringio`
 
+or using bundler with the Gemfile (Installation & Quick Start - Using bundler)
+
 ## Installation & Quick Start
  - Step 1. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 2. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+
+### Using bundler
+ - Step 1. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
+ - Step 2. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+
 
 If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted preventing to be shown.
 
