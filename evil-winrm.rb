@@ -69,7 +69,7 @@ class EvilWinRM
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
             opts.on("-H", "--hash HASH", "NTLM hash") do |val|
-                if  options[:password] != nil and val != nil
+                if options[:password] != nil and val != nil
                     self.print_header()
                     self.print_message("You must choose either password or hash auth. Both at the same time are not allowed", TYPE_ERROR)
                     self.custom_exit(1, false)
@@ -410,7 +410,7 @@ class EvilWinRM
                             end
                             print(output.output)
                         rescue
-                            self.print_message("Check file names", TYPE_ERROR)
+                            self.print_message("Check filenames", TYPE_ERROR)
                         end
 
                     elsif command.start_with?('Donut-Loader') then
@@ -428,7 +428,7 @@ class EvilWinRM
                             end
                             print(output.output)
                         rescue
-                            self.print_message("Check file names", TYPE_ERROR)
+                            self.print_message("Check filenames", TYPE_ERROR)
                         end
 
                     elsif command.start_with?('services') then
