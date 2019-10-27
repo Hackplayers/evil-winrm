@@ -1,3 +1,7 @@
+### 1.9
+ - Added AmsiScanBufferBypass
+ - We fix the ps1 load with large size
+ 
 ### 1.8
  - Added pass-the-hash feature
  - Added bundler installation method
