@@ -17,7 +17,7 @@ require 'io/console'
 # Constants
 
 # Version
-VERSION = '1.8'
+VERSION = '1.9'
 
 # Msg types
 TYPE_INFO = 0

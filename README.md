@@ -169,7 +169,7 @@ Use it at your own servers and/or with the server owner's permission.
 [TheWover]: https://github.com/TheWover
 [Sh11td0wn]: https://github.com/Sh11td0wn
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-1.8-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-1.9-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
