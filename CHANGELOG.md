@@ -1,6 +1,6 @@
 ### 1.9
  - Added AmsiScanBufferBypass
- - We fix the ps1 load with large size
+ - Fix the ps1 load with large size
  
 ### 1.8
  - Added pass-the-hash feature
