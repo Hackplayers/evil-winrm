@@ -441,7 +441,13 @@ class EvilWinRM
                             command = ""
                             load_script = load_script.gsub(" ","")
                             load_script = File.binread(load_script)
-                            output = shell.run(load_script)
+                            load_script = Base64.strict_encode64(load_script)
+                            script_split = load_script.scan(/.{1,5000}/)
+                            script_split.each do |item|
+                                output = shell.run("$a += '" + item + "'")
+                            end
+                            output = shell.run("IEX ([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($a))).replace('???','')")
+                            output = shell.run("$a = $null")
                         end
 
                     elsif command.start_with?('menu') then
