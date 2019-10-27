@@ -16,19 +16,20 @@ phase. The purpose of this program is to provide nice and easy-to-use features f
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
 ## Features
+ - Load in memory Powershell scripts
+ - Load in memory dll files bypassing some AVs
+ - Load in memory C# (C Sharp) assemblies bypassing some AVs
+ - Load x64 payloads generated with awesome [donut] technique
+ - Bypass AMSI
+ - Pass-the-hash support
+ - SSL and certificates support
+ - Upload and download files
+ - List remote machine services without privileges
  - Command History
  - WinRM command completion
  - Local files completion
- - Upload and download files
- - List remote machine services
- - Load Powershell scripts
- - Load in memory dll files bypassing some AVs
- - Load in memory C# (C Sharp) compiled exe files bypassing some AVs
- - Load x64 payloads generated with awesome [donut] technique
  - Colorization on output messages (can be disabled optionally)
- - SSL and certificates support
- - Pass-the-hash support
-
+ 
 ## Help
 ```
 Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
@@ -41,7 +42,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -U, --url URL                    Remote url endpoint (default /wsman)
     -u, --user USER                  Username (required)
     -p, --password PASS              Password
-    -H, --hash HASH                  NTLM hash
+    -H, --hash NTHash                NTHash 
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -h, --help                       Display this help message
@@ -87,12 +88,12 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    Second argument (destination for upload/download) can be blank and in that case it will be uploaded/downloaded to current local dir or initial (landing dir once connected) remote dir.
     
  - **services**: list all services. No administrator permissions needed.
- - **menu**: load the `Invoke-Binary` and `l04d3r-LoadDll` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
+ - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
    ![menu](resources/image2.png)
 
 #### Load powershell scripts
- - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions.
+ - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
    ![ps1](resources/image7.png)
 
@@ -120,6 +121,10 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
       `pip3 install donut-shellcode`
    
       ![donuts](resources/image10.png)
+
+ - Bypass-4MSI: patchs AMSI protection.
+      
+      ![amsi](resources/image11.png)
 
 
 #### Extra features
