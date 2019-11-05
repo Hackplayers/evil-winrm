@@ -55,14 +55,15 @@ class EvilWinRM
     def arguments()
         options = { port:$port, url:$url }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]"
+            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
                 $ssl = true
                 options[:port] = "5986"
             end
             opts.on("-c", "--pub-key PUBLIC_KEY_PATH", "Local path to public key certificate") { |val| options[:pub_key] = val }
             opts.on("-k", "--priv-key PRIVATE_KEY_PATH", "Local path to private key certificate") { |val| options[:priv_key] = val }
-            opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts local path") { |val| options[:scripts] = val }
+            opts.on("-r", "--realm DOMAIN", "The realm has to be set up in /etc/krb5.conf like this -> CONTOSO.COM = { kdc = fooserver.contoso.com }") { |val| options[:realm] = val.upcase }
+	    opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts local path") { |val| options[:scripts] = val }
             opts.on("-e", "--executables EXES_PATH", "C# executables local path") { |val| options[:executables] = val }
             opts.on("-i", "--ip IP", "Remote host IP or hostname (required)") { |val| options[:ip] = val }
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
@@ -96,7 +97,11 @@ class EvilWinRM
 
         begin
             optparse.parse!
-            mandatory = [:ip, :user]
+	    if options[:realm].nil? then
+	        mandatory = [:ip, :user]
+	    else 
+		mandatory = [:ip]
+	    end
             missing = mandatory.select{ |param| options[param].nil? }
             unless missing.empty?
                 raise OptionParser::MissingArgument.new(missing.join(', '))
@@ -111,7 +116,7 @@ class EvilWinRM
 
         $host = options[:ip]
         $user = options[:user]
-        if options[:password] == nil
+        if options[:password].nil? and options[:realm].nil?
             options[:password] = STDIN.getpass(prompt='Enter Password: ')
         end
         $password = options[:password]
@@ -121,6 +126,7 @@ class EvilWinRM
         $url = options[:url]
         $pub_key = options[:pub_key]
         $priv_key = options[:priv_key]
+	$realm = options[:realm]
     end
 
     # Print script header
@@ -148,16 +154,22 @@ class EvilWinRM
                     user: $user,
                     password: $password,
                     :no_ssl_peer_verification => true,
-                    transport: :ssl,
-                )
+                    transport: :ssl)
             end
-        else
+
+        elsif not $realm.nil? then
+            $conn = WinRM::Connection.new(
+                endpoint: "http://" + $host + ":" + $port + $url,
+                user: "",
+                password: "",
+		transport: :kerberos,
+		realm: $realm)
+	else
             $conn = WinRM::Connection.new(
                 endpoint: "http://" + $host + ":" + $port + $url,
                 user: $user,
                 password: $password,
-                :no_ssl_peer_verification => true,
-            )
+                :no_ssl_peer_verification => true )
         end
     end
 
