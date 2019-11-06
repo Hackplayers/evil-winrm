@@ -115,11 +115,12 @@ class EvilWinRM
             custom_exit(1, false)
         end
 
-        $host = options[:ip]
-        $user = options[:user]
         if options[:password].nil? and options[:realm].nil?
             options[:password] = STDIN.getpass(prompt='Enter Password: ')
         end
+
+        $host = options[:ip]
+        $user = options[:user]
         $password = options[:password]
         $port = options[:port]
         $scripts_path = options[:scripts]
@@ -312,6 +313,7 @@ class EvilWinRM
         file_manager = WinRM::FS::FileManager.new($conn)
         self.print_header()
 
+        #SSL checks
         if !$ssl and ($pub_key or $priv_key) then
             self.print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING)
         elsif $ssl
@@ -320,6 +322,15 @@ class EvilWinRM
 
         if $ssl and ($pub_key or $priv_key) then
             self.check_certs($pub_key, $priv_key)
+        end
+
+        # Kerberos checks
+         if !$user.nil? and !$realm.nil?
+            self.print_message("User is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
+        end
+
+        if !$password.nil? and !$realm.nil?
+            self.print_message("Password is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
         end
 
         if $scripts_path != nil then
