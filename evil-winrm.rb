@@ -13,7 +13,7 @@ require 'base64'
 require 'readline'
 require 'optionparser'
 require 'io/console'
-
+require 'time'
 # Constants
 
 # Version
@@ -365,6 +365,7 @@ class EvilWinRM
         command = ""
 
         begin
+            time = Time.now.to_i
             self.print_message("Establishing connection to remote endpoint", TYPE_INFO)
             $conn.shell(:powershell) do |shell|
                 until command == "exit" do
@@ -482,8 +483,11 @@ class EvilWinRM
                             $LIST = $LIST + $LIST2
                             print(output.output)
                         end
+                    elsif (command == "Bypass-4MSI") and (Time.now.to_i < time + 20)
+                        puts()
+                        self.print_message("Wait for patching, AV could be still watching for suspicious activity...", TYPE_WARNING)
+                        sleep(9)                   
                     end
-
                     output = shell.run(command) do |stdout, stderr|
                         STDOUT.print(stdout)
                         STDERR.print(stderr)
