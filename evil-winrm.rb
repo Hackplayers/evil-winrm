@@ -14,6 +14,7 @@ require 'readline'
 require 'optionparser'
 require 'io/console'
 require 'time'
+
 # Constants
 
 # Version
@@ -62,10 +63,10 @@ class EvilWinRM
             end
             opts.on("-c", "--pub-key PUBLIC_KEY_PATH", "Local path to public key certificate") { |val| options[:pub_key] = val }
             opts.on("-k", "--priv-key PRIVATE_KEY_PATH", "Local path to private key certificate") { |val| options[:priv_key] = val }
-            opts.on("-r", "--realm DOMAIN", "The realm has to be set up in /etc/krb5.conf like this -> CONTOSO.COM = { kdc = fooserver.contoso.com }") { |val| options[:realm] = val.upcase }
+            opts.on("-r", "--realm DOMAIN", "Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }") { |val| options[:realm] = val.upcase }
             opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts local path") { |val| options[:scripts] = val }
             opts.on("-e", "--executables EXES_PATH", "C# executables local path") { |val| options[:executables] = val }
-            opts.on("-i", "--ip IP", "Remote host IP or hostname (required)") { |val| options[:ip] = val }
+            opts.on("-i", "--ip IP", "Remote host IP or hostname. FQDN for Kerberos auth (required)") { |val| options[:ip] = val }
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
@@ -483,11 +484,13 @@ class EvilWinRM
                             $LIST = $LIST + $LIST2
                             print(output.output)
                         end
+
                     elsif (command == "Bypass-4MSI") and (Time.now.to_i < time + 20)
                         puts()
-                        self.print_message("Wait for patching, AV could be still watching for suspicious activity...", TYPE_WARNING)
-                        sleep(9)                   
+                        self.print_message("Waiting for patching, AV could be still watching for suspicious activity...", TYPE_WARNING)
+                        sleep(9)
                     end
+
                     output = shell.run(command) do |stdout, stderr|
                         STDOUT.print(stdout)
                         STDERR.print(stderr)
