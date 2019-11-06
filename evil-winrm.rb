@@ -168,7 +168,7 @@ class EvilWinRM
                 transport: :kerberos,
                 realm: $realm
             )
-    else
+        else
             $conn = WinRM::Connection.new(
                 endpoint: "http://" + $host + ":" + $port + $url,
                 user: $user,
@@ -512,8 +512,10 @@ class EvilWinRM
             end
         rescue SignalException
             self.custom_exit(130)
-        rescue
-            self.print_message("Can't establish connection. Check connection params", TYPE_ERROR)
+        rescue SystemExit
+            
+        rescue Exception => ex
+            self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR)
             self.custom_exit(1)
         end
     end
