@@ -155,7 +155,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ```
  - Check it with `klist`
  - For remove ticket use: `kdestroy`
- - For more information about kerberos see this [cheatsheet]:
+ - For more information about kerberos see this [cheatsheet]
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
