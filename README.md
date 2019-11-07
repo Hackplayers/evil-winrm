@@ -22,6 +22,7 @@ purposes by system administrators as well but the most of its features are focus
  - Load x64 payloads generated with awesome [donut] technique
  - Bypass AMSI
  - Pass-the-hash support
+ - Kerberos support
  - SSL and certificates support
  - Upload and download files
  - List remote machine services without privileges
@@ -32,15 +33,16 @@ purposes by system administrators as well but the most of its features are focus
  
 ## Help
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ]
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM]
     -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
+    -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
     -e, --executables EXES_PATH      C# executables local path
     -i, --ip IP                      Remote host IP or hostname (required)
-    -U, --url URL                    Remote url endpoint (default /wsman)
-    -u, --user USER                  Username (required)
+    -U, --url URL                    Remote url endpoint (default wsman)
+    -u, --user USER                  Username (required if not using kerberos)
     -p, --password PASS              Password
     -H, --hash NTHash                NTHash 
     -P, --port PORT                  Remote host port (default 5985)
@@ -126,6 +128,34 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
       
       ![amsi](resources/image11.png)
 
+#### Kerberos
+ - First you have to sync with the DC: `rdate -n <dc_ip>`
+
+ - To generate ticket there are many ways:
+ 
+   * Using [ticketer.py] from impacket:
+
+      `ticketer.py -dc-ip <dc_ip> -nthash <krbtgt_nthash> -domain-sid <domain_sid> -domain <domain_name> <user>`
+
+   * If you get a kirbi ticket using [Rubeus] or [Mimikatz] you have to convert to ccache using [ticket_converter.py]:
+
+      `python ticket_converter.py ticket.kirbi ticket.ccache` 
+
+ - Add ccache ticket. There are 2 options:
+
+    `export KRB5CCNAME=/foo/var/user.ccache`
+
+    `cp user.ccache /tmp/krb5cc_0`
+
+ - Add realm to `/etc/krb5.conf` (for linux). Important use this format:
+   ```
+    CONTOSO.COM = {
+                kdc = fooserver.contoso.con
+    }
+   ```
+ - Check it with `klist`
+ - For remove ticket use: `kdestroy`
+ - For more information about kerberos see this [cheatsheet]:
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
@@ -173,6 +203,12 @@ Use it at your own servers and/or with the server owner's permission.
 [WinRb]: https://github.com/WinRb/WinRM/graphs/contributors
 [TheWover]: https://github.com/TheWover
 [Sh11td0wn]: https://github.com/Sh11td0wn
+[ticketer.py]: https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py
+[ticket_converter.py]: https://github.com/Zer1t0/ticket_converter
+[Rubeus]: https://github.com/GhostPack/Rubeus
+[Mimikatz]: https://github.com/gentilkiwi/mimikatz
+[cheatsheet]: https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
+
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-1.9-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
