@@ -46,7 +46,7 @@ $host = ""
 $port = "5985"
 $user = ""
 $password = ""
-$url = "/wsman"
+$url = "wsman"
 
 
 # Class creation
@@ -71,7 +71,7 @@ class EvilWinRM
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
             opts.on("-H", "--hash HASH", "NTLM hash") do |val|
-                if options[:password] != nil and val != nil
+                if !options[:password].nil? and !val.nil?
                     self.print_header()
                     self.print_message("You must choose either password or hash auth. Both at the same time are not allowed", TYPE_ERROR)
                     self.custom_exit(1, false)
@@ -85,7 +85,7 @@ class EvilWinRM
             end
             opts.on("-P", "--port PORT", "Remote host port (default 5985)") { |val| options[:port] = val }
             opts.on("-V", "--version", "Show version") do |val|
-                puts("v" + VERSION)
+                puts("v#{VERSION}")
                 self.custom_exit(0, false)
             end
             opts.on('-h', '--help', 'Display this help message') do
@@ -134,7 +134,7 @@ class EvilWinRM
     # Print script header
     def print_header()
          puts()
-         self.print_message("Evil-WinRM shell v" + VERSION, TYPE_INFO, false)
+         self.print_message("Evil-WinRM shell v#{VERSION}", TYPE_INFO, false)
      end
 
     # Generate connection object
@@ -142,7 +142,7 @@ class EvilWinRM
         if $ssl then
             if $pub_key and $priv_key then
                 $conn = WinRM::Connection.new(
-                    endpoint: "https://" + $host + ":" + $port + $url,
+                    endpoint: "https://#{$host}:#{$port}/#{$url}",
                     user: $user,
                     password: $password,
                     :no_ssl_peer_verification => true,
@@ -152,7 +152,7 @@ class EvilWinRM
                 )
             else
                 $conn = WinRM::Connection.new(
-                    endpoint: "https://" + $host + ":" + $port + $url,
+                    endpoint: "https://#{$host}:#{$port}/#{$url}",
                     user: $user,
                     password: $password,
                     :no_ssl_peer_verification => true,
@@ -160,9 +160,9 @@ class EvilWinRM
                 )
             end
 
-        elsif not $realm.nil? then
+        elsif !$realm.nil? then
             $conn = WinRM::Connection.new(
-                endpoint: "http://" + $host + ":" + $port + $url,
+                endpoint: "http://#{$host}:#{$port}/#{$url}",
                 user: "",
                 password: "",
                 transport: :kerberos,
@@ -170,7 +170,7 @@ class EvilWinRM
             )
         else
             $conn = WinRM::Connection.new(
-                endpoint: "http://" + $host + ":" + $port + $url,
+                endpoint: "http://#{$host}:#{$port}/#{$url}",
                 user: $user,
                 password: $password,
                 :no_ssl_peer_verification => true
@@ -236,7 +236,7 @@ class EvilWinRM
             self.custom_exit(1)
         end
 
-        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil then
+        if !(/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil? then
             # Windows
             if path[-1] != "\\" then
                 path.concat("\\")
@@ -333,7 +333,7 @@ class EvilWinRM
             self.print_message("Password is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
         end
 
-        if $scripts_path != nil then
+        if !$scripts_path.nil? then
             self.check_directories($scripts_path, "scripts")
             functions = self.read_scripts($scripts_path)
             self.silent_warnings do
@@ -341,7 +341,7 @@ class EvilWinRM
             end
         end
 
-        if $executables_path != nil then
+        if !$executables_path.nil? then
             self.check_directories($executables_path, "executables")
             executables = self.read_executables($executables_path)
         end
