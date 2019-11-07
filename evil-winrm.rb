@@ -81,7 +81,7 @@ class EvilWinRM
                     self.print_message("Invalid hash format", TYPE_ERROR)
                     self.custom_exit(1, false)
                 end
-                options[:password] = "00000000000000000000000000000000:" + val
+                options[:password] = "00000000000000000000000000000000:#{val}"
             end
             opts.on("-P", "--port PORT", "Remote host port (default 5985)") { |val| options[:port] = val }
             opts.on("-V", "--version", "Show version") do |val|
@@ -498,7 +498,7 @@ class EvilWinRM
 
                     elsif (command == "Bypass-4MSI") and (Time.now.to_i < time + 20)
                         puts()
-                        self.print_message("Waiting for patching, AV could be still watching for suspicious activity...", TYPE_WARNING)
+                        self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING)
                         sleep(9)
                     end
 
@@ -512,8 +512,21 @@ class EvilWinRM
             end
         rescue SignalException
             self.custom_exit(130)
-        rescue SystemExit
-            
+        rescue SystemExit        
+        rescue GSSAPI::GssApiError => e
+            if e.message.include? "Cannot contact any KDC for realm"
+                self.print_message("Check your /ect/krb5.conf and /etc/hosts files to ensure the format is correct and you can resolve #{$host}", TYPE_ERROR)
+            elsif e.message.include? "Clock skew too great"
+                self.print_message("Sync date with DC. A solution could be: rdate -n #{$host}", TYPE_ERROR)
+            elsif e.message.include? "No Kerberos credentials available (default cache: FILE:/tmp/krb5cc_0)"
+                self.print_message("There is no ticket imported. A solution could be export KRB5CCNAME=/foo/var/ticket.ccache or cp /foo/var/ticket.ccache /tmp/krb5cc_0", TYPE_ERROR)
+            else
+                self.print_message("An error of type #{e.class} happened, message is: #{e.message}", TYPE_ERROR)
+            end
+            self.custom_exit(1)
+        rescue SocketError
+            self.print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR)
+            self.custom_exit(1)
         rescue Exception => ex
             self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR)
             self.custom_exit(1)
