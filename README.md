@@ -20,9 +20,9 @@ purposes by system administrators as well but the most of its features are focus
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) assemblies bypassing some AVs
  - Load x64 payloads generated with awesome [donut] technique
- - Bypass AMSI
+ - AMSI Bypass
  - Pass-the-hash support
- - Kerberos support
+ - Kerberos auth support
  - SSL and certificates support
  - Upload and download files
  - List remote machine services without privileges
@@ -129,7 +129,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
       ![amsi](resources/image11.png)
 
 #### Kerberos
- - First you have to sync with the DC: `rdate -n <dc_ip>`
+ - First you have to sync date with the DC: `rdate -n <dc_ip>`
 
  - To generate ticket there are many ways:
  
@@ -141,21 +141,21 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
       `python ticket_converter.py ticket.kirbi ticket.ccache` 
 
- - Add ccache ticket. There are 2 options:
+ - Add ccache ticket. There are 2 ways:
 
-    `export KRB5CCNAME=/foo/var/user.ccache`
+    `export KRB5CCNAME=/foo/var/ticket.ccache`
 
-    `cp user.ccache /tmp/krb5cc_0`
+    `cp ticket.ccache /tmp/krb5cc_0`
 
- - Add realm to `/etc/krb5.conf` (for linux). Important use this format:
+ - Add realm to `/etc/krb5.conf` (for linux). Use of this format is important:
    ```
     CONTOSO.COM = {
                 kdc = fooserver.contoso.con
     }
    ```
- - Check it with `klist`
- - For remove ticket use: `kdestroy`
- - For more information about kerberos see this [cheatsheet]
+ - Check Kerberos tickets with `klist`
+ - To remove ticket use: `kdestroy`
+ - For more information about Kerberos check this [cheatsheet]
 
 #### Extra features
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
