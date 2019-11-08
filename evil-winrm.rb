@@ -390,12 +390,12 @@ class EvilWinRM
                         command = ""
 
                         if upload_command[2].to_s.empty? then 
-                            upload_command[2] = pwd
-                            self.print_message("Uploading " + upload_command[1] + " to " + upload_command[2] + "\\" + upload_command[1].split('/')[-1], TYPE_INFO)
-                        else
-                            self.print_message("Uploading " + upload_command[1] + " to " + upload_command[2], TYPE_INFO)
+                            upload_command[2] = "#{pwd}\\#{upload_command[1].split('/')[-1]}"
+                        elsif not upload_command[2].index ':\\'
+                            upload_command[2] = "#{pwd}\\#{upload_command[2]}"
                         end
                         begin
+                            self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
                             file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
                             if bytes_copied == total_bytes then
                                 self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
