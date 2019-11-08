@@ -2,6 +2,7 @@
  - Added AMSI bypass
  - Fix the ps1 load with large size
  - Kerberos auth support
+ - Fix upload/download functionality
 
 ### 1.8
  - Added pass-the-hash feature
