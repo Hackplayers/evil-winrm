@@ -79,16 +79,14 @@ If you don't want to put the password in clear text, you can optionally avoid to
 To use IPv6, the address must be added to /etc/hosts. Just put the already set name of the host after `-i` argument instead of an IP address.
 
 #### Basic commands
- - **upload**: local files can be auto-completed using tab key. It is recommended to use absolute path for destination to avoid errors. Otherwise you could get uncontrolled errors due Winrm-fs limitations. 
-   - usage: `upload local_path remote_absolute_path`
- - **download**: It is recommended to use absolute paths to avoid errors. Otherwise you could get uncontrolled errors due Winrm-fs limitations.
-   - usage: `download remote_absolute_path local_path`
+ - **upload**: local files can be auto-completed using tab key. 
+   - usage: `upload local_filename` or `upload local_filename destination_filename`
+ - **download**: 
+   - usage: `download remote_filename` or `download remote_filename destination_filename`
    
  __Note about paths (upload/download)__:
-   If the file to download is in the initial remote dir, absolute path on first parameter can be avoided in order to use simple file name.
-   Relative paths are not recommended to use and can cause errors on download/upload.
-   Second argument (destination for upload/download) can be blank and in that case it will be uploaded/downloaded to current local dir or initial (landing dir once connected) remote dir.
-    
+   Relative paths are not allowed to use on download/upload. Use filenames on current directory or absolute path.
+  
  - **services**: list all services. No administrator permissions needed.
  - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
