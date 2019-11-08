@@ -30,7 +30,7 @@ purposes by system administrators as well but the most of its features are focus
  - WinRM command completion
  - Local files completion
  - Colorization on output messages (can be disabled optionally)
- 
+
 ## Help
 ```
 Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM]
@@ -83,10 +83,10 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    - usage: `upload local_filename` or `upload local_filename destination_filename`
  - **download**: 
    - usage: `download remote_filename` or `download remote_filename destination_filename`
-   
+
  __Note about paths (upload/download)__:
    Relative paths are not allowed to use on download/upload. Use filenames on current directory or absolute path.
-  
+
  - **services**: list all services. No administrator permissions needed.
  - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
@@ -102,35 +102,33 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    ![Invoke-Binary](resources/image3.png)
 
-
  - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
    The dll file can be hosted by smb, http or locally. Once it is loaded type `menu`, then it is possible to autocomplete all functions.
-   
+
    ![l04d3r-LoadDll1](resources/image4.png)
    ![l04d3r-LoadDll2](resources/image5.png)
 
-
  - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
- 
+
    ![Donut-Loader](resources/image8.png)
 
     You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
     This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: 
-  
+
       `pip3 install donut-shellcode`
-   
+
       ![donuts](resources/image10.png)
 
  - Bypass-4MSI: patchs AMSI protection.
-      
+
       ![amsi](resources/image11.png)
 
 #### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
 
  - To generate ticket there are many ways:
- 
+
    * Using [ticketer.py] from impacket:
 
       `ticketer.py -dc-ip <dc_ip> -nthash <krbtgt_nthash> -domain-sid <domain_sid> -domain <domain_name> <user>`
@@ -146,11 +144,13 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
     `cp ticket.ccache /tmp/krb5cc_0`
 
  - Add realm to `/etc/krb5.conf` (for linux). Use of this format is important:
+
    ```
     CONTOSO.COM = {
                 kdc = fooserver.contoso.con
     }
    ```
+
  - Check Kerberos tickets with `klist`
  - To remove ticket use: `kdestroy`
  - For more information about Kerberos check this [cheatsheet]
