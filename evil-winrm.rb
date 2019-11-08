@@ -410,9 +410,12 @@ class EvilWinRM
                         download_command = command.tokenize
                         command = ""
 
-                        if download_command[2].to_s.empty? then download_command[2] = download_command[1] end
+                        if not download_command[1].index ':\\' then download_command[1] = "#{pwd}\\#{download_command[1]}" end
+                        
+                        if download_command[2].to_s.empty? then download_command[2] = download_command[1].split('\\')[-1] end
+                        
                         begin
-                            self.print_message("Downloading " + download_command[1] + " to " + download_command[2], TYPE_INFO)
+                            self.print_message("Downloading #{download_command[1]} to #{download_command[2]}", TYPE_INFO)
                             file_manager.download(download_command[1], download_command[2])
                             self.print_message("Download successful!", TYPE_INFO)
                         rescue
