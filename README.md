@@ -56,19 +56,19 @@ Depending of your installation method (3 availables) the installation of them co
 
 ## Installation & Quick Start (3 methods)
 
-### Method 1. Git clone and install dependencies on your system manually
+### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
+ - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
+ - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+ 
+### Method 2. Git clone and install dependencies on your system manually
  - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs colorize stringio`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
-### Method 2. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
+### Method 3. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
  - Step 1. Install bundler: `gem install bundler:2.0.2`
  - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
  - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
-
-### Method 3. Installation directly as ruby gem (dependencies will be installed automatically on your system)
- - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
- - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ## Documentation
 
