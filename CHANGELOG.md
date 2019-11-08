@@ -1,3 +1,9 @@
+### 1.9
+ - Added AMSI bypass
+ - Fix the ps1 load with large size
+ - Kerberos auth support
+ - Improve upload/download functionality
+
 ### 1.8
  - Added pass-the-hash feature
  - Added bundler installation method
