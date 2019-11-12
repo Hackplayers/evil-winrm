@@ -14,6 +14,7 @@ require 'readline'
 require 'optionparser'
 require 'io/console'
 require 'time'
+require 'gssapi'
 
 # Constants
 
