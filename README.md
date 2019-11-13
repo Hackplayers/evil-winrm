@@ -54,6 +54,9 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
 Depending of your installation method (3 availables) the installation of them could be required to be done manually.
 
+Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
+For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
+
 ## Installation & Quick Start (3 methods)
 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
