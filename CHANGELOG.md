@@ -1,3 +1,6 @@
+### 2.0
+ - Fix GSSAPI error
+
 ### 1.9
  - Added AMSI bypass
  - Fix the ps1 load with large size
