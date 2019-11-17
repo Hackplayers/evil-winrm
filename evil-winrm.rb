@@ -396,6 +396,11 @@ class EvilWinRM
                     command = Readline.readline("*Evil-WinRM*".red + " PS ".yellow + pwd + "> ", true) # True for command history
 
                     if command.start_with?('upload') then
+                        if self.docker_detection() then
+                            puts()
+                            self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                        end
+
                         upload_command = command.tokenize
                         command = ""
 
@@ -417,6 +422,11 @@ class EvilWinRM
                         end
 
                     elsif command.start_with?('download') then
+                        if self.docker_detection() then
+                            puts()
+                            self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                        end
+
                         download_command = command.tokenize
                         command = ""
 
