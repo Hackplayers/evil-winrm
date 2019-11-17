@@ -57,7 +57,7 @@ Depending of your installation method (3 availables) the installation of them co
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
 
-## Installation & Quick Start (3 methods)
+## Installation & Quick Start (4 methods)
 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
  - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
@@ -72,6 +72,9 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
  - Step 1. Install bundler: `gem install bundler:2.0.2`
  - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
  - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+
+### Method 4. Using Docker
+ - Step 1. Launch docker container based on already built image: `docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/data:/data OscarAkaElvis/evil-winrm oscarakaelvis/evil-winrm -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'`
 
 ## Documentation
 
