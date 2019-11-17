@@ -1,5 +1,6 @@
 ### 2.0
  - Fix GSSAPI error
+ - Docker support added
 
 ### 1.9
  - Added AMSI bypass
