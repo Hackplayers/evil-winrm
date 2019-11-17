@@ -1,4 +1,4 @@
-# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE)
+# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE) [![Docker-shield]](https://hub.docker.com/r/oscarakaelvis/evil-winrm)
 The ultimate WinRM shell for hacking/pentesting
 
 ![Banner](resources/evil-winrm_logo.png)
@@ -30,7 +30,7 @@ purposes by system administrators as well but the most of its features are focus
  - WinRM command completion
  - Local files completion
  - Colorization on output messages (can be disabled optionally)
- - Docker support
+ - Docker support (prebuilt images available at [Dockerhub])
 
 ## Help
 ```
@@ -214,9 +214,11 @@ Use it at your own servers and/or with the server owner's permission.
 [Rubeus]: https://github.com/GhostPack/Rubeus
 [Mimikatz]: https://github.com/gentilkiwi/mimikatz
 [cheatsheet]: https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
+[Dockerhub]: https://hub.docker.com/r/oscarakaelvis/evil-winrm
 
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-2.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
+[Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
