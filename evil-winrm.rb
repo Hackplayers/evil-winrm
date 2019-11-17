@@ -18,7 +18,7 @@ require 'time'
 # Constants
 
 # Version
-VERSION = '1.9'
+VERSION = '2.0'
 
 # Msg types
 TYPE_INFO = 0
@@ -175,6 +175,15 @@ class EvilWinRM
                 password: $password,
                 :no_ssl_peer_verification => true
             )
+        end
+    end
+
+    # Detect if a docker environment
+    def docker_detection()
+        if File.exist?("/.dockerenv") then
+            return true
+        else
+            return false
         end
     end
 
@@ -387,6 +396,11 @@ class EvilWinRM
                     command = Readline.readline("*Evil-WinRM*".red + " PS ".yellow + pwd + "> ", true) # True for command history
 
                     if command.start_with?('upload') then
+                        if self.docker_detection() then
+                            puts()
+                            self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                        end
+
                         upload_command = command.tokenize
                         command = ""
 
@@ -408,6 +422,11 @@ class EvilWinRM
                         end
 
                     elsif command.start_with?('download') then
+                        if self.docker_detection() then
+                            puts()
+                            self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                        end
+
                         download_command = command.tokenize
                         command = ""
 
@@ -521,17 +540,6 @@ class EvilWinRM
         rescue SignalException
             self.custom_exit(130)
         rescue SystemExit
-        rescue GSSAPI::GssApiError => e
-            if e.message.include? "Cannot contact any KDC for realm"
-                self.print_message("Check your /ect/krb5.conf and /etc/hosts files to ensure the format is correct and you can resolve #{$host}", TYPE_ERROR)
-            elsif e.message.include? "Clock skew too great"
-                self.print_message("Sync date with DC. A solution could be: rdate -n #{$host}", TYPE_ERROR)
-            elsif e.message.include? "No Kerberos credentials available (default cache: FILE:/tmp/krb5cc_0)"
-                self.print_message("There is no ticket imported. A solution could be export KRB5CCNAME=/foo/var/ticket.ccache or cp /foo/var/ticket.ccache /tmp/krb5cc_0", TYPE_ERROR)
-            else
-                self.print_message("An error of type #{e.class} happened, message is: #{e.message}", TYPE_ERROR)
-            end
-            self.custom_exit(1)
         rescue SocketError
             self.print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR)
             self.custom_exit(1)

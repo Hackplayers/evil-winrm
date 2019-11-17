@@ -1,7 +1,7 @@
-# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE)
+# Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE) [![Docker-shield]](https://hub.docker.com/r/oscarakaelvis/evil-winrm)
 The ultimate WinRM shell for hacking/pentesting
 
-![Banner](resources/evil-winrm_logo.png)
+![Banner](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/evil-winrm_logo.png)
 
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
@@ -30,6 +30,7 @@ purposes by system administrators as well but the most of its features are focus
  - WinRM command completion
  - Local files completion
  - Colorization on output messages (can be disabled optionally)
+ - Docker support (prebuilt images available at [Dockerhub])
 
 ## Help
 ```
@@ -54,7 +55,10 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
 Depending of your installation method (3 availables) the installation of them could be required to be done manually.
 
-## Installation & Quick Start (3 methods)
+Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
+For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
+
+## Installation & Quick Start (4 methods)
 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
  - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
@@ -70,6 +74,9 @@ Depending of your installation method (3 availables) the installation of them co
  - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
  - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
+### Method 4. Using Docker
+ - Step 1. Launch docker container based on already built image: `docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/foo/data:/data oscarakaelvis/evil-winrm oscarakaelvis/evil-winrm -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'`
+
 ## Documentation
 
 #### Clear text password
@@ -84,45 +91,46 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - **download**: 
    - usage: `download remote_filename` or `download remote_filename destination_filename`
 
- __Note about paths (upload/download)__:
+ __Notes about paths (upload/download)__:
    Relative paths are not allowed to use on download/upload. Use filenames on current directory or absolute path.
+   If you are using Evil-WinRM in a docker environment, bear in mind that all local paths should be at `/data` and be pretty sure that you mapped it as a volume in order to be able to access to downloaded files or to be able to upload files from your local host O.S.
 
  - **services**: list all services. No administrator permissions needed.
  - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
-   ![menu](resources/image2.png)
+   ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
 #### Load powershell scripts
  - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
-   ![ps1](resources/image7.png)
+   ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
 #### Advanced commands
 - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
 
-   ![Invoke-Binary](resources/image3.png)
+   ![Invoke-Binary](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image3.png)
 
  - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
    The dll file can be hosted by smb, http or locally. Once it is loaded type `menu`, then it is possible to autocomplete all functions.
 
-   ![l04d3r-LoadDll1](resources/image4.png)
-   ![l04d3r-LoadDll2](resources/image5.png)
+   ![l04d3r-LoadDll1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image4.png)
+   ![l04d3r-LoadDll2](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image5.png)
 
  - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
 
-   ![Donut-Loader](resources/image8.png)
+   ![Donut-Loader](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image8.png)
 
     You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
     This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: 
 
       `pip3 install donut-shellcode`
 
-      ![donuts](resources/image10.png)
+      ![donuts](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image10.png)
 
  - Bypass-4MSI: patchs AMSI protection.
 
-      ![amsi](resources/image11.png)
+      ![amsi](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image11.png)
 
 #### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
@@ -159,7 +167,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
 
 ## Changelog:
-Changelog and project changes can be checked here: [CHANGELOG.md](CHANGELOG.md)
+Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
 
 ## Credits:
 Main author:
@@ -182,7 +190,7 @@ Hat tip to:
  - [Sh11td0wn] for inspiration about new features.
 
 ## Disclaimer & License
-This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
+This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE).
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
@@ -206,9 +214,11 @@ Use it at your own servers and/or with the server owner's permission.
 [Rubeus]: https://github.com/GhostPack/Rubeus
 [Mimikatz]: https://github.com/gentilkiwi/mimikatz
 [cheatsheet]: https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
+[Dockerhub]: https://hub.docker.com/r/oscarakaelvis/evil-winrm
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-1.9-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-2.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
+[Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
