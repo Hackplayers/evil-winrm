@@ -70,6 +70,10 @@ Depending of your installation method (3 availables) the installation of them co
  - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
  - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
+### Method 4. Using docker
+ - Step 1. Build the docker image: `docker build .-t evil-winrm`
+ - Setp 2. Use the docker image: `docker run -it -v $PWD/data:/data evil-winrm`
+
 ## Documentation
 
 #### Clear text password
