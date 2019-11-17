@@ -178,6 +178,15 @@ class EvilWinRM
         end
     end
 
+    # Detect if a docker environment
+    def docker_detection()
+        if File.exist?("/.dockerenv") then
+            return true
+        else
+            return false
+        end
+    end
+
     # Define colors
     def colorize(text, color = "default")
         colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
