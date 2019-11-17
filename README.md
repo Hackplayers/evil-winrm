@@ -74,7 +74,7 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
  - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ### Method 4. Using Docker
- - Step 1. Launch docker container based on already built image: `docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/data:/data OscarAkaElvis/evil-winrm oscarakaelvis/evil-winrm -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'`
+ - Step 1. Launch docker container based on already built image: `docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/foo/data:/data oscarakaelvis/evil-winrm oscarakaelvis/evil-winrm -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'`
 
 ## Documentation
 
