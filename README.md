@@ -1,7 +1,7 @@
 # Evil-WinRM [![Version-shield]](evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](LICENSE) [![Docker-shield]](https://hub.docker.com/r/oscarakaelvis/evil-winrm)
 The ultimate WinRM shell for hacking/pentesting
 
-![Banner](resources/evil-winrm_logo.png)
+![Banner](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/evil-winrm_logo.png)
 
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
@@ -98,39 +98,39 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - **services**: list all services. No administrator permissions needed.
  - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
-   ![menu](resources/image2.png)
+   ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
 #### Load powershell scripts
  - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
-   ![ps1](resources/image7.png)
+   ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
 #### Advanced commands
 - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
 
-   ![Invoke-Binary](resources/image3.png)
+   ![Invoke-Binary](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image3.png)
 
  - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
    The dll file can be hosted by smb, http or locally. Once it is loaded type `menu`, then it is possible to autocomplete all functions.
 
-   ![l04d3r-LoadDll1](resources/image4.png)
-   ![l04d3r-LoadDll2](resources/image5.png)
+   ![l04d3r-LoadDll1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image4.png)
+   ![l04d3r-LoadDll2](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image5.png)
 
  - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
 
-   ![Donut-Loader](resources/image8.png)
+   ![Donut-Loader](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image8.png)
 
     You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
     This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: 
 
       `pip3 install donut-shellcode`
 
-      ![donuts](resources/image10.png)
+      ![donuts](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image10.png)
 
  - Bypass-4MSI: patchs AMSI protection.
 
-      ![amsi](resources/image11.png)
+      ![amsi](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image11.png)
 
 #### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
@@ -167,7 +167,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
 
 ## Changelog:
-Changelog and project changes can be checked here: [CHANGELOG.md](CHANGELOG.md)
+Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
 
 ## Credits:
 Main author:
@@ -190,7 +190,7 @@ Hat tip to:
  - [Sh11td0wn] for inspiration about new features.
 
 ## Disclaimer & License
-This script is licensed under LGPLv3+. Direct link to [License](LICENSE).
+This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE).
 
 Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
