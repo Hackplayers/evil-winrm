@@ -155,7 +155,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    ```
     CONTOSO.COM = {
-                kdc = fooserver.contoso.con
+                kdc = fooserver.contoso.com
     }
    ```
 
