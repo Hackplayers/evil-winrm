@@ -1,3 +1,6 @@
+### 2.1
+ - Fixed required params for certificates auth
+
 ### 2.0
  - Fix GSSAPI error
  - Docker support added
