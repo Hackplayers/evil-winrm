@@ -70,7 +70,7 @@ class EvilWinRM
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
             opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
-            opts.on("-H", "--hash HASH", "NTLM hash") do |val|
+            opts.on("-H", "--hash HASH", "NTHash") do |val|
                 if !options[:password].nil? and !val.nil?
                     self.print_header()
                     self.print_message("You must choose either password or hash auth. Both at the same time are not allowed", TYPE_ERROR)
@@ -98,7 +98,7 @@ class EvilWinRM
 
         begin
             optparse.parse!
-        if options[:realm].nil? then
+        if options[:realm].nil? and options[:priv_key].nil? and options[:pub_key].nil? then
             mandatory = [:ip, :user]
         else
             mandatory = [:ip]
@@ -115,7 +115,7 @@ class EvilWinRM
             custom_exit(1, false)
         end
 
-        if options[:password].nil? and options[:realm].nil?
+        if options[:password].nil? and options[:realm].nil? and options[:priv_key].nil? and options[:pub_key].nil?
             options[:password] = STDIN.getpass(prompt='Enter Password: ')
         end
 
