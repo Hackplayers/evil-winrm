@@ -530,7 +530,9 @@ class EvilWinRM
                     end
 
                     output = shell.run(command) do |stdout, stderr|
-                        STDOUT.print(stdout)
+                        stdout&.each_line do |line|
+                            STDOUT.puts(line.rstrip!)
+                        end
                         STDERR.print(stderr)
                     end
                 end
