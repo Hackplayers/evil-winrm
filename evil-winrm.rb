@@ -393,7 +393,7 @@ class EvilWinRM
                 until command == "exit" do
 
                     pwd = shell.run("(get-location).path").output.strip
-                    command = Readline.readline("*Evil-WinRM*".red + " PS ".yellow + pwd + "> ", true) # True for command history
+                    command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
 
                     if command.start_with?('upload') then
                         if self.docker_detection() then
