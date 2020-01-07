@@ -8,7 +8,6 @@
 require 'winrm'
 require 'winrm-fs'
 require 'stringio'
-require 'colorize'
 require 'base64'
 require 'readline'
 require 'optionparser'

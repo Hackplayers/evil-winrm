@@ -54,7 +54,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`.
 Depending of your installation method (3 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
@@ -67,7 +67,7 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
  - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
  
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs colorize stringio`
+ - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs stringio`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
