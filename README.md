@@ -16,6 +16,7 @@ phase. The purpose of this program is to provide nice and easy-to-use features f
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
 ## Features
+ - Compatible to Linux and Windows client systems
  - Load in memory Powershell scripts
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) assemblies bypassing some AVs
