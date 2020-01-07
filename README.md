@@ -29,7 +29,7 @@ purposes by system administrators as well but the most of its features are focus
  - Command History
  - WinRM command completion
  - Local files completion
- - Colorization on output messages (can be disabled optionally)
+ - Colorization on prompt and output messages (can be disabled optionally)
  - Docker support (prebuilt images available at [Dockerhub])
 
 ## Help
@@ -48,6 +48,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -H, --hash NTHash                NTHash 
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
+    -n, --no-colors                  Disable colors
     -h, --help                       Display this help message
 ```
 
@@ -162,9 +163,6 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - Check Kerberos tickets with `klist`
  - To remove ticket use: `kdestroy`
  - For more information about Kerberos check this [cheatsheet]
-
-#### Extra features
- - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)

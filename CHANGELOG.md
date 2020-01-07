@@ -1,6 +1,7 @@
 ### 2.1
  - Fixed required params for certificates auth
  - Removed trailing spaces for better visualization
+ - Added command line option to disable colors
 
 ### 2.0
  - Fix GSSAPI error

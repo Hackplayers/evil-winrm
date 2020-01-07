@@ -34,7 +34,7 @@ $LISTASSEM = [''].sort
 $DONUTPARAM1 = ['-process_id']
 $DONUTPARAM2 = ['-donutfile']
 
-# Colors. Set this to false to disable colors
+# Colors
 $colors_enabled = true
 
 # Path for ps1 scripts and exec files
@@ -87,6 +87,9 @@ class EvilWinRM
             opts.on("-V", "--version", "Show version") do |val|
                 puts("v#{VERSION}")
                 self.custom_exit(0, false)
+            end
+            opts.on("-n", "--no-colors", "Disable colors") do |val|
+                $colors_enabled = false
             end
             opts.on('-h', '--help', 'Display this help message') do
                 self.print_header()
@@ -393,7 +396,11 @@ class EvilWinRM
                 until command == "exit" do
 
                     pwd = shell.run("(get-location).path").output.strip
-                    command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
+                    if $colors_enabled then
+                        command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
+                    else
+                        command = Readline.readline("*Evil-WinRM* PS " + pwd + "> ", true)
+                    end
 
                     if command.start_with?('upload') then
                         if self.docker_detection() then
