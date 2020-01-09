@@ -101,7 +101,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
 #### Load powershell scripts
- - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
+ - To load a ps1 file you just have to type the name (auto-completion using tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
