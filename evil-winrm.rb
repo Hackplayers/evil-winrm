@@ -545,7 +545,7 @@ class EvilWinRM
 		        end
 		rescue Interrupt
 			puts
-			print "Press y to exit, press any other key to continue: "
+			self.print_message("Press y to exit, press any other key to continue: ", TYPE_WARNING)
 			if STDIN.getch.downcase == "y"
 				puts
 				self.custom_exit(130)
@@ -555,8 +555,8 @@ class EvilWinRM
 		end
                 self.custom_exit(0)
             end
-        rescue SignalException
-            self.custom_exit(130)
+        #rescue SignalException
+        #    self.custom_exit(130)
         rescue SystemExit
         rescue SocketError
             self.print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR)
