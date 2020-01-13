@@ -3,6 +3,7 @@
  - Removed trailing spaces for better visualization
  - Added command line option to disable colors
  - Improved Windows compatibility
+ - Trap capturing to avoid accidental shell exit on Ctrl+C
 
 ### 2.0
  - Fix GSSAPI error

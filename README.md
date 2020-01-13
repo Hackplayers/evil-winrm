@@ -32,6 +32,7 @@ purposes by system administrators as well but the most of its features are focus
  - Local files completion
  - Colorization on prompt and output messages (can be disabled optionally)
  - Docker support (prebuilt images available at [Dockerhub])
+ - Trap capturing to avoid accidental shell exit on Ctrl+C
 
 ## Help
 ```
