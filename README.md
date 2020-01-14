@@ -16,6 +16,7 @@ phase. The purpose of this program is to provide nice and easy-to-use features f
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
 ## Features
+ - Compatible to Linux and Windows client systems
  - Load in memory Powershell scripts
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) assemblies bypassing some AVs
@@ -29,8 +30,9 @@ purposes by system administrators as well but the most of its features are focus
  - Command History
  - WinRM command completion
  - Local files completion
- - Colorization on output messages (can be disabled optionally)
+ - Colorization on prompt and output messages (can be disabled optionally)
  - Docker support (prebuilt images available at [Dockerhub])
+ - Trap capturing to avoid accidental shell exit on Ctrl+C
 
 ## Help
 ```
@@ -48,11 +50,12 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -H, --hash NTHash                NTHash 
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
+    -n, --no-colors                  Disable colors
     -h, --help                       Display this help message
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2` and `colorize >=0.8.1`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`.
 Depending of your installation method (3 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
@@ -65,7 +68,7 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
  - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
  
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs colorize stringio`
+ - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs stringio`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
@@ -101,7 +104,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
 #### Load powershell scripts
- - To load a ps1 file you just have to type the name (auto-completion usnig tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
+ - To load a ps1 file you just have to type the name (auto-completion using tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
@@ -155,16 +158,13 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    ```
     CONTOSO.COM = {
-                kdc = fooserver.contoso.con
+                kdc = fooserver.contoso.com
     }
    ```
 
  - Check Kerberos tickets with `klist`
  - To remove ticket use: `kdestroy`
  - For more information about Kerberos check this [cheatsheet]
-
-#### Extra features
- - To disable colors just modify on code this variable `$colors_enabled`. Set it to false: `$colors_enabled = false`
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
@@ -217,7 +217,7 @@ Use it at your own servers and/or with the server owner's permission.
 [Dockerhub]: https://hub.docker.com/r/oscarakaelvis/evil-winrm
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-2.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-2.1-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"

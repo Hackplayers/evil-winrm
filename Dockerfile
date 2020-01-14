@@ -14,7 +14,6 @@ LABEL \
 RUN gem install \
     winrm \
     winrm-fs \
-    colorize \
     stringio
 
 # Create volume for powershell scripts
