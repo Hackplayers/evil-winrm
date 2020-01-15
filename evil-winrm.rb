@@ -17,7 +17,7 @@ require 'time'
 # Constants
 
 # Version
-VERSION = '2.1'
+VERSION = '2.2'
 
 # Msg types
 TYPE_INFO = 0

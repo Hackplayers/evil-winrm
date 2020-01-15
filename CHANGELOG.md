@@ -1,3 +1,5 @@
+### 2.2
+ - # TODO
 ### 2.1
  - Fixed required params for certificates auth
  - Removed trailing spaces for better visualization
