@@ -544,7 +544,7 @@ class EvilWinRM
                 rescue Interrupt
                     puts("\n\n")
                     self.print_message("Press \"y\" to exit, press any other key to continue", TYPE_WARNING)
-                    if STDIN.getch.downcase == "y" or STDIN.getch.downcase == "Y"
+                    if STDIN.getch.downcase == "y"
                         self.custom_exit(130)
                     else
                         retry
