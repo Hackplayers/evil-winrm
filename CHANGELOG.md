@@ -1,5 +1,5 @@
 ### 2.2
- - Added progress bar for file uploads
+ - Added progress bar for file uploads/downloads
 
 ### 2.1
  - Fixed required params for certificates auth

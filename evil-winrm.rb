@@ -630,4 +630,3 @@ end
 # Execution
 e = EvilWinRM.new
 e.main
-

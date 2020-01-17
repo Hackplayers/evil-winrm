@@ -25,7 +25,7 @@ purposes by system administrators as well but the most of its features are focus
  - Pass-the-hash support
  - Kerberos auth support
  - SSL and certificates support
- - Upload and download files
+ - Upload and download files showing progress bar
  - List remote machine services without privileges
  - Command History
  - WinRM command completion
