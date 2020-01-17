@@ -1,5 +1,6 @@
 ### 2.2
- - # TODO
+ - Added progress bar for file uploads
+
 ### 2.1
  - Fixed required params for certificates auth
  - Removed trailing spaces for better visualization

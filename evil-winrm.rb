@@ -317,6 +317,7 @@ class EvilWinRM
         exit(exit_code)
     end
 
+    # Progress bar
     def progress_bar(bytes_done, total_bytes)
             progress = ((bytes_done.to_f / total_bytes.to_f) * 100).round
             progress_bar = (progress / 10).round
