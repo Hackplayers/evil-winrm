@@ -47,6 +47,38 @@ $user = ""
 $password = ""
 $url = "wsman"
 
+# Redefine download method from winrm-fs
+module WinRM
+    module FS
+        class FileManager
+            def download(remote_path, local_path, chunk_size = 1024 * 1024, first = true, size: -1)
+                @logger.debug("downloading: #{remote_path} -> #{local_path} #{chunk_size}")
+                index = 0
+                output = _output_from_file(remote_path, chunk_size, index)
+                return download_dir(remote_path, local_path, chunk_size, first) if output.exitcode == 2
+
+                return false if output.exitcode >= 1
+
+                File.open(local_path, 'wb') do |fd|
+                    out = _write_file(fd, output)
+                    index += out.length
+                    until out.empty?
+                        if size != -1
+                            yield index, size
+                        end
+                        output = _output_from_file(remote_path, chunk_size, index)
+                        return false if output.exitcode >= 1
+
+                        out = _write_file(fd, output)
+                        index += out.length
+                    end
+                end
+            end
+
+            true
+        end
+    end
+end
 
 # Class creation
 class EvilWinRM
@@ -328,6 +360,12 @@ class EvilWinRM
             $stdout.flush
     end
 
+    # Get filesize
+    def filesize(shell, path)
+        size = shell.run("(get-item #{path}).length").output.strip.to_i
+        return size
+    end
+
     # Main function
     def main
         self.arguments()
@@ -431,6 +469,7 @@ class EvilWinRM
                                 file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
                                     progress_bar(bytes_copied, total_bytes)
                                     if bytes_copied == total_bytes then
+                                        puts("                                                             ")
                                         self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
                                         self.print_message("Upload successful!", TYPE_INFO)
                                     end
@@ -453,7 +492,11 @@ class EvilWinRM
 
                             begin
                                 self.print_message("Downloading #{download_command[1]} to #{download_command[2]}", TYPE_INFO)
-                                file_manager.download(download_command[1], download_command[2])
+                                size = self.filesize(shell, download_command[1])
+                                file_manager.download(download_command[1], download_command[2], size: size) do | index, size |
+                                    progress_bar(index, size)
+                                end
+                                puts("                                                             ")
                                 self.print_message("Download successful!", TYPE_INFO)
                             rescue
                                 self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
@@ -587,3 +630,4 @@ end
 # Execution
 e = EvilWinRM.new
 e.main
+
