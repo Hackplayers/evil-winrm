@@ -469,7 +469,7 @@ class EvilWinRM
                                 file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
                                     progress_bar(bytes_copied, total_bytes)
                                     if bytes_copied == total_bytes then
-                                        puts ()
+                                        puts()
                                         self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
                                         self.print_message("Upload successful!", TYPE_INFO)
                                     end
@@ -496,7 +496,7 @@ class EvilWinRM
                                 file_manager.download(download_command[1], download_command[2], size: size) do | index, size |
                                     progress_bar(index, size)
                                 end
-                                puts ()
+                                puts()
                                 self.print_message("Download successful!", TYPE_INFO)
                             rescue
                                 self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
