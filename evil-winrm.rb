@@ -317,6 +317,16 @@ class EvilWinRM
         exit(exit_code)
     end
 
+    def progress_bar(bytes_done, total_bytes)
+            progress = ((bytes_done.to_f / total_bytes.to_f) * 100).round
+            progress_bar = (progress / 10).round
+            progress_string = "▓" * (progress_bar-1).clamp(0,9)
+            progress_string = progress_string + "▒" + ("░" * (10-progress_bar))
+            message = "Progress: #{progress}% : |#{progress_string}|          \r"
+            print message
+            $stdout.flush
+    end
+
     # Main function
     def main
         self.arguments()
@@ -418,6 +428,7 @@ class EvilWinRM
                             begin
                                 self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
                                 file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
+                                    progress_bar(bytes_copied, total_bytes)
                                     if bytes_copied == total_bytes then
                                         self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
                                         self.print_message("Upload successful!", TYPE_INFO)
