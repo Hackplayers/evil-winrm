@@ -1,5 +1,6 @@
 ### 2.2
  - Added progress bar for file uploads/downloads
+ - New ascii art on menu
 
 ### 2.1
  - Fixed required params for certificates auth

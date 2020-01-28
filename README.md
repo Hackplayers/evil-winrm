@@ -170,24 +170,22 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
 
 ## Credits:
-Main author:
+Staff:
 
- - [cybervaca]
-
-Collaborators, developers, documenters, testers and supporters:
-
- - [OscarAkaElvis]
- - [jarilaos]
- - [vis0r]
+ - [Cybervaca], (founder). Twitter: [@CyberVaca_]
+ - [OscarAkaElvis], Twitter: [@OscarAkaElvis]
+ - [Laox], Twitter: [@_Laox]
 
 Hat tip to:
 
+ - [Vis0r] for his personal support.
  - [Alamot] for his original code.
  - [3v4Si0N] for his awesome dll loader.
  - [WinRb] All contributors of ruby library.
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
+ - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE).
@@ -197,10 +195,10 @@ Any misuse of this software will not be the responsibility of the author or of a
 Use it at your own servers and/or with the server owner's permission.
 
 <!-- Github URLs -->
-[cybervaca]: https://github.com/cybervaca
+[Cybervaca]: https://github.com/cybervaca
 [OscarAkaElvis]: https://github.com/OscarAkaElvis
-[jarilaos]: https://github.com/jarilaos
-[vis0r]: https://github.com/vmotos
+[Laox]: https://github.com/jarilaos
+[Vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
 [donut]: https://github.com/TheWover/donut
@@ -215,6 +213,12 @@ Use it at your own servers and/or with the server owner's permission.
 [Mimikatz]: https://github.com/gentilkiwi/mimikatz
 [cheatsheet]: https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
 [Dockerhub]: https://hub.docker.com/r/oscarakaelvis/evil-winrm
+[Hackplayers]: https://www.hackplayers.com/
+
+<!-- Twitter URLs -->
+[@CyberVaca_]: https://twitter.com/CyberVaca_
+[@OscarAkaElvis]: https://twitter.com/OscarAkaElvis
+[@_Laox]: https://twitter.com/_Laox
 
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-2.2-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
