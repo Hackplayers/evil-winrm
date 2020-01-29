@@ -1,6 +1,9 @@
 ### 2.2
  - Added progress bar for file uploads/downloads
  - New ascii art on menu
+ - Name of Dll loader refactored
+ - Help added to Invoke-Binary
+ - Fixed Invoke-Binary to accept any number of arguments separated by commas
 
 ### 2.1
  - Fixed required params for certificates auth
