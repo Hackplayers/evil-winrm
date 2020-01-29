@@ -362,7 +362,7 @@ class EvilWinRM
 
     # Get filesize
     def filesize(shell, path)
-        size = shell.run("(get-item #{path}).length").output.strip.to_i
+        size = shell.run("(get-item '#{path}').length").output.strip.to_i
         return size
     end
 
