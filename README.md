@@ -99,7 +99,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    If you are using Evil-WinRM in a docker environment, bear in mind that all local paths should be at `/data` and be pretty sure that you mapped it as a volume in order to be able to access to downloaded files or to be able to upload files from your local host O.S.
 
  - **services**: list all services. No administrator permissions needed.
- - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
+ - **menu**: load the `Invoke-Binary`, `Dll-Loader`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
@@ -109,16 +109,16 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
 #### Advanced commands
-- Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
+- Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image3.png)
 
- - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
+ - Dll-Loader: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
    The dll file can be hosted by smb, http or locally. Once it is loaded type `menu`, then it is possible to autocomplete all functions.
 
-   ![l04d3r-LoadDll1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image4.png)
-   ![l04d3r-LoadDll2](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image5.png)
+   ![Dll-Loader1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image4.png)
+   ![Dll-Loader2](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image5.png)
 
  - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
 
