@@ -25,7 +25,7 @@ purposes by system administrators as well but the most of its features are focus
  - Pass-the-hash support
  - Kerberos auth support
  - SSL and certificates support
- - Upload and download files
+ - Upload and download files showing progress bar
  - List remote machine services without privileges
  - Command History
  - WinRM command completion
@@ -99,7 +99,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    If you are using Evil-WinRM in a docker environment, bear in mind that all local paths should be at `/data` and be pretty sure that you mapped it as a volume in order to be able to access to downloaded files or to be able to upload files from your local host O.S.
 
  - **services**: list all services. No administrator permissions needed.
- - **menu**: load the `Invoke-Binary`, `l04d3r-LoadDll`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
+ - **menu**: load the `Invoke-Binary`, `Dll-Loader`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
@@ -109,16 +109,16 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
 #### Advanced commands
-- Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key and allows up to 3 parameters. The executables must be in the path set at `-e` argument.
+- Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key. Arguments for the exe file can be passed comma separated. Example: `Invoke-Binary /opt/csharp/Binary.exe 'param1, param2, param3'`. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image3.png)
 
- - l04d3r-LoadDll: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
+ - Dll-Loader: allows loading dll libraries in memory, it is equivalent to: `[Reflection.Assembly]::Load([IO.File]::ReadAllBytes("pwn.dll"))`
 
    The dll file can be hosted by smb, http or locally. Once it is loaded type `menu`, then it is possible to autocomplete all functions.
 
-   ![l04d3r-LoadDll1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image4.png)
-   ![l04d3r-LoadDll2](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image5.png)
+   ![Dll-Loader1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image4.png)
+   ![Dll-Loader2](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image5.png)
 
  - Donut-Loader: allows to inject x64 payloads generated with awesome [donut] technique. No need to encode the payload.bin, just generate and inject!
 
@@ -170,24 +170,22 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
 
 ## Credits:
-Main author:
+Staff:
 
- - [cybervaca]
-
-Collaborators, developers, documenters, testers and supporters:
-
- - [OscarAkaElvis]
- - [jarilaos]
- - [vis0r]
+ - [Cybervaca], (founder). Twitter: [@CyberVaca_]
+ - [OscarAkaElvis], Twitter: [@OscarAkaElvis]
+ - [Laox], Twitter: [@_Laox]
 
 Hat tip to:
 
+ - [Vis0r] for his personal support.
  - [Alamot] for his original code.
  - [3v4Si0N] for his awesome dll loader.
  - [WinRb] All contributors of ruby library.
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
+ - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE).
@@ -197,10 +195,10 @@ Any misuse of this software will not be the responsibility of the author or of a
 Use it at your own servers and/or with the server owner's permission.
 
 <!-- Github URLs -->
-[cybervaca]: https://github.com/cybervaca
+[Cybervaca]: https://github.com/cybervaca
 [OscarAkaElvis]: https://github.com/OscarAkaElvis
-[jarilaos]: https://github.com/jarilaos
-[vis0r]: https://github.com/vmotos
+[Laox]: https://github.com/jarilaos
+[Vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
 [donut]: https://github.com/TheWover/donut
@@ -215,9 +213,15 @@ Use it at your own servers and/or with the server owner's permission.
 [Mimikatz]: https://github.com/gentilkiwi/mimikatz
 [cheatsheet]: https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a
 [Dockerhub]: https://hub.docker.com/r/oscarakaelvis/evil-winrm
+[Hackplayers]: https://www.hackplayers.com/
+
+<!-- Twitter URLs -->
+[@CyberVaca_]: https://twitter.com/CyberVaca_
+[@OscarAkaElvis]: https://twitter.com/OscarAkaElvis
+[@_Laox]: https://twitter.com/_Laox
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-2.1-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-2.2-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
