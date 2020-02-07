@@ -98,7 +98,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    Relative paths are not allowed to use on download/upload. Use filenames on current directory or absolute path.
    If you are using Evil-WinRM in a docker environment, bear in mind that all local paths should be at `/data` and be pretty sure that you mapped it as a volume in order to be able to access to downloaded files or to be able to upload files from your local host O.S.
 
- - **services**: list all services. No administrator permissions needed.
+ - **services**: list all services showing if there your account has permissions over each one. No administrator permissions needed to use this feature.
  - **menu**: load the `Invoke-Binary`, `Dll-Loader`, `Donut-Loader` and `Bypass-4MSI` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
