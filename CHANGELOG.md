@@ -1,3 +1,7 @@
+### 2.3
+ - Fixed Invoke-Binary arguments
+ - Service function improved, now show privileges over the services
+
 ### 2.2
  - Added progress bar for file uploads/downloads
  - New ascii art on menu
