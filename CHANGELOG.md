@@ -1,5 +1,6 @@
 ### 2.3
- - #TODO
+ - Fixed Invoke-Binary arguments
+ - Service function updated
 
 ### 2.2
  - Added progress bar for file uploads/downloads
