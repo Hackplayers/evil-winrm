@@ -74,8 +74,9 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
 
 ### Method 3. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
  - Step 1. Install bundler: `gem install bundler:2.0.2`
- - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
- - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+ - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
+ - Step 3. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
+ - Step 4. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ### Method 4. Using Docker
  - Step 1. Launch docker container based on already built image: `docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/foo/data:/data oscarakaelvis/evil-winrm -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'`
