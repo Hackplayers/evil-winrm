@@ -590,6 +590,10 @@ class EvilWinRM
                             STDERR.print(stderr)
                         end
                     end
+                rescue Errno::EACCES => ex
+                    puts()
+                    self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR)
+                    retry
                 rescue Interrupt
                     puts("\n\n")
                     self.print_message("Press \"y\" to exit, press any other key to continue", TYPE_WARNING)

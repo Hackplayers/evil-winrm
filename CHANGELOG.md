@@ -1,5 +1,5 @@
 ### 2.4
- - #TODO
+ - File permission access error now handled in exception to avoid losing connection
 
 ### 2.3
  - Fixed Invoke-Binary arguments
