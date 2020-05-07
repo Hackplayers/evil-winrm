@@ -40,6 +40,3 @@ DEPENDENCIES
   stringio
   winrm
   winrm-fs
-
-BUNDLED WITH
-   2.0.2
