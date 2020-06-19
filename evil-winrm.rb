@@ -46,6 +46,7 @@ $port = "5985"
 $user = ""
 $password = ""
 $url = "wsman"
+$service = "HTTP"
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -85,7 +86,7 @@ class EvilWinRM
 
     # Arguments
     def arguments()
-        options = { port:$port, url:$url }
+        options = { port:$port, url:$url, service:$service }
         optparse = OptionParser.new do |opts|
             opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
@@ -96,6 +97,7 @@ class EvilWinRM
             opts.on("-k", "--priv-key PRIVATE_KEY_PATH", "Local path to private key certificate") { |val| options[:priv_key] = val }
             opts.on("-r", "--realm DOMAIN", "Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }") { |val| options[:realm] = val.upcase }
             opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts local path") { |val| options[:scripts] = val }
+            opts.on("-S", "--service SPN_PREFIX", "Prefix of the SPN (default HTTP)") { |val| options[:service] = val }
             opts.on("-e", "--executables EXES_PATH", "C# executables local path") { |val| options[:executables] = val }
             opts.on("-i", "--ip IP", "Remote host IP or hostname. FQDN for Kerberos auth (required)") { |val| options[:ip] = val }
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
@@ -163,6 +165,7 @@ class EvilWinRM
         $pub_key = options[:pub_key]
         $priv_key = options[:priv_key]
         $realm = options[:realm]
+        $service = options[:service]
     end
 
     # Print script header
@@ -200,7 +203,8 @@ class EvilWinRM
                 user: "",
                 password: "",
                 transport: :kerberos,
-                realm: $realm
+                realm: $realm,
+                service: $service
             )
         else
             $conn = WinRM::Connection.new(
