@@ -1,6 +1,7 @@
 ### 2.4
  - File permission access error now handled in exception to avoid losing connection
  - Improvements on bundler installation method
+ - Added spn (Service Principal Names) option param for kerberos auth to set some different than default HTTP
 
 ### 2.3
  - Fixed Invoke-Binary arguments
