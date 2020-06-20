@@ -397,6 +397,10 @@ class EvilWinRM
             self.print_message("Password is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
         end
 
+        if $realm.nil? and !$service.nil? then
+            self.print_message("Useless spn provided, only used for Kerberos auth", TYPE_WARNING)
+        end
+
         if !$scripts_path.nil? then
             self.check_directories($scripts_path, "scripts")
             functions = self.read_scripts($scripts_path)
