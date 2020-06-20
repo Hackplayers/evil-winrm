@@ -15,6 +15,9 @@ if you have credentials and permissions to use it. So we can say that it could b
 phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate 
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
+It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM 
+protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
+
 ## Features
  - Compatible to Linux and Windows client systems
  - Load in memory Powershell scripts
