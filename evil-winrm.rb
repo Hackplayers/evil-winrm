@@ -46,7 +46,7 @@ $port = "5985"
 $user = ""
 $password = ""
 $url = "wsman"
-$service = "HTTP"
+$default_service = "HTTP"
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -166,6 +166,11 @@ class EvilWinRM
         $priv_key = options[:priv_key]
         $realm = options[:realm]
         $service = options[:service]
+        if !$realm.nil? then
+            if $service.nil? then
+                $service = $default_service
+            end
+        end
     end
 
     # Print script header
@@ -420,7 +425,7 @@ class EvilWinRM
               when Readline.line_buffer =~ /help.*/i
                 puts("#{$LIST.join("\t")}")
               when Readline.line_buffer =~ /\[.*/i
-                $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?              
+                $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
               when Readline.line_buffer =~ /Invoke-Binary.*/i
                 executables.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
               when Readline.line_buffer =~ /donutfile.*/i
