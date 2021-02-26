@@ -443,7 +443,8 @@ class EvilWinRM
                     until command == "exit" do
                         pwd = shell.run("(get-location).path").output.strip
                         if $colors_enabled then
-                            command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
+                            print(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ")
+                            command = Readline.readline('', true)
                         else
                             command = Readline.readline("*Evil-WinRM* PS " + pwd + "> ", true)
                         end
