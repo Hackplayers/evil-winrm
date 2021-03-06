@@ -234,7 +234,7 @@ class EvilWinRM
     def colorize(text, color = "default")
         colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
         color_code = colors[color]
-        return "\033[0;#{color_code}m#{text}\033[0m"
+        return "\001\033[0;#{color_code}m\002#{text}\001\033[0m\002"
     end
 
     # Messsage printing
@@ -456,8 +456,7 @@ class EvilWinRM
                     until command == "exit" do
                         pwd = shell.run("(get-location).path").output.strip
                         if $colors_enabled then
-                            print(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ")
-                            command = Readline.readline('', true)
+                            command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
                         else
                             command = Readline.readline("*Evil-WinRM* PS " + pwd + "> ", true)
                         end
