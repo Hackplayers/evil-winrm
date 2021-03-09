@@ -1,3 +1,9 @@
+### 2.4
+ - File permission access error now handled in exception to avoid losing connection
+ - Improvements on bundler installation method
+ - Added spn (Service Principal Names) option param for kerberos auth to set some different than default HTTP
+ - Fixed prompt colors (ANSI)
+
 ### 2.3
  - Fixed Invoke-Binary arguments
  - Service function improved, now show privileges over the services
@@ -29,7 +35,7 @@
 ### 1.8
  - Added pass-the-hash feature
  - Added bundler installation method
- 
+
 ### 1.7
  - Added x64 compatibility to use Donut payloads
 

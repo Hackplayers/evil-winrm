@@ -15,6 +15,9 @@ if you have credentials and permissions to use it. So we can say that it could b
 phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate 
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
+It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM 
+protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
+
 ## Features
  - Compatible to Linux and Windows client systems
  - Load in memory Powershell scripts
@@ -36,18 +39,19 @@ purposes by system administrators as well but the most of its features are focus
 
 ## Help
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM]
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX]
     -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
+        --spn SPN_PREFIX             SPN prefix for Kerberos auth (default HTTP)
     -e, --executables EXES_PATH      C# executables local path
-    -i, --ip IP                      Remote host IP or hostname (required)
-    -U, --url URL                    Remote url endpoint (default wsman)
+    -i, --ip IP                      Remote host IP or hostname. FQDN for Kerberos auth (required)
+    -U, --url URL                    Remote url endpoint (default /wsman)
     -u, --user USER                  Username (required if not using kerberos)
     -p, --password PASS              Password
-    -H, --hash NTHash                NTHash 
+    -H, --hash HASH                  NTHash
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
@@ -73,9 +77,10 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
  - Step 3. Ready. Just launch it! `~$ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ### Method 3. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
- - Step 1. Install bundler: `gem install bundler:2.0.2`
- - Step 2. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
- - Step 3. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
+ - Step 1. Install bundler: `gem install bundler`
+ - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
+ - Step 3. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
+ - Step 4. Launch it with bundler: `bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
 
 ### Method 4. Using Docker
  - Step 1. Launch docker container based on already built image: `docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/foo/data:/data oscarakaelvis/evil-winrm -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'`
@@ -221,7 +226,7 @@ Use it at your own servers and/or with the server owner's permission.
 [@_Laox]: https://twitter.com/_Laox
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-2.3-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-2.4-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"

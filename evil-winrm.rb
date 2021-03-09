@@ -17,7 +17,7 @@ require 'time'
 # Constants
 
 # Version
-VERSION = '2.3'
+VERSION = '2.4'
 
 # Msg types
 TYPE_INFO = 0
@@ -46,6 +46,7 @@ $port = "5985"
 $user = ""
 $password = ""
 $url = "wsman"
+$default_service = "HTTP"
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -85,9 +86,9 @@ class EvilWinRM
 
     # Arguments
     def arguments()
-        options = { port:$port, url:$url }
+        options = { port:$port, url:$url, service:$service }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM]"
+            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
                 $ssl = true
                 options[:port] = "5986"
@@ -96,10 +97,11 @@ class EvilWinRM
             opts.on("-k", "--priv-key PRIVATE_KEY_PATH", "Local path to private key certificate") { |val| options[:priv_key] = val }
             opts.on("-r", "--realm DOMAIN", "Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }") { |val| options[:realm] = val.upcase }
             opts.on("-s", "--scripts PS_SCRIPTS_PATH", "Powershell scripts local path") { |val| options[:scripts] = val }
+            opts.on("--spn SPN_PREFIX", "SPN prefix for Kerberos auth (default HTTP)") { |val| options[:service] = val }
             opts.on("-e", "--executables EXES_PATH", "C# executables local path") { |val| options[:executables] = val }
             opts.on("-i", "--ip IP", "Remote host IP or hostname. FQDN for Kerberos auth (required)") { |val| options[:ip] = val }
             opts.on("-U", "--url URL", "Remote url endpoint (default /wsman)") { |val| options[:url] = val }
-            opts.on("-u", "--user USER", "Username (required)") { |val| options[:user] = val }
+            opts.on("-u", "--user USER", "Username (required if not using kerberos)") { |val| options[:user] = val }
             opts.on("-p", "--password PASS", "Password") { |val| options[:password] = val }
             opts.on("-H", "--hash HASH", "NTHash") do |val|
                 if !options[:password].nil? and !val.nil?
@@ -163,6 +165,12 @@ class EvilWinRM
         $pub_key = options[:pub_key]
         $priv_key = options[:priv_key]
         $realm = options[:realm]
+        $service = options[:service]
+        if !$realm.nil? then
+            if $service.nil? then
+                $service = $default_service
+            end
+        end
     end
 
     # Print script header
@@ -200,7 +208,8 @@ class EvilWinRM
                 user: "",
                 password: "",
                 transport: :kerberos,
-                realm: $realm
+                realm: $realm,
+                service: $service
             )
         else
             $conn = WinRM::Connection.new(
@@ -225,7 +234,7 @@ class EvilWinRM
     def colorize(text, color = "default")
         colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
         color_code = colors[color]
-        return "\033[0;#{color_code}m#{text}\033[0m"
+        return "\001\033[0;#{color_code}m\002#{text}\001\033[0m\002"
     end
 
     # Messsage printing
@@ -393,6 +402,10 @@ class EvilWinRM
             self.print_message("Password is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
         end
 
+        if $realm.nil? and !$service.nil? then
+            self.print_message("Useless spn provided, only used for Kerberos auth", TYPE_WARNING)
+        end
+
         if !$scripts_path.nil? then
             self.check_directories($scripts_path, "scripts")
             functions = self.read_scripts($scripts_path)
@@ -412,7 +425,7 @@ class EvilWinRM
               when Readline.line_buffer =~ /help.*/i
                 puts("#{$LIST.join("\t")}")
               when Readline.line_buffer =~ /\[.*/i
-                $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?              
+                $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
               when Readline.line_buffer =~ /Invoke-Binary.*/i
                 executables.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
               when Readline.line_buffer =~ /donutfile.*/i
@@ -590,6 +603,10 @@ class EvilWinRM
                             STDERR.print(stderr)
                         end
                     end
+                rescue Errno::EACCES => ex
+                    puts()
+                    self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR)
+                    retry
                 rescue Interrupt
                     puts("\n\n")
                     self.print_message("Press \"y\" to exit, press any other key to continue", TYPE_WARNING)
