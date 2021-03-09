@@ -234,7 +234,7 @@ class EvilWinRM
     def colorize(text, color = "default")
         colors = {"default" => "38", "blue" => "34", "red" => "31", "yellow" => "1;33", "magenta" => "35"}
         color_code = colors[color]
-        return "\033[0;#{color_code}m#{text}\033[0m"
+        return "\001\033[0;#{color_code}m\002#{text}\001\033[0m\002"
     end
 
     # Messsage printing
