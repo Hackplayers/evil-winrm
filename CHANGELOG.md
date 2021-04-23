@@ -1,3 +1,6 @@
+### 3.0
+ - Remote files/directories autocomplete feature (Thanks to Arale61)
+
 ### 2.4
  - File permission access error now handled in exception to avoid losing connection
  - Improvements on bundler installation method

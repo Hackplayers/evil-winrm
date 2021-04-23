@@ -6,16 +6,16 @@ The ultimate WinRM shell for hacking/pentesting
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
 
-WinRM (Windows Remote Management) is the Microsoft implementation of WS-Management Protocol. A standard SOAP based protocol 
-that allows hardware and operating systems from different vendors to interoperate. Microsoft included it in their Operating 
+WinRM (Windows Remote Management) is the Microsoft implementation of WS-Management Protocol. A standard SOAP based protocol
+that allows hardware and operating systems from different vendors to interoperate. Microsoft included it in their Operating
 Systems in order to make life easier to system administrators.
 
-This program can be used on any Microsoft Windows Servers with this feature enabled (usually at port 5985), of course only 
-if you have credentials and permissions to use it. So we can say that it could be used in a post-exploitation hacking/pentesting 
-phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate 
+This program can be used on any Microsoft Windows Servers with this feature enabled (usually at port 5985), of course only
+if you have credentials and permissions to use it. So we can say that it could be used in a post-exploitation hacking/pentesting
+phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
-It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM 
+It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM
 protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
 
 ## Features
@@ -32,7 +32,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - List remote machine services without privileges
  - Command History
  - WinRM command completion
- - Local files completion
+ - Local and remote files/directories completion
  - Colorization on prompt and output messages (can be disabled optionally)
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
@@ -70,7 +70,7 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
  - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
  - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
- 
+
 ### Method 2. Git clone and install dependencies on your system manually
  - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs stringio`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
@@ -94,9 +94,9 @@ If you don't want to put the password in clear text, you can optionally avoid to
 To use IPv6, the address must be added to /etc/hosts. Just put the already set name of the host after `-i` argument instead of an IP address.
 
 #### Basic commands
- - **upload**: local files can be auto-completed using tab key. 
+ - **upload**: local files can be auto-completed using tab key.
    - usage: `upload local_filename` or `upload local_filename destination_filename`
- - **download**: 
+ - **download**:
    - usage: `download remote_filename` or `download remote_filename destination_filename`
 
  __Notes about paths (upload/download)__:
@@ -130,7 +130,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ![Donut-Loader](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image8.png)
 
     You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
-    This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: 
+    This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip:
 
       `pip3 install donut-shellcode`
 
@@ -151,7 +151,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    * If you get a kirbi ticket using [Rubeus] or [Mimikatz] you have to convert to ccache using [ticket_converter.py]:
 
-      `python ticket_converter.py ticket.kirbi ticket.ccache` 
+      `python ticket_converter.py ticket.kirbi ticket.ccache`
 
  - Add ccache ticket. There are 2 ways:
 
@@ -190,13 +190,14 @@ Hat tip to:
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
+ - arale61 for his awesome contribution to autocomplete files/directories.
  - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE).
 
-Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
-Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
+Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only.
+Any misuse of this software will not be the responsibility of the author or of any other collaborator.
 Use it at your own servers and/or with the server owner's permission.
 
 <!-- Github URLs -->
