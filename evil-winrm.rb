@@ -85,7 +85,7 @@ end
 class EvilWinRM
 
     @@directories = Hash.new
-    @@cache_ttl = 3
+    @@cache_ttl = 10
 
     # Arguments
     def arguments()
@@ -466,8 +466,6 @@ class EvilWinRM
 
                     until command == "exit" do
                         pwd = shell.run("(get-location).path").output.strip
-
-                        
                         
                         if $colors_enabled then
                             command = Readline.readline(self.colorize("*Evil-WinRM*", "red") + self.colorize(" PS ", "yellow") + pwd + "> ", true)
@@ -486,8 +484,6 @@ class EvilWinRM
 
                             if upload_command[2].to_s.empty? then
                                 upload_command[2] = "#{pwd}\\#{upload_command[1].split('/')[-1]}"
-                            # elsif not upload_command[2].index ':\\'
-                            #     upload_command[2] = "#{pwd}\\#{upload_command[2]}"
                             end
                             begin
                                 self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
