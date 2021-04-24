@@ -84,8 +84,10 @@ end
 # Class creation
 class EvilWinRM
 
-    @@directories = Hash.new
-    @@cache_ttl_s = 5
+    def initialize()
+        @directories = Hash.new
+        @cache_ttl = 5
+    end
 
     # Arguments
     def arguments()
@@ -450,17 +452,18 @@ class EvilWinRM
                             paths = self.paths(str)
                             result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                             result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ) || [])
-                            result.concat(self.complete_path(str, shell))
+                            result.concat(self.complete_path(str, shell) || [])
                             result
                         else
                             result = $LIST.grep( /^#{Regexp.escape(str)}/i ) || []
-                            result.concat(self.complete_path(str, shell))
+                            result.concat(self.complete_path(str, shell) || [])
                             result
                         end
                     end
 
-                Readline.completion_proc = completion
-                Readline.completion_append_character = ''
+                    Readline.completion_proc = completion
+                    Readline.completion_append_character = ''
+                    Readline.basic_word_break_characters = " "
 
                     until command == "exit" do
                         pwd = shell.run("(get-location).path").output.strip
@@ -602,9 +605,22 @@ class EvilWinRM
                             self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING)
                             sleep(9)
                         end
-
-                        command = command.gsub('\\ ', '` ')
-                        puts(command)
+                        
+                        # dirty hack for sending paths with spaces coming from remote path completion proc
+                        if command.include?('\\ ') then
+                            command.gsub!('\\ ', '\#\#\#\#')
+                            new_parts = Array.new()
+                            parts = command.split(' ')
+                            parts.each do |x|
+                                if x.include?('\#\#\#\#') then
+                                    c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
+                                    new_parts.push(c)
+                                else
+                                    new_parts.push(x)
+                                end
+                            end
+                            command = new_parts.join(' ')
+                        end
 
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
@@ -638,11 +654,36 @@ class EvilWinRM
         end
     end
 
+    def get_from_cache(str)
+        current_time = Time.now.to_i
+        current_vals = @directories[str]
+        result = Array.new
+        unless current_vals.nil? then
+            is_valid = current_vals['time'] > current_time - @cache_ttl            
+            result = current_vals['files'] if is_valid
+            @directories.delete(str) unless is_valid
+        end        
+        return result
+    end
+
+
+    def set_cache(str, paths)
+        current_time = Time.now.to_i
+        @directories[str] = { 'time' => current_time, 'files' => paths }
+    end
+
+    def normalize_path(str)
+        p_str = str || ""
+        p_str = str.downcase.gsub('\\', '/')
+        p_str = str.downcase.gsub(' ', '\\ ')
+        p_str
+    end
+
     def complete_path(str, shell)
         if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
             unless (str.nil? || str.empty?) then
-                # puts(str)
-                c_time = Time.now.to_i
+                current_vals = self.get_from_cache(self.normalize_path(str))                
+                return current_vals unless current_vals.nil? || current_vals.empty?
 
                 pscmd = "$a=@();$(ls '#{str.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/').ToLower())\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/').ToLower())\" } });$a;"
 
@@ -650,8 +691,10 @@ class EvilWinRM
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
                 s.collect! { |str| str.downcase.gsub('\\', '/') }
                 s.collect! { |str| str.downcase.gsub(' ', '\\ ') }
+                
+                self.set_cache(self.normalize_path(str), s)
                 s
-            end
+            end                          
         end
     end
 end
