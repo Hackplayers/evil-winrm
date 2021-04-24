@@ -84,8 +84,11 @@ end
 # Class creation
 class EvilWinRM
 
-    @@directories = Hash.new
-    @@cache_ttl = 10
+    def initialize()
+        @directories = Hash.new
+        @cache_ttl = 10
+    end
+    
 
     # Arguments
     def arguments()
@@ -462,6 +465,7 @@ class EvilWinRM
 
                 Readline.completion_proc = completion
                 Readline.completion_append_character = ''
+                Readline.basic_word_break_characters = " "
             
 
                     until command == "exit" do
@@ -606,7 +610,22 @@ class EvilWinRM
                             sleep(9)
                         end
 
-                        command = command.gsub('\\ ', '` ')
+                        # dirty hack for sending paths with spaces coming from remote path completion proc
+                        if command.include?('\\ ') then
+                            command.gsub!('\\ ', '\#\#\#\#')
+                            new_parts = Array.new()
+                            parts = command.split(' ')
+                            parts.each do |x|
+                                if x.include?('\#\#\#\#') then
+                                    c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
+                                    new_parts.push(c)
+                                else
+                                    new_parts.push(x)
+                                end
+                            end
+                            command = new_parts.join(' ')
+                        end
+                        
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
                                 STDOUT.puts(line.rstrip!)
@@ -640,18 +659,18 @@ class EvilWinRM
     end
 
     def get_from_cache(str)
-        # puts("Getting from cache:\n#{@@directories}\nend getting...")
         current_time = Time.now.to_i
-        current_vals = @@directories[str]
-
-        return current_vals['files'] unless current_vals.nil? || current_vals['time'] < current_time - @@cache_ttl
+        current_vals = @directories[str]
+        is_valid = !current_vals.nil? && (current_vals['time'] < current_time - @cache_ttl)
+        t = @directories.delete(str) unless is_valid
+        return current_vals['files'] if is_valid
+        return []
     end
 
 
     def set_cache(str, paths)
         current_time = Time.now.to_i
-        @@directories[str] = { 'time' => current_time, 'files' => paths }
-        # puts(@@directories)
+        @directories[str] = { 'time' => current_time, 'files' => paths }
     end
 
     def normalize_path(str)
