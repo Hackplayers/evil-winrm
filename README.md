@@ -113,6 +113,12 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
+#### Remote path completion
+- **Remote path competion**
+- Remote path completion features facilitating interacting with the remote file system.
+
+   ![Remote path competion](./resources/completion.gif)
+
 #### Advanced commands
 - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key. Arguments for the exe file can be passed comma separated. Example: `Invoke-Binary /opt/csharp/Binary.exe 'param1, param2, param3'`. The executables must be in the path set at `-e` argument.
 
