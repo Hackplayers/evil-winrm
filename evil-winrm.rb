@@ -374,7 +374,6 @@ class EvilWinRM
             progress_string = progress_string + "▒" + ("░" * (10-progress_bar))
             message = "Progress: #{progress}% : |#{progress_string}|          \r"
             print message
-            $stdout.flush
     end
 
     # Get filesize
@@ -670,22 +669,21 @@ class EvilWinRM
         end
     end
 
-    def get_from_cache(str)
+    def get_from_cache(n_path)        
         current_time = Time.now.to_i
-        current_vals = @directories[str]
+        current_vals = @directories[n_path]
         result = Array.new
         unless current_vals.nil? then
             is_valid = current_vals['time'] > current_time - @cache_ttl            
             result = current_vals['files'] if is_valid
-            @directories.delete(str) unless is_valid
+            @directories.delete(n_path) unless is_valid
         end        
         return result
     end
 
-
-    def set_cache(str, paths)
+    def set_cache(n_path, paths)
         current_time = Time.now.to_i
-        @directories[str] = { 'time' => current_time, 'files' => paths }
+        @directories[n_path] = { 'time' => current_time, 'files' => paths }
     end
 
     def normalize_path(str)
@@ -695,21 +693,39 @@ class EvilWinRM
         p_str
     end
 
+    def get_dir_parts(n_path)
+        return [n_path, "" ] if !!(n_path[-1] =~ /\/$/)
+        i_last = n_path.rindex('/')
+        if i_last.nil?
+            return ["/", n_path]
+        end
+        next_i = i_last + 1
+        return [n_path[0..i_last], n_path[next_i..]]
+    end
+
     def complete_path(str, shell)
         str = './' if (str.nil? || str.empty?)
-        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then            
-            current_vals = self.get_from_cache(self.normalize_path(str))                
-            return current_vals unless current_vals.nil? || current_vals.empty?
+        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
+            n_path = self.normalize_path(str)
+            parts = self.get_dir_parts(n_path)
+            dir_p = parts[0]
+            nam_p = parts[1]
+            result = self.get_from_cache(dir_p)
 
-            pscmd = "$a=@();$(ls '#{str.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/').ToLower())\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/').ToLower())\" } });$a;"
+            # it's hungry for a self method:
+            if result.nil? || result.empty? then
+                pscmd = "$a=@();$(ls '#{dir_p.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/').ToLower())\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/').ToLower())\" } });$a;"
 
-            output = shell.run(pscmd).output
-            s = output.to_s.gsub(/\r/, '').split(/\n/)
-            s.collect! { |str| str.downcase.gsub('\\', '/') }
-            s.collect! { |str| str.downcase.gsub(' ', '\\ ') }
+                output = shell.run(pscmd).output
+                s = output.to_s.gsub(/\r/, '').split(/\n/)
+                s.collect! { |x| x.downcase.gsub('\\', '/').gsub(' ', '\\ ') }
+                
+                self.set_cache(dir_p, s)
+                result = s
+            end
             
-            self.set_cache(self.normalize_path(str), s)
-            s
+            return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/) unless nam_p.empty?
+            return result
         end
     end
 end
