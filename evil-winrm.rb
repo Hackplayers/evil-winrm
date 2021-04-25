@@ -453,7 +453,7 @@ class EvilWinRM
                         when Readline.line_buffer =~ /^(upload|download).*/i
                             paths = self.paths(str)
                             result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
-                            result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ) || [])
+                            result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ).select {|x| !$COMMANDS.include?(x)} || [])
                             result.concat(self.complete_path(str, shell) || [])
                             result
                         when (Readline.line_buffer.empty? || !Readline.line_buffer.include?(' ') )
