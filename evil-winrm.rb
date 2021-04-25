@@ -464,7 +464,7 @@ class EvilWinRM
                             result.concat(self.complete_path(str, shell) || [])
                             result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ).select {|x| !$COMMANDS.include?(x)} || [])                            
                             result
-                        when (Readline.line_buffer.empty? || !Readline.line_buffer.include?(' ') )
+                        when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ') && !!!(Readline.line_buffer =~ /^(\.\/|\~\/|\.\.\/|[a-z]\:\/)/)))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
                             result
                         else
