@@ -89,6 +89,7 @@ class EvilWinRM
         @directories = Hash.new
         @cache_ttl = 5
         @executables = Array.new
+        @functions = Array.new
     end
 
     # Arguments
@@ -330,8 +331,8 @@ class EvilWinRM
 
     # Read powershell script files
     def read_scripts(scripts)
-        files = Dir.entries(scripts).select{ |f| File.file? File.join(scripts, f) }
-        return files
+        files = Dir.entries(scripts).select{ |f| File.file? File.join(scripts, f) } || []
+        return files.grep(/^*\.(ps1|psd1|psm1)$/)
     end
 
     # Read executable files
@@ -415,9 +416,9 @@ class EvilWinRM
 
         if !$scripts_path.nil? then
             self.check_directories($scripts_path, "scripts")
-            functions = self.read_scripts($scripts_path)
+            @functions = self.read_scripts($scripts_path)
             self.silent_warnings do
-                $LIST = $LIST + functions
+                $LIST = $LIST + @functions
             end
         end
 
@@ -462,14 +463,12 @@ class EvilWinRM
                             result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                             result = result || []
                             result.concat(self.complete_path(str, shell) || [])
-                            result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ).select {|x| !$COMMANDS.include?(x)} || [])                            
                             result
                         when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ') && !!!(Readline.line_buffer =~ /^(\.\/|\~\/|\.\.\/|[a-z]\:\/)/)))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
-                            result
+                            result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
+                            result.uniq
                         else
-                            # paths = self.paths(str)
-                            # result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                             result = Array.new
                             result.concat(self.complete_path(str, shell) || [])
                             result
@@ -582,7 +581,7 @@ class EvilWinRM
                             output = shell.run('$servicios = Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath  ; foreach ($servicio in $servicios  ) {Get-Service $servicio.PSChildName -ErrorAction SilentlyContinue | Out-Null ; if ($? -eq $true) {$privs = $true} else {$privs = $false} ; $Servicios_object = New-Object psobject -Property @{"Service" = $servicio.pschildname ; "Path" = $servicio.imagepath ; "Privileges" = $privs} ;  $Servicios_object }')
                             print(output.output.chomp)
 
-                        elsif command.start_with?(*functions) then
+                        elsif command.start_with?(*@functions) then
                             self.silent_warnings do
                                 load_script = $scripts_path + command
                                 command = ""
