@@ -88,6 +88,7 @@ class EvilWinRM
     def initialize()
         @directories = Hash.new
         @cache_ttl = 5
+        @executables = Array.new
     end
 
     # Arguments
@@ -441,8 +442,14 @@ class EvilWinRM
                         when Readline.line_buffer =~ /\[.*/i
                             $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Invoke-Binary.*/i
-                            my_execs = @executables || []
-                            my_execs.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
+                            result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []
+                            
+                            if result.empty? then
+                                paths = self.paths(str)
+                                result.concat(paths.grep( /^#{Regexp.escape(str)}/i ))
+                            end
+                            
+                            result
                         when Readline.line_buffer =~ /donutfile.*/i
                             paths = self.paths(str)
                             paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
@@ -453,8 +460,9 @@ class EvilWinRM
                         when Readline.line_buffer =~ /^(upload|download).*/i
                             paths = self.paths(str)
                             result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
-                            result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ).select {|x| !$COMMANDS.include?(x)} || [])
+                            result = result || []
                             result.concat(self.complete_path(str, shell) || [])
+                            result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ).select {|x| !$COMMANDS.include?(x)} || [])                            
                             result
                         when (Readline.line_buffer.empty? || !Readline.line_buffer.include?(' ') )
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
