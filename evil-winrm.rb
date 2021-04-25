@@ -29,6 +29,7 @@ TYPE_DATA = 3
 
 # Available commands
 $LIST = ['upload', 'download', 'exit', 'menu', 'services'].sort
+$COMMANDS = $LIST.dup
 $LISTASSEM = [''].sort
 $DONUTPARAM1 = ['-process_id']
 $DONUTPARAM2 = ['-donutfile']
@@ -448,14 +449,19 @@ class EvilWinRM
                             $DONUTPARAM2.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Donut-Loader.*/i
                             $DONUTPARAM1.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
-                        when Readline.line_buffer =~ /upload.*/i
+                        when Readline.line_buffer =~ /^(upload|download).*/i
                             paths = self.paths(str)
                             result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                             result.concat($LIST.grep( /^#{Regexp.escape(str)}/i ) || [])
                             result.concat(self.complete_path(str, shell) || [])
                             result
+                        when (Readline.line_buffer.empty? || !Readline.line_buffer.include?(' ') )
+                            result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
+                            result
                         else
-                            result = $LIST.grep( /^#{Regexp.escape(str)}/i ) || []
+                            # paths = self.paths(str)
+                            # result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
+                            result = Array.new
                             result.concat(self.complete_path(str, shell) || [])
                             result
                         end
@@ -597,6 +603,8 @@ class EvilWinRM
                                 end
                                 $LIST2 = autocomplete.split("\n")
                                 $LIST = $LIST + $LIST2
+                                $COMMANDS = $COMMANDS + $LIST2
+                                $COMMANDS = $COMMANDS.uniq
                                 print(output.output)
                             end
 
@@ -680,21 +688,20 @@ class EvilWinRM
     end
 
     def complete_path(str, shell)
-        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
-            unless (str.nil? || str.empty?) then
-                current_vals = self.get_from_cache(self.normalize_path(str))                
-                return current_vals unless current_vals.nil? || current_vals.empty?
+        str = './' if (str.nil? || str.empty?)
+        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then            
+            current_vals = self.get_from_cache(self.normalize_path(str))                
+            return current_vals unless current_vals.nil? || current_vals.empty?
 
-                pscmd = "$a=@();$(ls '#{str.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/').ToLower())\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/').ToLower())\" } });$a;"
+            pscmd = "$a=@();$(ls '#{str.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/').ToLower())\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/').ToLower())\" } });$a;"
 
-                output = shell.run(pscmd).output
-                s = output.to_s.gsub(/\r/, '').split(/\n/)
-                s.collect! { |str| str.downcase.gsub('\\', '/') }
-                s.collect! { |str| str.downcase.gsub(' ', '\\ ') }
-                
-                self.set_cache(self.normalize_path(str), s)
-                s
-            end                          
+            output = shell.run(pscmd).output
+            s = output.to_s.gsub(/\r/, '').split(/\n/)
+            s.collect! { |str| str.downcase.gsub('\\', '/') }
+            s.collect! { |str| str.downcase.gsub(' ', '\\ ') }
+            
+            self.set_cache(self.normalize_path(str), s)
+            s
         end
     end
 end
