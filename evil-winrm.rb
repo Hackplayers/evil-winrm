@@ -509,7 +509,8 @@ class EvilWinRM
                                 puts()
                                 self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
-                            upload_command = command.tokenize
+                            # upload_command = command.tokenize
+                            upload_command = self.get_command_parts(command)                            
                             command = ""
 
                             if upload_command[2].to_s.empty? then
@@ -525,7 +526,8 @@ class EvilWinRM
                                         self.print_message("Upload successful!", TYPE_INFO)
                                     end
                                 end
-                            rescue
+                            rescue StandardError => err
+                                # self.print_message("Error: #{err.to_s}: #{err.backtrace}")
                                 self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
                             end
                         elsif command.start_with?('download') then
@@ -534,12 +536,12 @@ class EvilWinRM
                                 self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
 
-                            download_command = command.tokenize
+                            download_command = self.get_command_parts(command)
                             command = ""
 
-                            download_command[1].gsub!(':\\', ':/')
+                            download_command[1].gsub!('\\', '/')
                             download_command[1] = "#{pwd}/#{download_command[1]}" unless download_command[1].include?(':/')
-                            download_command[2] = "./" if download_command[2].empty?
+                            download_command[2] = "./" if download_command[2].nil? || download_command[2].empty?
 
                             download_command[2] = File.expand_path(download_command[2])
 
@@ -646,21 +648,7 @@ class EvilWinRM
                             sleep(9)
                         end
                         
-                        # dirty hack for sending paths with spaces coming from remote path completion proc
-                        if command.include?('\\ ') then
-                            command.gsub!('\\ ', '\#\#\#\#')
-                            new_parts = Array.new()
-                            parts = command.split(' ')
-                            parts.each do |x|
-                                if x.include?('\#\#\#\#') then
-                                    c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
-                                    new_parts.push(c)
-                                else
-                                    new_parts.push(x)
-                                end
-                            end
-                            command = new_parts.join(' ')
-                        end
+                        command = self.get_command_parts(command).join(' ') unless command.nil? || command.strip.empty?
 
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
@@ -694,27 +682,45 @@ class EvilWinRM
         end
     end
 
-    def get_from_cache(n_path)        
+    def get_command_parts(command)
+        tmpCommand = command.gsub('\\ ', '\#\#\#\#')
+        tmpCommand = tmpCommand || ""
+        new_parts = Array.new()
+        parts = tmpCommand.split(' ')
+        parts.each do |x|
+            if x.include?('\#\#\#\#') then
+                c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
+                new_parts.push(c)
+            else
+                new_parts.push(x)
+            end
+        end
+        new_parts
+    end
+
+    def get_from_cache(n_path)
+        a_path = n_path.downcase
         current_time = Time.now.to_i
-        current_vals = @directories[n_path]
+        current_vals = @directories[a_path]
         result = Array.new
         unless current_vals.nil? then
             is_valid = current_vals['time'] > current_time - @cache_ttl            
             result = current_vals['files'] if is_valid
-            @directories.delete(n_path) unless is_valid
+            @directories.delete(a_path) unless is_valid
         end        
         return result
     end
 
     def set_cache(n_path, paths)
+        a_path = n_path.downcase
         current_time = Time.now.to_i
-        @directories[n_path] = { 'time' => current_time, 'files' => paths }
+        @directories[a_path] = { 'time' => current_time, 'files' => paths }
     end
 
     def normalize_path(str)
         p_str = str || ""
-        p_str = str.downcase.gsub('\\', '/')
-        p_str = str.downcase.gsub(' ', '\\ ')
+        p_str = str.gsub('\\', '/')
+        p_str = str.gsub(' ', '\\ ')
         p_str
     end
 
@@ -739,7 +745,7 @@ class EvilWinRM
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
-                pscmd = "$a=@();$(ls '#{dir_p.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/').ToLower())\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/').ToLower())\" } });$a;"
+                pscmd = "$a=@();$(ls '#{dir_p.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a;"
 
                 output = shell.run(pscmd).output
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
@@ -751,7 +757,7 @@ class EvilWinRM
                 result = s
             end
             
-            return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/) unless nam_p.empty?
+            return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/i) unless nam_p.empty?
             return result
         end
     end
