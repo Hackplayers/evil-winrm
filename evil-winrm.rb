@@ -344,8 +344,12 @@ class EvilWinRM
     # Read local files and directories names
     def paths(directory)
         directory = "./" if directory.nil? || directory.empty?
-        dir_lasts = directory.rindex('/')        
-        my_dir = directory[..dir_lasts]
+        dir_lasts = directory.rindex('/')
+        if dir_lasts.nil? then
+            my_dir = "./"
+        else
+            my_dir = directory[..dir_lasts]
+        end
 
         my_dir = File.expand_path(my_dir)
         my_dir = File.dirname(my_dir) unless File.directory?(my_dir)
@@ -448,8 +452,9 @@ class EvilWinRM
                     case
                         when Readline.line_buffer =~ /help.*/i
                             puts("#{$LIST.join("\t")}")
-                        when Readline.line_buffer =~ /\[.*/i
-                            $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
+                        # todo: fix:
+                        # when Readline.line_buffer =~ /\[.*/i
+                        #     $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Invoke-Binary.*/i
                             result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []                            
                             if result.empty? then
@@ -459,7 +464,7 @@ class EvilWinRM
                             result.uniq
                         when Readline.line_buffer =~ /donutfile.*/i
                             paths = self.paths(str)
-                            paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
+                            paths.grep( /^#{Regexp.escape(str)}/i )
                         when Readline.line_buffer =~ /Donut-Loader -process_id.*/i
                             $DONUTPARAM2.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Donut-Loader.*/i
@@ -480,7 +485,7 @@ class EvilWinRM
                                 paths = self.paths(str)
                                 paths.grep( /^#{Regexp.escape(str)}/i ).uniq
                             end
-                        when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ') && !!!(Readline.line_buffer =~ /^(\.\/|\~\/|\.\.\/|[a-z]\:\/)/)))
+                        when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ')))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
                             result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
                             result.uniq
@@ -736,9 +741,13 @@ class EvilWinRM
 
     def complete_path(str, shell)
         str = './' if (str.nil? || str.empty?)
+        str = './' + str unless str.include?('/')
+        puts(str)
         if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
             n_path = self.normalize_path(str)
+            puts(n_path)
             parts = self.get_dir_parts(n_path)
+            puts(parts)
             dir_p = parts[0]
             nam_p = parts[1]
             result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/)/
@@ -751,12 +760,13 @@ class EvilWinRM
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
                 s.collect! { |x| self.normalize_path(x) }
 
-                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/)/ && s.length == 1
-                
+                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/)/
                 self.set_cache(dir_p, s)
                 result = s
+                puts(result)
             end
             
+            puts("#{dir_p}#{nam_p}")
             return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/i) unless nam_p.empty?
             return result
         end
