@@ -481,7 +481,8 @@ class EvilWinRM
                             else                                
                                 paths = self.paths(str)
                             end
-                        when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ')))
+                            
+                        when (Readline.line_buffer.strip.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ /^(\.\/|[a,z,A-Z]\:|\.\.\/|\~\/|\/)/i ))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
                             result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
                             result.uniq
@@ -738,15 +739,16 @@ class EvilWinRM
     def complete_path(str, shell)
         str = './' if (str.nil? || str.empty?)
         str = './' + str unless str.include?('/')
-        # puts(str)
-        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
+        cache_filter = /^(\.\/|\.\.\/|\~|\/)/i
+        
+        if !!(str =~ /^(\.\/|[a,z,A-Z]\:|\.\.\/|\~\/|\/)/i) then
             n_path = self.normalize_path(str)
             # puts(n_path)
             parts = self.get_dir_parts(n_path)
-            # puts(parts)
+            # puts(parts.to_s)
             dir_p = parts[0]
             nam_p = parts[1]
-            result = self.get_from_cache(dir_p) unless !!(dir_p =~ /^(\.\/|\.\.\/|\~)/)
+            result = self.get_from_cache(dir_p) unless !!(dir_p =~ cache_filter)
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
@@ -756,14 +758,15 @@ class EvilWinRM
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
                 s.collect! { |x| self.normalize_path(x) }
 
-                self.set_cache(dir_p, s) unless !!(dir_p =~ /^(\.\/|\.\.\/|\~)/)
+                self.set_cache(dir_p, s) unless !!(dir_p =~ cache_filter)
                 
                 result = s
+                # puts(s)
             end
             
             # puts("#{dir_p}: #{nam_p}")
             return result if nam_p.empty?
-            return result.grep(/^*\/#{Regexp.escape(nam_p)}/i) if !!(dir_p =~ /^(\.\/|\.\.\/|\~)/)
+            return result.grep(/^*\/#{Regexp.escape(nam_p)}/i) if !!(dir_p =~ cache_filter)
             return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}/i)
         end
     end
