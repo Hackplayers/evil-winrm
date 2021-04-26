@@ -742,12 +742,12 @@ class EvilWinRM
     def complete_path(str, shell)
         str = './' if (str.nil? || str.empty?)
         str = './' + str unless str.include?('/')
-        puts(str)
+        # puts(str)
         if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
             n_path = self.normalize_path(str)
-            puts(n_path)
+            # puts(n_path)
             parts = self.get_dir_parts(n_path)
-            puts(parts)
+            # puts(parts)
             dir_p = parts[0]
             nam_p = parts[1]
             result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/)/
@@ -763,10 +763,10 @@ class EvilWinRM
                 dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/)/
                 self.set_cache(dir_p, s)
                 result = s
-                puts(result)
+                # puts(result)
             end
             
-            puts("#{dir_p}#{nam_p}")
+            # puts("#{dir_p}#{nam_p}")
             return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/i) unless nam_p.empty?
             return result
         end
