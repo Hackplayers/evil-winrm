@@ -750,7 +750,7 @@ class EvilWinRM
             # puts(parts)
             dir_p = parts[0]
             nam_p = parts[1]
-            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/)/
+            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~)/
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
@@ -760,7 +760,7 @@ class EvilWinRM
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
                 s.collect! { |x| self.normalize_path(x) }
 
-                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/)/
+                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/|\~)/
                 self.set_cache(dir_p, s)
                 result = s
                 # puts(result)
