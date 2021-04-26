@@ -342,23 +342,20 @@ class EvilWinRM
     end
 
     # Read local files and directories names
-    def paths(directory)
-        directory = "./" if directory.nil? || directory.empty?
-        dir_lasts = directory.rindex('/')
-        if dir_lasts.nil? then
-            my_dir = "./"
-        else
-            my_dir = directory[..dir_lasts]
-        end
+    def paths(a_path)
+        parts = self.get_dir_parts(a_path)
+        my_dir = parts[0]
+        grep_for = parts[1]
 
         my_dir = File.expand_path(my_dir)
-        my_dir = File.dirname(my_dir) unless File.directory?(my_dir)
-        my_dir = my_dir + '/' unless my_dir[-1] == '/'
-        
+        my_dir = my_dir + "/" unless my_dir[-1] == '/'
+                
         files = Dir.glob("#{my_dir}*", File::FNM_DOTMATCH)
         directories = Dir.glob("#{my_dir}*").select {|f| File.directory? f}
 
-        return files + directories
+        result = files + directories || []
+
+        result.grep( /^#{Regexp.escape(my_dir)}#{grep_for}/i ).uniq
     end
 
     # Custom exit
@@ -472,8 +469,7 @@ class EvilWinRM
                         when Readline.line_buffer =~ /^upload.*/i
                             test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
                             if test_s.count(' ') < 2 then
-                                paths = self.paths(str)
-                                paths.grep( /^#{Regexp.escape(str)}/i ).uniq
+                                self.paths(str) || []
                             else
                                 self.complete_path(str, shell) || []
                             end
@@ -481,9 +477,8 @@ class EvilWinRM
                             test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
                             if test_s.count(' ') < 2 then
                                 self.complete_path(str, shell) || []
-                            else
+                            else                                
                                 paths = self.paths(str)
-                                paths.grep( /^#{Regexp.escape(str)}/i ).uniq
                             end
                         when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ')))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
@@ -733,7 +728,7 @@ class EvilWinRM
         return [n_path, "" ] if !!(n_path[-1] =~ /\/$/)
         i_last = n_path.rindex('/')
         if i_last.nil?
-            return ["/", n_path]
+            return ["./", n_path]
         end
         next_i = i_last + 1
         return [n_path[0..i_last], n_path[next_i..]]
