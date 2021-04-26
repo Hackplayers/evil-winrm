@@ -343,8 +343,17 @@ class EvilWinRM
 
     # Read local files and directories names
     def paths(directory)
-        files = Dir.glob("#{directory}*.*", File::FNM_DOTMATCH)
-        directories = Dir.glob("#{directory}*").select {|f| File.directory? f}
+        directory = "./" if directory.nil? || directory.empty?
+        dir_lasts = directory.rindex('/')        
+        my_dir = directory[..dir_lasts]
+
+        my_dir = File.expand_path(my_dir)
+        my_dir = File.dirname(my_dir) unless File.directory?(my_dir)
+        my_dir = my_dir + '/' unless my_dir[-1] == '/'
+        
+        files = Dir.glob("#{my_dir}*", File::FNM_DOTMATCH)
+        directories = Dir.glob("#{my_dir}*").select {|f| File.directory? f}
+
         return files + directories
     end
 
@@ -442,14 +451,12 @@ class EvilWinRM
                         when Readline.line_buffer =~ /\[.*/i
                             $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Invoke-Binary.*/i
-                            result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []
-                            
+                            result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []                            
                             if result.empty? then
                                 paths = self.paths(str)
                                 result.concat(paths.grep( /^#{Regexp.escape(str)}/i ))
-                            end
-                            
-                            result
+                            end                            
+                            result.uniq
                         when Readline.line_buffer =~ /donutfile.*/i
                             paths = self.paths(str)
                             paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
@@ -457,12 +464,22 @@ class EvilWinRM
                             $DONUTPARAM2.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Donut-Loader.*/i
                             $DONUTPARAM1.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
-                        when Readline.line_buffer =~ /^(upload|download).*/i
-                            paths = self.paths(str)
-                            result = paths.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
-                            result = result || []
-                            result.concat(self.complete_path(str, shell) || [])
-                            result
+                        when Readline.line_buffer =~ /^upload.*/i
+                            test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
+                            if test_s.count(' ') < 2 then
+                                paths = self.paths(str)
+                                paths.grep( /^#{Regexp.escape(str)}/i ).uniq
+                            else
+                                self.complete_path(str, shell) || []
+                            end
+                        when Readline.line_buffer =~ /^download.*/i
+                            test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
+                            if test_s.count(' ') < 2 then
+                                self.complete_path(str, shell) || []
+                            else
+                                paths = self.paths(str)
+                                paths.grep( /^#{Regexp.escape(str)}/i ).uniq
+                            end
                         when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ') && !!!(Readline.line_buffer =~ /^(\.\/|\~\/|\.\.\/|[a-z]\:\/)/)))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
                             result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
@@ -501,7 +518,7 @@ class EvilWinRM
                             begin
                                 self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
                                 file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
-                                    progress_bar(bytes_copied, total_bytes)
+                                    self.progress_bar(bytes_copied, total_bytes)
                                     if bytes_copied == total_bytes then
                                         puts("                                                             ")
                                         self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
@@ -520,15 +537,23 @@ class EvilWinRM
                             download_command = command.tokenize
                             command = ""
 
-                            if not download_command[1].index ':\\' then download_command[1] = "#{pwd}\\#{download_command[1]}" end
+                            download_command[1].gsub!(':\\', ':/')
+                            download_command[1] = "#{pwd}/#{download_command[1]}" unless download_command[1].include?(':/')
+                            download_command[2] = "./" if download_command[2].empty?
 
-                            if download_command[2].to_s.empty? then download_command[2] = download_command[1].split('\\')[-1] end
+                            download_command[2] = File.expand_path(download_command[2])
+
+                            if File.directory?(download_command[2]) then
+                                download_command[2] += '/' unless download_command[2][-1] == '/'
+                            end
+
+                            download_command[2] += download_command[1].split('/')[-1] if File.directory?(download_command[2])
 
                             begin
                                 self.print_message("Downloading #{download_command[1]} to #{download_command[2]}", TYPE_INFO)
                                 size = self.filesize(shell, download_command[1])
                                 file_manager.download(download_command[1], download_command[2], size: size) do | index, size |
-                                    progress_bar(index, size)
+                                    self.progress_bar(index, size)
                                 end
                                 puts("                                                             ")
                                 self.print_message("Download successful!", TYPE_INFO)
@@ -710,7 +735,7 @@ class EvilWinRM
             parts = self.get_dir_parts(n_path)
             dir_p = parts[0]
             nam_p = parts[1]
-            result = self.get_from_cache(dir_p)
+            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/)/
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
@@ -718,7 +743,9 @@ class EvilWinRM
 
                 output = shell.run(pscmd).output
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
-                s.collect! { |x| x.downcase.gsub('\\', '/').gsub(' ', '\\ ') }
+                s.collect! { |x| self.normalize_path(x) }
+
+                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/)/ && s.length == 1
                 
                 self.set_cache(dir_p, s)
                 result = s
