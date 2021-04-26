@@ -346,6 +346,7 @@ class EvilWinRM
         parts = self.get_dir_parts(a_path)
         my_dir = parts[0]
         grep_for = parts[1]
+        # puts("grep_for: #{grep_for}")
 
         my_dir = File.expand_path(my_dir)
         my_dir = my_dir + "/" unless my_dir[-1] == '/'
@@ -745,7 +746,7 @@ class EvilWinRM
             # puts(parts)
             dir_p = parts[0]
             nam_p = parts[1]
-            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~)/
+            result = self.get_from_cache(dir_p) unless !!(dir_p =~ /^(\.\/|\.\.\/|\~)/)
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
@@ -755,15 +756,15 @@ class EvilWinRM
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
                 s.collect! { |x| self.normalize_path(x) }
 
-                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/|\~)/
-                self.set_cache(dir_p, s)
+                self.set_cache(dir_p, s) unless !!(dir_p =~ /^(\.\/|\.\.\/|\~)/)
+                
                 result = s
-                # puts(result)
             end
             
-            # puts("#{dir_p}#{nam_p}")
-            return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/i) unless nam_p.empty?
-            return result
+            # puts("#{dir_p}: #{nam_p}")
+            return result if nam_p.empty?
+            return result.grep(/^*\/#{Regexp.escape(nam_p)}/i) if !!(dir_p =~ /^(\.\/|\.\.\/|\~)/)
+            return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}/i)
         end
     end
 end
