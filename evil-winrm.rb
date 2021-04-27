@@ -702,22 +702,6 @@ class EvilWinRM
         new_parts
     end
 
-    def get_command_parts(command)
-        tmpCommand = command.gsub('\\ ', '\#\#\#\#')
-        tmpCommand = tmpCommand || ""
-        new_parts = Array.new()
-        parts = tmpCommand.split(' ')
-        parts.each do |x|
-            if x.include?('\#\#\#\#') then
-                c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
-                new_parts.push(c)
-            else
-                new_parts.push(x)
-            end
-        end
-        new_parts
-    end
-
     def get_from_cache(n_path)
         a_path = n_path.downcase
         current_time = Time.now.to_i
