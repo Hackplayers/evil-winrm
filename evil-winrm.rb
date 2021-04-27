@@ -87,7 +87,7 @@ class EvilWinRM
 
     def initialize()
         @directories = Hash.new
-        @cache_ttl = 5
+        @cache_ttl = 10
         @executables = Array.new
         @functions = Array.new
     end
@@ -480,7 +480,7 @@ class EvilWinRM
                             else                                
                                 paths = self.paths(str)
                             end
-                        when (Readline.line_buffer.empty? || (!Readline.line_buffer.include?(' ')))
+                        when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ /^(\.\/|\.\.\/|[a-z,A-Z]\:\/|\~\/)/))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
                             result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
                             result.uniq
@@ -493,6 +493,7 @@ class EvilWinRM
 
                     Readline.completion_proc = completion
                     Readline.completion_append_character = ''
+                    Readline.completion_case_fold = true
                     Readline.basic_word_break_characters = " "
 
                     until command == "exit" do
@@ -567,7 +568,9 @@ class EvilWinRM
                             begin
                                 invoke_Binary = command.tokenize
                                 command = ""
+                                # puts(invoke_Binary.to_s)
                                 if !invoke_Binary[1].to_s.empty? then
+                                    
                                     load_executable = invoke_Binary[1]
                                     load_executable = File.binread(load_executable)
                                     load_executable = Base64.strict_encode64(load_executable)
@@ -579,9 +582,10 @@ class EvilWinRM
                                 elsif
                                     output = shell.run("Invoke-Binary")
                                 end
-                                print(output.output)
-                            rescue
+                                # print(output.output)
+                            rescue StandardError => err
                                 self.print_message("Check filenames", TYPE_ERROR)
+                                # self.print_message("Invoke-Binary: #{err.to_s}:\n#{err.backtrace}\n", TYPE_ERROR)
                             end
 
                         elsif command.start_with?('Donut-Loader') then
@@ -648,7 +652,7 @@ class EvilWinRM
                             sleep(9)
                         end
                         
-                        command = self.get_command_parts(command).join(' ') unless command.nil? || command.strip.empty?
+                        command = Regexp.escape(self.get_command_parts(command).join(' ')).gsub(/\\/, '').gsub(/\"/, "'") unless command.nil? || command.strip.empty?
 
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
@@ -698,6 +702,22 @@ class EvilWinRM
         new_parts
     end
 
+    def get_command_parts(command)
+        tmpCommand = command.gsub('\\ ', '\#\#\#\#')
+        tmpCommand = tmpCommand || ""
+        new_parts = Array.new()
+        parts = tmpCommand.split(' ')
+        parts.each do |x|
+            if x.include?('\#\#\#\#') then
+                c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
+                new_parts.push(c)
+            else
+                new_parts.push(x)
+            end
+        end
+        new_parts
+    end
+
     def get_from_cache(n_path)
         a_path = n_path.downcase
         current_time = Time.now.to_i
@@ -720,7 +740,7 @@ class EvilWinRM
     def normalize_path(str)
         p_str = str || ""
         p_str = str.gsub('\\', '/')
-        p_str = str.gsub(' ', '\\ ')
+        p_str = Regexp.escape(str)
         p_str
     end
 
@@ -738,31 +758,38 @@ class EvilWinRM
         str = './' if (str.nil? || str.empty?)
         str = './' + str unless str.include?('/')
         # puts(str)
-        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/)*/) then
+        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/) then
             n_path = self.normalize_path(str)
             # puts(n_path)
             parts = self.get_dir_parts(n_path)
-            # puts(parts)
+            # puts("Parts:\n#{parts.to_s}\n")
             dir_p = parts[0]
             nam_p = parts[1]
-            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~)/
+            result = []
+            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~|\/)/i
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
-                pscmd = "$a=@();$(ls '#{dir_p.gsub('\\ ', ' ')}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))\/\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a;"
+                target_dir = Regexp.escape(dir_p).gsub(/\\/, '').gsub(/\"/, "'")
+                pscmd = "$a=@();$(ls '#{target_dir}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a += \"$($(Resolve-Path -Path '#{target_dir}').Path.Replace('\\','/'))\";$a"
 
                 output = shell.run(pscmd).output
+                
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
-                s.collect! { |x| self.normalize_path(x) }
-
-                dir_p = self.get_dir_parts(s[0])[0] if dir_p =~ /^(\.\/|\.\.\/|\~)/
+                s.collect!{ |x| self.normalize_path(x) }
+                dir_p = s.pop
+                
                 self.set_cache(dir_p, s)
+
                 result = s
-                # puts(result)
+                # puts(s)
             end
             
-            # puts("#{dir_p}#{nam_p}")
-            return result.grep(/^#{Regexp.escape(dir_p)}#{Regexp.escape(nam_p)}*/i) unless nam_p.empty?
+            path_grep = dir_p + nam_p
+            # puts("\n#{path_grep}\n")            
+            filtered = result.filter { |x| x.downcase.include?(path_grep.downcase) }
+            # puts("filtered:\n#{filtered}\n")
+            return filtered unless filtered.nil?
             return result
         end
     end
