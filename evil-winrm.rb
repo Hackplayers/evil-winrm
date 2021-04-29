@@ -494,7 +494,7 @@ class EvilWinRM
                     Readline.completion_proc = completion
                     Readline.completion_append_character = ''
                     Readline.completion_case_fold = true
-                    Readline.basic_word_break_characters = " "
+                    Readline.completer_quote_characters = "\""
 
                     until command == "exit" do
                         pwd = shell.run("(get-location).path").output.strip
@@ -652,8 +652,6 @@ class EvilWinRM
                             sleep(9)
                         end
                         
-                        command = Regexp.escape(self.get_command_parts(command).join(' ')).gsub(/\\/, '').gsub(/\"/, "'") unless command.nil? || command.strip.empty?
-
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
                                 STDOUT.puts(line.rstrip!)
@@ -703,22 +701,30 @@ class EvilWinRM
     end
 
     def get_from_cache(n_path)
-        a_path = n_path.downcase
-        current_time = Time.now.to_i
-        current_vals = @directories[a_path]
-        result = Array.new
-        unless current_vals.nil? then
-            is_valid = current_vals['time'] > current_time - @cache_ttl            
-            result = current_vals['files'] if is_valid
-            @directories.delete(a_path) unless is_valid
+        unless n_path.nil? || n_path.empty? then
+            a_path = self.normalize_path(n_path)
+            current_time = Time.now.to_i
+            current_vals = @directories[a_path]
+            result = Array.new
+            unless current_vals.nil? then
+                is_valid = current_vals['time'] > current_time - @cache_ttl            
+                result = current_vals['files'] if is_valid
+                @directories.delete(a_path) unless is_valid
+            end 
+            # puts("get_cache (#{a_path}) : #{result.to_s}")
+            # puts("cache info: #{@directories.to_s}")
+            return result
         end        
-        return result
     end
 
     def set_cache(n_path, paths)
-        a_path = n_path.downcase
-        current_time = Time.now.to_i
-        @directories[a_path] = { 'time' => current_time, 'files' => paths }
+        unless n_path.nil? || n_path.empty? then
+            a_path = self.normalize_path(n_path)
+            current_time = Time.now.to_i
+            @directories[a_path] = { 'time' => current_time, 'files' => paths }
+            # puts("set cache (#{a_path}) : #{paths.to_s}")
+            # puts("cache info: #{@directories.to_s}")
+        end
     end
 
     def normalize_path(str)
@@ -733,48 +739,52 @@ class EvilWinRM
         i_last = n_path.rindex('/')
         if i_last.nil?
             return ["./", n_path]
-        end
+        end        
+        
         next_i = i_last + 1
-        return [n_path[0..i_last], n_path[next_i..]]
+        amount = n_path.length() - next_i
+
+        return [n_path[0, i_last + 1], n_path[next_i, amount]]
     end
 
     def complete_path(str, shell)
-        str = './' if (str.nil? || str.empty?)
-        str = './' + str unless str.include?('/')
+        
         # puts(str)
-        if !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/) then
-            n_path = self.normalize_path(str)
+        if !str.empty? && !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/i) then
+            # n_path = self.normalize_path(str)
+            n_path = str
             # puts(n_path)
             parts = self.get_dir_parts(n_path)
             # puts("Parts:\n#{parts.to_s}\n")
             dir_p = parts[0]
             nam_p = parts[1]
             result = []
-            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~|\/)/i
+            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~|\/)/
 
             # it's hungry for a self method:
             if result.nil? || result.empty? then
-                target_dir = Regexp.escape(dir_p).gsub(/\\/, '').gsub(/\"/, "'")
+                # target_dir = Regexp.escape(dir_p).gsub(/\\/, '').gsub(/\"/, "'")
+                target_dir = dir_p
                 pscmd = "$a=@();$(ls '#{target_dir}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a += \"$($(Resolve-Path -Path '#{target_dir}').Path.Replace('\\','/'))\";$a"
 
                 output = shell.run(pscmd).output
                 
                 s = output.to_s.gsub(/\r/, '').split(/\n/)
-                s.collect!{ |x| self.normalize_path(x) }
+                s
                 dir_p = s.pop
-                
+
                 self.set_cache(dir_p, s)
 
                 result = s
                 # puts(s)
             end
-            
-            path_grep = dir_p + nam_p
-            # puts("\n#{path_grep}\n")            
-            filtered = result.filter { |x| x.downcase.include?(path_grep.downcase) }
+            dir_p = dir_p + "/" unless dir_p[-1] == "/"
+            path_grep = self.normalize_path(dir_p + nam_p)
+            path_grep = path_grep.chop() if !path_grep.empty? && path_grep[0] == "\""
+            # puts("\n#{path_grep}\n")
+            filtered = result.grep(/^#{path_grep}/i)
             # puts("filtered:\n#{filtered}\n")
-            return filtered unless filtered.nil?
-            return result
+            return filtered.collect{ |x| "\"#{x}" }
         end
     end
 end
