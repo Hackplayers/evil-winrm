@@ -85,11 +85,22 @@ end
 # Class creation
 class EvilWinRM
 
+    def completion_check()
+        begin
+            Readline.quoting_detection_proc
+            @completion_supported = true
+          rescue NotImplementedError
+            @completion_supported = false
+            self.print_message("Completions are OFF\nOnly supported on 'Gnu Readline' based terminals.\n", TYPE_WARNING)
+          end
+    end
+
     def initialize()
         @directories = Hash.new
         @cache_ttl = 10
         @executables = Array.new
         @functions = Array.new
+        self.completion_check()
     end
 
     # Arguments
@@ -748,43 +759,44 @@ class EvilWinRM
     end
 
     def complete_path(str, shell)
-        
-        # puts(str)
-        if !str.empty? && !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/i) then
-            # n_path = self.normalize_path(str)
-            n_path = str
-            # puts(n_path)
-            parts = self.get_dir_parts(n_path)
-            # puts("Parts:\n#{parts.to_s}\n")
-            dir_p = parts[0]
-            nam_p = parts[1]
-            result = []
-            result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~|\/)/
+        if @completion_supported then
+            # puts(str)
+            if !str.empty? && !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/i) then
+                # n_path = self.normalize_path(str)
+                n_path = str
+                # puts(n_path)
+                parts = self.get_dir_parts(n_path)
+                # puts("Parts:\n#{parts.to_s}\n")
+                dir_p = parts[0]
+                nam_p = parts[1]
+                result = []
+                result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~|\/)/
 
-            # it's hungry for a self method:
-            if result.nil? || result.empty? then
-                # target_dir = Regexp.escape(dir_p).gsub(/\\/, '').gsub(/\"/, "'")
-                target_dir = dir_p
-                pscmd = "$a=@();$(ls '#{target_dir}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a += \"$($(Resolve-Path -Path '#{target_dir}').Path.Replace('\\','/'))\";$a"
+                # it's hungry for a self method:
+                if result.nil? || result.empty? then
+                    # target_dir = Regexp.escape(dir_p).gsub(/\\/, '').gsub(/\"/, "'")
+                    target_dir = dir_p
+                    pscmd = "$a=@();$(ls '#{target_dir}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a += \"$($(Resolve-Path -Path '#{target_dir}').Path.Replace('\\','/'))\";$a"
 
-                output = shell.run(pscmd).output
-                
-                s = output.to_s.gsub(/\r/, '').split(/\n/)
-                s
-                dir_p = s.pop
+                    output = shell.run(pscmd).output
+                    
+                    s = output.to_s.gsub(/\r/, '').split(/\n/)
+                    s
+                    dir_p = s.pop
 
-                self.set_cache(dir_p, s)
+                    self.set_cache(dir_p, s)
 
-                result = s
-                # puts(s)
+                    result = s
+                    # puts(s)
+                end
+                dir_p = dir_p + "/" unless dir_p[-1] == "/"
+                path_grep = self.normalize_path(dir_p + nam_p)
+                path_grep = path_grep.chop() if !path_grep.empty? && path_grep[0] == "\""
+                # puts("\n#{path_grep}\n")
+                filtered = result.grep(/^#{path_grep}/i)
+                # puts("filtered:\n#{filtered}\n")
+                return filtered.collect{ |x| "\"#{x}" }
             end
-            dir_p = dir_p + "/" unless dir_p[-1] == "/"
-            path_grep = self.normalize_path(dir_p + nam_p)
-            path_grep = path_grep.chop() if !path_grep.empty? && path_grep[0] == "\""
-            # puts("\n#{path_grep}\n")
-            filtered = result.grep(/^#{path_grep}/i)
-            # puts("filtered:\n#{filtered}\n")
-            return filtered.collect{ |x| "\"#{x}" }
         end
     end
 end
