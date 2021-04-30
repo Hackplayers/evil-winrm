@@ -521,16 +521,15 @@ class EvilWinRM
                                 puts()
                                 self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
-                            # upload_command = command.tokenize
-                            upload_command = self.get_command_parts(command)                            
-                            command = ""
-
-                            if upload_command[2].to_s.empty? then
-                                upload_command[2] = "#{pwd}\\#{upload_command[1].split('/')[-1]}"
-                            end
+                            
                             begin
-                                self.print_message("Uploading #{upload_command[1]} to #{upload_command[2]}", TYPE_INFO)
-                                file_manager.upload(upload_command[1], upload_command[2]) do |bytes_copied, total_bytes|
+                                paths = self.get_upload_paths(command)
+                                puts(paths.to_s)
+                                right_path = paths.pop
+                                left_path = paths.pop
+                                
+                                self.print_message("Uploading #{left_path} to #{right_path}", TYPE_INFO)
+                                file_manager.upload(left_path, right_path) do |bytes_copied, total_bytes|
                                     self.progress_bar(bytes_copied, total_bytes)
                                     if bytes_copied == total_bytes then
                                         puts("                                                             ")
@@ -539,42 +538,36 @@ class EvilWinRM
                                     end
                                 end
                             rescue StandardError => err
-                                # self.print_message("Error: #{err.to_s}: #{err.backtrace}")
+                                self.print_message("Error: #{err.to_s}: #{err.backtrace}", TYPE_ERROR)
                                 self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
+                            ensure 
+                                command = ""
                             end
                         elsif command.start_with?('download') then
                             if self.docker_detection() then
                                 puts()
                                 self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
-
-                            download_command = self.get_command_parts(command)
-                            command = ""
-
-                            download_command[1].gsub!('\\', '/')
-                            download_command[1] = "#{pwd}/#{download_command[1]}" unless download_command[1].include?(':/')
-                            download_command[2] = "./" if download_command[2].nil? || download_command[2].empty?
-
-                            download_command[2] = File.expand_path(download_command[2])
-
-                            if File.directory?(download_command[2]) then
-                                download_command[2] += '/' unless download_command[2][-1] == '/'
-                            end
-
-                            download_command[2] += download_command[1].split('/')[-1] if File.directory?(download_command[2])
-
+                            
                             begin
-                                self.print_message("Downloading #{download_command[1]} to #{download_command[2]}", TYPE_INFO)
-                                size = self.filesize(shell, download_command[1])
-                                file_manager.download(download_command[1], download_command[2], size: size) do | index, size |
+                                paths = self.get_download_paths(command)
+                                right_path = paths.pop
+                                left_path = paths.pop
+
+                                self.print_message("Downloading #{left_path} to #{right_path}", TYPE_INFO)
+                                size = self.filesize(shell, left_path)
+                                file_manager.download(left_path, right_path, size: size) do | index, size |
                                     self.progress_bar(index, size)
                                 end
                                 puts("                                                             ")
                                 self.print_message("Download successful!", TYPE_INFO)
-                            rescue
+                            rescue StandardError => err
+                                # self.print_message("Error: #{err.to_s}: #{err.backtrace}")
                                 self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
+                            ensure
+                                command = ""
                             end
-
+                            
                         elsif command.start_with?('Invoke-Binary') then
                             begin
                                 invoke_Binary = command.tokenize
@@ -695,20 +688,54 @@ class EvilWinRM
         end
     end
 
-    def get_command_parts(command)
-        tmpCommand = command.gsub('\\ ', '\#\#\#\#')
-        tmpCommand = tmpCommand || ""
-        new_parts = Array.new()
-        parts = tmpCommand.split(' ')
-        parts.each do |x|
-            if x.include?('\#\#\#\#') then
-                c = "\"#{x.gsub('\#\#\#\#', ' ')}\""
-                new_parts.push(c)
-            else
-                new_parts.push(x)
+    def extract_filename(path)
+        path.split('/')[-1]
+    end
+
+    def extract_next_quoted_path(cmd_with_quoted_path)
+        begin_i = cmd_with_quoted_path.index("\"")
+        l_total = cmd_with_quoted_path.length()
+        next_i = cmd_with_quoted_path[begin_i +1, l_total - begin_i].index("\"")
+        result = cmd_with_quoted_path[begin_i +1, next_i]
+        result
+    end
+
+    def get_upload_paths(upload_command)
+        quotes = upload_command.count("\"")
+        result = []
+        if quotes == 0 || quotes % 2 != 0 then
+            result = upload_command.split(' ')
+            result.delete_at(0)
+        else
+            quoted_path = self.extract_next_quoted_path(upload_command)
+            upload_command = upload_command.gsub("\"#{quoted_path}\"", '')
+            result = upload_command.split(' ')
+            result.delete_at(0)
+            result.push(quoted_path) unless quoted_path.nil? || quoted_path.empty?
+        end
+        result.push("./#{self.extract_filename(result[0])}") if result.length == 1
+        result
+    end
+
+    def get_download_paths(download_command)
+        quotes = download_command.count("\"")
+        result = []
+        if quotes == 0 || quotes % 2 != 0 then
+            result = download_command.split(' ')
+            result.delete_at(0)
+        else
+            quoted_path = self.extract_next_quoted_path(download_command)
+            download_command = download_command.gsub("\"#{quoted_path}\"", '')
+            result.push(quoted_path)
+            rest = download_command.split(' ')
+            unless rest.nil? || rest.empty?
+                rest.delete_at(0)
+                result.push(rest[0]) if rest.length == 1
             end
         end
-        new_parts
+
+        result.push("./#{self.extract_filename(result[0])}") if result.length == 1
+        result
     end
 
     def get_from_cache(n_path)
