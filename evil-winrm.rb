@@ -551,7 +551,6 @@ class EvilWinRM
                             
                             begin
                                 paths = self.get_download_paths(command, pwd)
-                                puts(paths)
                                 right_path = paths.pop
                                 left_path = paths.pop
 
