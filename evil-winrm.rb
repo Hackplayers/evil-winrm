@@ -492,7 +492,7 @@ class EvilWinRM
                             else                                
                                 paths = self.paths(str)
                             end
-                        when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ /^(\.\/|\.\.\/|[a-z,A-Z]\:\/|\~\/)/))
+                        when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ /^\"?(\.\/|\.\.\/|[a-z,A-Z]\:\/|\~\/|\/)/))
                             result = $COMMANDS.grep( /^#{Regexp.escape(str)}/i ) || []
                             result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
                             result.uniq
@@ -787,9 +787,8 @@ class EvilWinRM
 
     def complete_path(str, shell)
         if @completion_enabled then
-            # puts(str)
-            if !str.empty? && !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/i) then
-                # n_path = self.normalize_path(str)
+            # puts("\nGot\n#{str}\n")
+            if !str.empty? && !!(str =~ /^(\.\/|[a-z,A-Z]\:|\.\.\/|\~\/|\/)*/i) then
                 n_path = str
                 # puts(n_path)
                 parts = self.get_dir_parts(n_path)
@@ -806,13 +805,10 @@ class EvilWinRM
                     pscmd = "$a=@();$(ls '#{target_dir}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))/\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a += \"$($(Resolve-Path -Path '#{target_dir}').Path.Replace('\\','/'))\";$a"
 
                     output = shell.run(pscmd).output
-                    
                     s = output.to_s.gsub(/\r/, '').split(/\n/)
-                    s
+
                     dir_p = s.pop
-
                     self.set_cache(dir_p, s)
-
                     result = s
                     # puts(s)
                 end
