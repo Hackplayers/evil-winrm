@@ -89,10 +89,10 @@ class EvilWinRM
         begin
             Readline.quoting_detection_proc
             @completion_supported = true
-          rescue NotImplementedError
+        rescue NotImplementedError => err
             @completion_supported = false
-            self.print_message("Completions are OFF\nOnly supported on 'Gnu Readline' based terminals.\n", TYPE_WARNING)
-          end
+            self.print_message("Remote Path Completions are OFF\n#{err.to_s}\n", TYPE_WARNING)
+        end
     end
 
     def initialize()
