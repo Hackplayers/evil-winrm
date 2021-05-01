@@ -523,8 +523,7 @@ class EvilWinRM
                             end
                             
                             begin
-                                paths = self.get_upload_paths(command)
-                                puts(paths.to_s)
+                                paths = self.get_upload_paths(command, pwd)
                                 right_path = paths.pop
                                 left_path = paths.pop
                                 
@@ -550,7 +549,8 @@ class EvilWinRM
                             end
                             
                             begin
-                                paths = self.get_download_paths(command)
+                                paths = self.get_download_paths(command, pwd)
+                                puts(paths)
                                 right_path = paths.pop
                                 left_path = paths.pop
 
@@ -700,7 +700,7 @@ class EvilWinRM
         result
     end
 
-    def get_upload_paths(upload_command)
+    def get_upload_paths(upload_command, pwd)
         quotes = upload_command.count("\"")
         result = []
         if quotes == 0 || quotes % 2 != 0 then
@@ -713,11 +713,11 @@ class EvilWinRM
             result.delete_at(0)
             result.push(quoted_path) unless quoted_path.nil? || quoted_path.empty?
         end
-        result.push("./#{self.extract_filename(result[0])}") if result.length == 1
+        result.push("#{pwd}\\#{self.extract_filename(result[0])}") if result.length == 1
         result
     end
 
-    def get_download_paths(download_command)
+    def get_download_paths(download_command, pwd)
         quotes = download_command.count("\"")
         result = []
         if quotes == 0 || quotes % 2 != 0 then
