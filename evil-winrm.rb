@@ -88,9 +88,9 @@ class EvilWinRM
     def completion_check()
         begin
             Readline.quoting_detection_proc
-            @completion_supported = true
+            @completion_enabled = true
         rescue NotImplementedError => err
-            @completion_supported = false
+            @completion_enabled = false
             self.print_message("Remote Path Completions are OFF\n#{err.to_s}\n", TYPE_WARNING)
         end
     end
@@ -143,6 +143,7 @@ class EvilWinRM
             opts.on("-n", "--no-colors", "Disable colors") do |val|
                 $colors_enabled = false
             end
+            opts.on("-N", "--no-rpath-completion") { @completion_enabled = false }
             opts.on('-h', '--help', 'Display this help message') do
                 self.print_header()
                 puts(opts)
@@ -786,7 +787,7 @@ class EvilWinRM
     end
 
     def complete_path(str, shell)
-        if @completion_supported then
+        if @completion_enabled then
             # puts(str)
             if !str.empty? && !!(str =~ /^(\.\/|[a,z]\:|\.\.\/|\~\/|\/)*/i) then
                 # n_path = self.normalize_path(str)
