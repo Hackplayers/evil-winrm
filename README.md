@@ -190,7 +190,7 @@ Hat tip to:
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
- - arale61 for his awesome contribution to autocomplete files/directories.
+ - [arale61] for his awesome contribution to autocomplete files/directories.
  - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
@@ -207,6 +207,7 @@ Use it at your own servers and/or with the server owner's permission.
 [Vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
+[arale61]: https://github.com/arale61
 [donut]: https://github.com/TheWover/donut
 [donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r
