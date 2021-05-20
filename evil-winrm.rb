@@ -818,7 +818,7 @@ class EvilWinRM
                 # puts("\n#{path_grep}\n")
                 filtered = result.grep(/^#{path_grep}/i)
                 # puts("filtered:\n#{filtered}\n")
-                return filtered.collect{ |x| "\"#{x}" }
+                return filtered.collect{ |x| "\"#{x}\"" }
             end
         end
     end
