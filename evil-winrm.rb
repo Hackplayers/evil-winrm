@@ -461,9 +461,6 @@ class EvilWinRM
                     case
                         when Readline.line_buffer =~ /help.*/i
                             puts("#{$LIST.join("\t")}")
-                        # todo: fix:
-                        # when Readline.line_buffer =~ /\[.*/i
-                        #     $LISTASSEM.grep( /^#{Regexp.escape(str)}/i ) unless str.nil?
                         when Readline.line_buffer =~ /Invoke-Binary.*/i
                             result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []                            
                             if result.empty? then
@@ -562,7 +559,6 @@ class EvilWinRM
                                 puts("                                                             ")
                                 self.print_message("Download successful!", TYPE_INFO)
                             rescue StandardError => err
-                                # self.print_message("Error: #{err.to_s}: #{err.backtrace}")
                                 self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
                             ensure
                                 command = ""
@@ -572,7 +568,6 @@ class EvilWinRM
                             begin
                                 invoke_Binary = command.tokenize
                                 command = ""
-                                # puts(invoke_Binary.to_s)
                                 if !invoke_Binary[1].to_s.empty? then
                                     
                                     load_executable = invoke_Binary[1]
@@ -586,10 +581,8 @@ class EvilWinRM
                                 elsif
                                     output = shell.run("Invoke-Binary")
                                 end
-                                # print(output.output)
                             rescue StandardError => err
                                 self.print_message("Check filenames", TYPE_ERROR)
-                                # self.print_message("Invoke-Binary: #{err.to_s}:\n#{err.backtrace}\n", TYPE_ERROR)
                             end
 
                         elsif command.start_with?('Donut-Loader') then
@@ -749,8 +742,7 @@ class EvilWinRM
                 result = current_vals['files'] if is_valid
                 @directories.delete(a_path) unless is_valid
             end 
-            # puts("get_cache (#{a_path}) : #{result.to_s}")
-            # puts("cache info: #{@directories.to_s}")
+            
             return result
         end        
     end
@@ -760,8 +752,6 @@ class EvilWinRM
             a_path = self.normalize_path(n_path)
             current_time = Time.now.to_i
             @directories[a_path] = { 'time' => current_time, 'files' => paths }
-            # puts("set cache (#{a_path}) : #{paths.to_s}")
-            # puts("cache info: #{@directories.to_s}")
         end
     end
 
@@ -787,20 +777,15 @@ class EvilWinRM
 
     def complete_path(str, shell)
         if @completion_enabled then
-            # puts("\nGot\n#{str}\n")
             if !str.empty? && !!(str =~ /^(\.\/|[a-z,A-Z]\:|\.\.\/|\~\/|\/)*/i) then
                 n_path = str
-                # puts(n_path)
                 parts = self.get_dir_parts(n_path)
-                # puts("Parts:\n#{parts.to_s}\n")
                 dir_p = parts[0]
                 nam_p = parts[1]
                 result = []
                 result = self.get_from_cache(dir_p) unless dir_p =~ /^(\.\/|\.\.\/|\~|\/)/
 
-                # it's hungry for a self method:
                 if result.nil? || result.empty? then
-                    # target_dir = Regexp.escape(dir_p).gsub(/\\/, '').gsub(/\"/, "'")
                     target_dir = dir_p
                     pscmd = "$a=@();$(ls '#{target_dir}*' -ErrorAction SilentlyContinue -Force |Foreach-Object {  if((Get-Item $_.FullName -ErrorAction SilentlyContinue) -is [System.IO.DirectoryInfo] ){ $a +=  \"$($_.FullName.Replace('\\','/'))/\"}else{  $a += \"$($_.FullName.Replace('\\', '/'))\" } });$a += \"$($(Resolve-Path -Path '#{target_dir}').Path.Replace('\\','/'))\";$a"
 
@@ -810,14 +795,11 @@ class EvilWinRM
                     dir_p = s.pop
                     self.set_cache(dir_p, s)
                     result = s
-                    # puts(s)
                 end
                 dir_p = dir_p + "/" unless dir_p[-1] == "/"
                 path_grep = self.normalize_path(dir_p + nam_p)
                 path_grep = path_grep.chop() if !path_grep.empty? && path_grep[0] == "\""
-                # puts("\n#{path_grep}\n")
                 filtered = result.grep(/^#{path_grep}/i)
-                # puts("filtered:\n#{filtered}\n")
                 return filtered.collect{ |x| "\"#{x}\"" }
             end
         end
