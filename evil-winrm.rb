@@ -34,8 +34,9 @@ $LISTASSEM = [''].sort
 $DONUTPARAM1 = ['-process_id']
 $DONUTPARAM2 = ['-donutfile']
 
-# Colors
+# Colors and path completion
 $colors_enabled = true
+$check_rpath_completion = true
 
 # Path for ps1 scripts and exec files
 $scripts_path = ""
@@ -91,18 +92,24 @@ class EvilWinRM
         @cache_ttl = 10
         @executables = Array.new
         @functions = Array.new
-        self.completion_check()
     end
 
     # Remote path completion compatibility check
     def completion_check()
-        begin
-            Readline.quoting_detection_proc
-            @completion_enabled = true
-        rescue NotImplementedError => err
+        if $check_rpath_completion == true then
+             begin
+                 Readline.quoting_detection_proc
+                    @completion_enabled = true
+                rescue NotImplementedError => err
+                    @completion_enabled = false
+                    self.print_message("Remote path completions is disabled due ruby limitation: #{err.to_s}", TYPE_WARNING)
+                    self.print_message("For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion", TYPE_DATA)
+                end
+        else
             @completion_enabled = false
-            self.print_message("Remote Path Completions are OFF\n#{err.to_s}\n", TYPE_WARNING)
+            self.print_message("Remote path completion is disabled", TYPE_WARNING)
         end
+
     end
 
     # Arguments
@@ -145,8 +152,10 @@ class EvilWinRM
             opts.on("-n", "--no-colors", "Disable colors") do |val|
                 $colors_enabled = false
             end
-            opts.on("-N", "--no-rpath-completion") { @completion_enabled = false }
-            opts.on('-h', '--help', 'Display this help message') do
+            opts.on("-N", "--no-rpath-completion", "Disable remote path completion") do |val|
+                $check_rpath_completion = false
+            end
+            opts.on("-h", "--help", "Display this help message") do
                 self.print_header()
                 puts(opts)
                 puts()
