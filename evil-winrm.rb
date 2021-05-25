@@ -361,7 +361,7 @@ class EvilWinRM
 
         my_dir = File.expand_path(my_dir)
         my_dir = my_dir + "/" unless my_dir[-1] == '/'
-                
+
         files = Dir.glob("#{my_dir}*", File::FNM_DOTMATCH)
         directories = Dir.glob("#{my_dir}*").select {|f| File.directory? f}
 
@@ -390,12 +390,12 @@ class EvilWinRM
 
     # Progress bar
     def progress_bar(bytes_done, total_bytes)
-            progress = ((bytes_done.to_f / total_bytes.to_f) * 100).round
-            progress_bar = (progress / 10).round
-            progress_string = "▓" * (progress_bar-1).clamp(0,9)
-            progress_string = progress_string + "▒" + ("░" * (10-progress_bar))
-            message = "Progress: #{progress}% : |#{progress_string}|          \r"
-            print message
+        progress = ((bytes_done.to_f / total_bytes.to_f) * 100).round
+        progress_bar = (progress / 10).round
+        progress_string = "▓" * (progress_bar-1).clamp(0,9)
+        progress_string = progress_string + "▒" + ("░" * (10-progress_bar))
+        message = "Progress: #{progress}% : |#{progress_string}|          \r"
+        print message
     end
 
     # Get filesize
@@ -410,6 +410,7 @@ class EvilWinRM
         self.connection_initialization()
         file_manager = WinRM::FS::FileManager.new($conn)
         self.print_header()
+        self.completion_check()
 
         # SSL checks
         if !$ssl and ($pub_key or $priv_key) then
@@ -462,11 +463,11 @@ class EvilWinRM
                         when Readline.line_buffer =~ /help.*/i
                             puts("#{$LIST.join("\t")}")
                         when Readline.line_buffer =~ /Invoke-Binary.*/i
-                            result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []                            
+                            result = @executables.grep( /^#{Regexp.escape(str)}/i ) || []
                             if result.empty? then
                                 paths = self.paths(str)
                                 result.concat(paths.grep( /^#{Regexp.escape(str)}/i ))
-                            end                            
+                            end
                             result.uniq
                         when Readline.line_buffer =~ /donutfile.*/i
                             paths = self.paths(str)
@@ -486,7 +487,7 @@ class EvilWinRM
                             test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
                             if test_s.count(' ') < 2 then
                                 self.complete_path(str, shell) || []
-                            else                                
+                            else
                                 paths = self.paths(str)
                             end
                         when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ /^\"?(\.\/|\.\.\/|[a-z,A-Z]\:\/|\~\/|\/)/))
@@ -519,12 +520,12 @@ class EvilWinRM
                                 puts()
                                 self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
-                            
+
                             begin
                                 paths = self.get_upload_paths(command, pwd)
                                 right_path = paths.pop
                                 left_path = paths.pop
-                                
+
                                 self.print_message("Uploading #{left_path} to #{right_path}", TYPE_INFO)
                                 file_manager.upload(left_path, right_path) do |bytes_copied, total_bytes|
                                     self.progress_bar(bytes_copied, total_bytes)
@@ -537,7 +538,7 @@ class EvilWinRM
                             rescue StandardError => err
                                 self.print_message("Error: #{err.to_s}: #{err.backtrace}", TYPE_ERROR)
                                 self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
-                            ensure 
+                            ensure
                                 command = ""
                             end
                         elsif command.start_with?('download') then
@@ -545,7 +546,7 @@ class EvilWinRM
                                 puts()
                                 self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
                             end
-                            
+
                             begin
                                 paths = self.get_download_paths(command, pwd)
                                 right_path = paths.pop
@@ -563,13 +564,11 @@ class EvilWinRM
                             ensure
                                 command = ""
                             end
-                            
                         elsif command.start_with?('Invoke-Binary') then
                             begin
                                 invoke_Binary = command.tokenize
                                 command = ""
                                 if !invoke_Binary[1].to_s.empty? then
-                                    
                                     load_executable = invoke_Binary[1]
                                     load_executable = File.binread(load_executable)
                                     load_executable = Base64.strict_encode64(load_executable)
@@ -648,7 +647,7 @@ class EvilWinRM
                             self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING)
                             sleep(9)
                         end
-                        
+
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
                                 STDOUT.puts(line.rstrip!)
@@ -738,13 +737,13 @@ class EvilWinRM
             current_vals = @directories[a_path]
             result = Array.new
             unless current_vals.nil? then
-                is_valid = current_vals['time'] > current_time - @cache_ttl            
+                is_valid = current_vals['time'] > current_time - @cache_ttl
                 result = current_vals['files'] if is_valid
                 @directories.delete(a_path) unless is_valid
-            end 
-            
+            end
+
             return result
-        end        
+        end
     end
 
     def set_cache(n_path, paths)
@@ -767,8 +766,8 @@ class EvilWinRM
         i_last = n_path.rindex('/')
         if i_last.nil?
             return ["./", n_path]
-        end        
-        
+        end
+
         next_i = i_last + 1
         amount = n_path.length() - next_i
 
