@@ -55,6 +55,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
+    -N, --no-rpath-completion        Disable remote path completion
     -h, --help                       Display this help message
 ```
 
@@ -170,6 +171,26 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - Check Kerberos tickets with `klist`
  - To remove ticket use: `kdestroy`
  - For more information about Kerberos check this [cheatsheet]
+
+#### Remote path completion
+This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work.
+
+If you want to compile it yourself, you can follow these steps. Let's suppose that you want ruby 2.7.3:
+
+```
+wget -O ruby-install-0.8.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.8.1.tar.gz
+tar -xzvf ruby-install-0.8.1.tar.gz
+cd ruby-install-0.8.1/
+sudo make install
+ruby-install ruby 2.7.3 -- --with-readline-dir=/usr/include/readline
+```
+Depending of your system it will be installed at `/opt/rubies/ruby-2.7.3` or maybe at ` ~/.rubies/ruby-2.7.3`.
+
+To make the new ruby version as default on your system there are some different methods like `rvm` or `rbenv`. If your Linux is debian based, just one command is enough:
+
+`update-alternatives --install /usr/bin/ruby ruby /opt/rubies/ruby-2.7.3/bin/ruby 1`
+
+After that, just need to install evil-winrm dependencies for that new installed ruby version. The easiest way is to launch command `gem install evil-winrm`. The gem command is already belonging to the new ruby installation if you performed the change of default ruby.
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
