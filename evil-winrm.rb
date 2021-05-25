@@ -85,6 +85,16 @@ end
 # Class creation
 class EvilWinRM
 
+    # Initialization
+    def initialize()
+        @directories = Hash.new
+        @cache_ttl = 10
+        @executables = Array.new
+        @functions = Array.new
+        self.completion_check()
+    end
+
+    # Remote path completion compatibility check
     def completion_check()
         begin
             Readline.quoting_detection_proc
@@ -93,14 +103,6 @@ class EvilWinRM
             @completion_enabled = false
             self.print_message("Remote Path Completions are OFF\n#{err.to_s}\n", TYPE_WARNING)
         end
-    end
-
-    def initialize()
-        @directories = Hash.new
-        @cache_ttl = 10
-        @executables = Array.new
-        @functions = Array.new
-        self.completion_check()
     end
 
     # Arguments
