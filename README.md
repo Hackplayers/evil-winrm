@@ -32,7 +32,8 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - List remote machine services without privileges
  - Command History
  - WinRM command completion
- - Local and remote files/directories completion
+ - Local files/directories completion
+ - Remote path (files/directories) completion (can be disabled optionally)
  - Colorization on prompt and output messages (can be disabled optionally)
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
@@ -65,6 +66,8 @@ Depending of your installation method (3 availables) the installation of them co
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
+
+The remote path completion feature will work only if your ruby was compiled enabling the `--with-readline-dir` flag. This is enabled by default in ruby included on some Linux distributions but not in all. Check [the section below](#Remote-path-completion) for more info.
 
 ## Installation & Quick Start (4 methods)
 
@@ -211,7 +214,7 @@ Hat tip to:
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
- - [arale61] for his awesome contribution to autocomplete files/directories.
+ - [arale61] for his awesome contribution to remote path completion.
  - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
