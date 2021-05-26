@@ -189,11 +189,13 @@ ruby-install ruby 2.7.3 -- --with-readline-dir=/usr/include/readline
 ```
 Depending of your system it will be installed at `/opt/rubies/ruby-2.7.3` or maybe at ` ~/.rubies/ruby-2.7.3`.
 
-To make the new ruby version as default on your system there are some different methods like `rvm` or `rbenv`. If your Linux is debian based, just one command is enough:
+Now just need to install evil-winrm dependencies for that new installed ruby version. The easiest way is to launch command `/opt/rubies/ruby-2.7.3/bin/gem install evil-winrm`. The gem command used must be belonging to the new ruby installation.
 
-`update-alternatives --install /usr/bin/ruby ruby /opt/rubies/ruby-2.7.3/bin/ruby 1`
+After that, you can launch safely your new installed ruby to use it on evil-winrm: `/opt/rubies/ruby-2.7.3/bin/ruby ./evil-winrm.rb -h`
 
-After that, just need to install evil-winrm dependencies for that new installed ruby version. The easiest way is to launch command `gem install evil-winrm`. The gem command is already belonging to the new ruby installation if you performed the change of default ruby.
+It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
+
+Anyway, if you feel confortable with gem dependencies and want to set the new ruby installation as default on your system, there are some different methods like `rvm`, `rbenv` or `update-alternatives` if your Linux is Debian based. But remember that after doing this, probably you'll get in trouble with some gem dependencies.
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
