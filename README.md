@@ -176,7 +176,81 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - For more information about Kerberos check this [cheatsheet]
 
 #### Remote path completion
-This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work.
+This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
+
+#### Method1 (compile the needed extension)
+
+Using this method you'll compile ruby with the needed readline feature but to use only the library without changing the default ruby version on your system. Because of this, is the most recommended method.
+
+Let's suppose that you have in your Debian based system ruby 2.7.3:
+
+```
+# Install needed package
+apt install libreadline-dev
+
+# Check your ruby version
+ruby --version
+ruby 2.7.3p183 (2021-04-05 revision 6847ee089d) [x86_64-linux-gnu]
+
+# Download ruby source code (2.7.3 in this case):
+wget https://ftp.ruby-lang.org/pub/ruby/2.7/ruby-2.7.3.tar.gz
+
+# Extract source code
+tar -xf ruby-2.7.3.tar.gz
+
+# Compile the readline extension:
+cd ruby-2.7.3/ext/readline
+ruby ./extconf.rb
+make
+
+# Patch current version of the ruby readline extension:
+sudo cp /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so.bk
+sudo cp -f readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so
+```
+
+#### Method2 (Install ruby to use it only for evil-winrm using rbenv)
+
+Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using zsh. This script will automatize it. You'll need to launch it from the same dir where evil-winrm.rb and Gemfile is located (the evil-winrm created dir after a git clone for example):
+
+```
+#!/usr/bin/env zsh
+
+# Uninstall possible current installed versions
+sudo gem uninstall evil-winrm -q
+gem uninstall evil-winrm -q
+
+# Install rbenv
+sudo apt install rbenv
+
+# Config rbenv on zshrc config file
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(rbenv init -)"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install ruby with readline support
+export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/include/readline"
+rbenv install 2.7.1
+
+# Create file '.ruby-version' to set right ruby version
+rbenv local 2.7.1
+
+# Install local gems
+gem install bundler
+bundle install
+
+current_evwr="$(pwd)/evil-winrm.rb"
+
+sudo bash -c "cat << 'EOF' > /usr/bin/evil-winrm
+    #!/usr/bin/env sh
+    "${current_evwr}" "\$@"
+EOF"
+
+sudo chmod +x /usr/bin/evil-winrm
+```
+
+Then you can safely launch evil-winrm using the new installed ruby with the required readline support from any location.
+
+#### Method3 (compile entire ruby)
 
 If you want to compile it yourself, you can follow these steps. Let's suppose that you want ruby 2.7.3:
 
@@ -194,8 +268,6 @@ Now just need to install evil-winrm dependencies for that new installed ruby ver
 After that, you can launch safely your new installed ruby to use it on evil-winrm: `/opt/rubies/ruby-2.7.3/bin/ruby ./evil-winrm.rb -h`
 
 It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
-
-Anyway, if you feel confortable with gem dependencies and want to set the new ruby installation as default on your system, there are some different methods like `rvm`, `rbenv` or `update-alternatives` if your Linux is Debian based. But remember that after doing this, probably you'll get in trouble with some gem dependencies.
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
