@@ -35,6 +35,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Local files/directories completion
  - Remote path (files/directories) completion (can be disabled optionally)
  - Colorization on prompt and output messages (can be disabled optionally)
+ - Optional logging feature
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
 
@@ -57,6 +58,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
     -N, --no-rpath-completion        Disable remote path completion
+    -l, --log                        Log the WinRM session
     -h, --help                       Display this help message
 ```
 
@@ -91,13 +93,13 @@ The remote path completion feature will work only if your ruby was compiled enab
 
 ## Documentation
 
-#### Clear text password
+### Clear text password
 If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted preventing to be shown.
 
-#### Ipv6
+### Ipv6
 To use IPv6, the address must be added to /etc/hosts. Just put the already set name of the host after `-i` argument instead of an IP address.
 
-#### Basic commands
+### Basic commands
  - **upload**: local files can be auto-completed using tab key.
    - usage: `upload local_filename` or `upload local_filename destination_filename`
  - **download**:
@@ -112,12 +114,12 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
-#### Load powershell scripts
+### Load powershell scripts
  - To load a ps1 file you just have to type the name (auto-completion using tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
-#### Advanced commands
+### Advanced commands
 - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key. Arguments for the exe file can be passed comma separated. Example: `Invoke-Binary /opt/csharp/Binary.exe 'param1, param2, param3'`. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image3.png)
@@ -144,7 +146,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
       ![amsi](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image11.png)
 
-#### Kerberos
+### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
 
  - To generate ticket there are many ways:
@@ -175,7 +177,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - To remove ticket use: `kdestroy`
  - For more information about Kerberos check this [cheatsheet]
 
-#### Remote path completion
+### Remote path completion
 This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
 
 #### Method1 (compile the needed extension)
@@ -269,6 +271,9 @@ After that, you can launch safely your new installed ruby to use it on evil-winr
 
 It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
 
+### Logging
+This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions
+
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
 
@@ -289,6 +294,7 @@ Hat tip to:
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
  - [arale61] for his awesome contribution to remote path completion.
+ - [Borch] for his help adding logging feature.
  - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
@@ -306,6 +312,7 @@ Use it at your own servers and/or with the server owner's permission.
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
 [arale61]: https://github.com/arale61
+[Borch]: https://github.com/Stoo0rmq
 [donut]: https://github.com/TheWover/donut
 [donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r

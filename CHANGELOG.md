@@ -1,5 +1,6 @@
 ### 3.0
  - Remote files/directories autocomplete feature (Thanks to arale61)
+ - Added option to log commands and outputs to a log file (Thanks to Borch Cañavate)
 
 ### 2.4
  - File permission access error now handled in exception to avoid losing connection
