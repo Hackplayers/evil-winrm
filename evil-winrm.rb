@@ -13,6 +13,8 @@ require 'readline'
 require 'optionparser'
 require 'io/console'
 require 'time'
+require 'fileutils'
+require 'logger'
 
 # Constants
 
@@ -49,6 +51,32 @@ $user = ""
 $password = ""
 $url = "wsman"
 $default_service = "HTTP"
+
+# Global vars
+
+# Available commands
+$LIST = ['upload', 'download', 'exit', 'menu', 'services'].sort
+$COMMANDS = $LIST.dup
+$LISTASSEM = [''].sort
+$DONUTPARAM1 = ['-process_id']
+$DONUTPARAM2 = ['-donutfile']
+
+# Colors and path completion
+$colors_enabled = true
+$check_rpath_completion = true
+
+# Path for ps1 scripts and exec files
+$scripts_path = ""
+$executables_path = ""
+
+# Connection vars initialization
+$host = ""
+$port = "5985"
+$user = ""
+$password = ""
+$url = "wsman"
+$default_service = "HTTP"
+$full_logging_path = ENV["HOME"]+"/evil-winrm-logs"
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -102,7 +130,7 @@ class EvilWinRM
                     @completion_enabled = true
                 rescue NotImplementedError => err
                     @completion_enabled = false
-                    self.print_message("Remote path completions is disabled due ruby limitation: #{err.to_s}", TYPE_WARNING)
+                    self.print_message("Remote path completions is disabled due to ruby limitation: #{err.to_s}", TYPE_WARNING)
                     self.print_message("For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion", TYPE_DATA)
                 end
         else
@@ -116,7 +144,7 @@ class EvilWinRM
     def arguments()
         options = { port:$port, url:$url, service:$service }
         optparse = OptionParser.new do |opts|
-            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX]"
+            opts.banner = "Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]"
             opts.on("-S", "--ssl", "Enable ssl") do |val|
                 $ssl = true
                 options[:port] = "5986"
@@ -155,6 +183,12 @@ class EvilWinRM
             opts.on("-N", "--no-rpath-completion", "Disable remote path completion") do |val|
                 $check_rpath_completion = false
             end
+            opts.on("-l","--log","Log the WinRM session") do|val|
+                $log = true
+                $filepath = ""
+                $logfile = ""
+                $logger = ""
+            end
             opts.on("-h", "--help", "Display this help message") do
                 self.print_header()
                 puts(opts)
@@ -176,7 +210,7 @@ class EvilWinRM
             end
         rescue OptionParser::InvalidOption, OptionParser::MissingArgument
             self.print_header()
-            self.print_message($!.to_s, TYPE_ERROR)
+            self.print_message($!.to_s, TYPE_ERROR, true, $logger)
             puts(optparse)
             puts()
             custom_exit(1, false)
@@ -197,6 +231,22 @@ class EvilWinRM
         $priv_key = options[:priv_key]
         $realm = options[:realm]
         $service = options[:service]
+        if !$log.nil? then
+            if !Dir.exists?($full_logging_path)
+                Dir.mkdir $full_logging_path
+            end
+            if !Dir.exists?($full_logging_path + "/" + Time.now.strftime("%Y%d%m"))
+                Dir.mkdir $full_logging_path + "/" + Time.now.strftime("%Y%d%m")
+            end
+            if !Dir.exists?($full_logging_path + "/" + Time.now.strftime("%Y%d%m") + "/" + $host)
+                Dir.mkdir $full_logging_path+ "/" + Time.now.strftime("%Y%d%m") + "/" + $host
+            end
+            $filepath = $full_logging_path + "/" + Time.now.strftime("%Y%d%m") + "/" + $host + "/" + Time.now.strftime("%H%M%S")
+            $logger = Logger.new($filepath)
+            $logger.formatter = proc do |severity, datetime, progname, msg|
+                "#{datetime}: #{msg}\n"
+            end
+        end
         if !$realm.nil? then
             if $service.nil? then
                 $service = $default_service
@@ -269,7 +319,7 @@ class EvilWinRM
     end
 
     # Messsage printing
-    def print_message(msg, msg_type, prefix_print=true)
+    def print_message(msg, msg_type, prefix_print=true, log=nil)
         if msg_type == TYPE_INFO then
             msg_prefix = "Info: "
             color = "blue"
@@ -290,11 +340,14 @@ class EvilWinRM
         if !prefix_print then
             msg_prefix = ""
         end
-
         if $colors_enabled then
             puts(self.colorize("#{msg_prefix}#{msg}", color))
         else
             puts("#{msg_prefix}#{msg}")
+        end
+
+        if !log.nil?
+            log.info("#{msg_prefix}#{msg}")
         end
         puts()
     end
@@ -302,12 +355,12 @@ class EvilWinRM
     # Certificates validation
     def check_certs(pub_key, priv_key)
          if !File.file?(pub_key) then
-            self.print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR)
+            self.print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger)
             self.custom_exit(1)
         end
 
         if !File.file?($priv_key) then
-            self.print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR)
+            self.print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger)
             self.custom_exit(1)
         end
     end
@@ -315,7 +368,7 @@ class EvilWinRM
     # Directories validation
     def check_directories(path, purpose)
         if path == "" then
-            self.print_message("The directory used for #{purpose} can't be empty. Please set a path", TYPE_ERROR)
+            self.print_message("The directory used for #{purpose} can't be empty. Please set a path", TYPE_ERROR, true, $logger)
             self.custom_exit(1)
         end
 
@@ -332,7 +385,7 @@ class EvilWinRM
         end
 
         if !File.directory?(path) then
-            self.print_message("The directory \"#{path}\" used for #{purpose} was not found", TYPE_ERROR)
+            self.print_message("The directory \"#{path}\" used for #{purpose} was not found", TYPE_ERROR, true, $logger)
             self.custom_exit(1)
         end
 
@@ -386,14 +439,14 @@ class EvilWinRM
         if message_print then
             if exit_code == 0 then
                 puts()
-                self.print_message("Exiting with code #{exit_code.to_s}", TYPE_INFO)
+                self.print_message("Exiting with code #{exit_code.to_s}", TYPE_INFO, true, $logger)
             elsif exit_code == 1 then
-                self.print_message("Exiting with code #{exit_code.to_s}", TYPE_ERROR)
+                self.print_message("Exiting with code #{exit_code.to_s}", TYPE_ERROR, true, $logger)
             elsif exit_code == 130 then
                 puts()
-                self.print_message("Exiting...", TYPE_INFO)
+                self.print_message("Exiting...", TYPE_INFO, true, $logger)
             else
-                self.print_message("Exiting with code #{exit_code.to_s}", TYPE_ERROR)
+                self.print_message("Exiting with code #{exit_code.to_s}", TYPE_ERROR, true, $logger)
             end
         end
         exit(exit_code)
@@ -423,9 +476,14 @@ class EvilWinRM
         self.print_header()
         self.completion_check()
 
+        # Log check
+        if !$log.nil? then
+            self.print_message("Logging Enabled. Log file: #{$filepath}", TYPE_WARNING, true)
+        end
+
         # SSL checks
         if !$ssl and ($pub_key or $priv_key) then
-            self.print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING)
+            self.print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING, true, $logger)
         elsif $ssl
             self.print_message("SSL enabled", TYPE_WARNING)
         end
@@ -436,15 +494,15 @@ class EvilWinRM
 
         # Kerberos checks
          if !$user.nil? and !$realm.nil?
-            self.print_message("User is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
+            self.print_message("User is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING, true, $logger)
         end
 
         if !$password.nil? and !$realm.nil?
-            self.print_message("Password is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING)
+            self.print_message("Password is not needed for Kerberos auth. Ticket will be used", TYPE_WARNING, true, $logger)
         end
 
         if $realm.nil? and !$service.nil? then
-            self.print_message("Useless spn provided, only used for Kerberos auth", TYPE_WARNING)
+            self.print_message("Useless spn provided, only used for Kerberos auth", TYPE_WARNING, true, $logger)
         end
 
         if !$scripts_path.nil? then
@@ -525,11 +583,14 @@ class EvilWinRM
                         else
                             command = Readline.readline("*Evil-WinRM* PS " + pwd + "> ", true)
                         end
+                        if !$logger.nil?
+                            $logger.info("*Evil-WinRM* PS #{pwd} > #{command}")
+                        end
 
                         if command.start_with?('upload') then
                             if self.docker_detection() then
                                 puts()
-                                self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                                self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING, true, $logger)
                             end
 
                             begin
@@ -537,25 +598,25 @@ class EvilWinRM
                                 right_path = paths.pop
                                 left_path = paths.pop
 
-                                self.print_message("Uploading #{left_path} to #{right_path}", TYPE_INFO)
+                                self.print_message("Uploading #{left_path} to #{right_path}", TYPE_INFO, true, $logger)
                                 file_manager.upload(left_path, right_path) do |bytes_copied, total_bytes|
                                     self.progress_bar(bytes_copied, total_bytes)
                                     if bytes_copied == total_bytes then
                                         puts("                                                             ")
-                                        self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA)
-                                        self.print_message("Upload successful!", TYPE_INFO)
+                                        self.print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
+                                        self.print_message("Upload successful!", TYPE_INFO, true, $logger)
                                     end
                                 end
                             rescue StandardError => err
-                                self.print_message("Error: #{err.to_s}: #{err.backtrace}", TYPE_ERROR)
-                                self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR)
+                                self.print_message("Error: #{err.to_s}: #{err.backtrace}", TYPE_ERROR, true, $logger)
+                                self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR, true, $logger)
                             ensure
                                 command = ""
                             end
                         elsif command.start_with?('download') then
                             if self.docker_detection() then
                                 puts()
-                                self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING)
+                                self.print_message("Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command", TYPE_WARNING, true, $logger)
                             end
 
                             begin
@@ -563,15 +624,15 @@ class EvilWinRM
                                 right_path = paths.pop
                                 left_path = paths.pop
 
-                                self.print_message("Downloading #{left_path} to #{right_path}", TYPE_INFO)
+                                self.print_message("Downloading #{left_path} to #{right_path}", TYPE_INFO, true, $logger)
                                 size = self.filesize(shell, left_path)
                                 file_manager.download(left_path, right_path, size: size) do | index, size |
                                     self.progress_bar(index, size)
                                 end
                                 puts("                                                             ")
-                                self.print_message("Download successful!", TYPE_INFO)
+                                self.print_message("Download successful!", TYPE_INFO, true, $logger)
                             rescue StandardError => err
-                                self.print_message("Download failed. Check filenames or paths", TYPE_ERROR)
+                                self.print_message("Download failed. Check filenames or paths", TYPE_ERROR, true, $logger)
                             ensure
                                 command = ""
                             end
@@ -592,7 +653,7 @@ class EvilWinRM
                                     output = shell.run("Invoke-Binary")
                                 end
                             rescue StandardError => err
-                                self.print_message("Check filenames", TYPE_ERROR)
+                                self.print_message("Check filenames", TYPE_ERROR, true, $logger)
                             end
 
                         elsif command.start_with?('Donut-Loader') then
@@ -609,15 +670,20 @@ class EvilWinRM
                                     output = shell.run("Donut-Loader")
                                 end
                                 print(output.output)
+                                if !$logger.nil?
+                                    $logger.info(output.output)
+                                end
                             rescue
-                                self.print_message("Check filenames", TYPE_ERROR)
+                                self.print_message("Check filenames", TYPE_ERROR, true, $logger)
                             end
 
                         elsif command.start_with?('services') then
                             command = ""
                             output = shell.run('$servicios = Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath  ; foreach ($servicio in $servicios  ) {Get-Service $servicio.PSChildName -ErrorAction SilentlyContinue | Out-Null ; if ($? -eq $true) {$privs = $true} else {$privs = $false} ; $Servicios_object = New-Object psobject -Property @{"Service" = $servicio.pschildname ; "Path" = $servicio.imagepath ; "Privileges" = $privs} ;  $Servicios_object }')
                             print(output.output.chomp)
-
+                            if !$logger.nil?
+                                $logger.info(output.output.chomp)
+                            end
                         elsif command.start_with?(*@functions) then
                             self.silent_warnings do
                                 load_script = $scripts_path + command
@@ -651,28 +717,37 @@ class EvilWinRM
                                 $COMMANDS = $COMMANDS + $LIST2
                                 $COMMANDS = $COMMANDS.uniq
                                 print(output.output)
+                                if !$logger.nil?
+                                    $logger.info(output.output)
+                                end
                             end
 
                         elsif (command == "Bypass-4MSI") and (Time.now.to_i < time + 20)
                             puts()
-                            self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING)
+                            self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING, true, $logger)
                             sleep(9)
                         end
-
                         output = shell.run(command) do |stdout, stderr|
                             stdout&.each_line do |line|
                                 STDOUT.puts(line.rstrip!)
                             end
                             STDERR.print(stderr)
                         end
+                        if !$logger.nil? && !command.empty?
+                            output_logger=""
+                            output.output.each_line do |line|
+                                output_logger += "#{line.rstrip!}\n"
+                            end
+                            $logger.info(output_logger)
+                        end
                     end
                 rescue Errno::EACCES => ex
                     puts()
-                    self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR)
+                    self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR, true, $logger)
                     retry
                 rescue Interrupt
                     puts("\n\n")
-                    self.print_message("Press \"y\" to exit, press any other key to continue", TYPE_WARNING)
+                    self.print_message("Press \"y\" to exit, press any other key to continue", TYPE_WARNING, true, $logger)
                     if STDIN.getch.downcase == "y"
                         self.custom_exit(130)
                     else
@@ -683,10 +758,10 @@ class EvilWinRM
         end
         rescue SystemExit
         rescue SocketError
-            self.print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR)
+            self.print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR, true, $logger)
             self.custom_exit(1)
         rescue Exception => ex
-            self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR)
+            self.print_message("An error of type #{ex.class} happened, message is #{ex.message}", TYPE_ERROR, true, $logger)
             self.custom_exit(1)
         end
     end
