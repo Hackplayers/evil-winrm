@@ -33,6 +33,8 @@ GEM
       logging (>= 1.6.1, < 3.0)
       rubyzip (~> 1.1)
       winrm (~> 2.0)
+    logger (1.4.3)
+    fileutils (0.7.2)
 
 PLATFORMS
   ruby
