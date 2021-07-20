@@ -6,16 +6,16 @@ The ultimate WinRM shell for hacking/pentesting
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
 
-WinRM (Windows Remote Management) is the Microsoft implementation of WS-Management Protocol. A standard SOAP based protocol 
-that allows hardware and operating systems from different vendors to interoperate. Microsoft included it in their Operating 
+WinRM (Windows Remote Management) is the Microsoft implementation of WS-Management Protocol. A standard SOAP based protocol
+that allows hardware and operating systems from different vendors to interoperate. Microsoft included it in their Operating
 Systems in order to make life easier to system administrators.
 
-This program can be used on any Microsoft Windows Servers with this feature enabled (usually at port 5985), of course only 
-if you have credentials and permissions to use it. So we can say that it could be used in a post-exploitation hacking/pentesting 
-phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate 
+This program can be used on any Microsoft Windows Servers with this feature enabled (usually at port 5985), of course only
+if you have credentials and permissions to use it. So we can say that it could be used in a post-exploitation hacking/pentesting
+phase. The purpose of this program is to provide nice and easy-to-use features for hacking. It can be used with legitimate
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
-It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM 
+It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM
 protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
 
 ## Features
@@ -32,8 +32,10 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - List remote machine services without privileges
  - Command History
  - WinRM command completion
- - Local files completion
+ - Local files/directories completion
+ - Remote path (files/directories) completion (can be disabled optionally)
  - Colorization on prompt and output messages (can be disabled optionally)
+ - Optional logging feature
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
 
@@ -55,6 +57,8 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -P, --port PORT                  Remote host port (default 5985)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
+    -N, --no-rpath-completion        Disable remote path completion
+    -l, --log                        Log the WinRM session
     -h, --help                       Display this help message
 ```
 
@@ -65,12 +69,14 @@ Depending of your installation method (3 availables) the installation of them co
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
 
+The remote path completion feature will work only if your ruby was compiled enabling the `--with-readline-dir` flag. This is enabled by default in ruby included on some Linux distributions but not in all. Check [the section below](#Remote-path-completion) for more info.
+
 ## Installation & Quick Start (4 methods)
 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
  - Step 1. Install it (it will install automatically dependencies): `gem install evil-winrm`
  - Step 2. Ready. Just launch it! `~$ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'`
- 
+
 ### Method 2. Git clone and install dependencies on your system manually
  - Step 1. Install dependencies manually: `~$ sudo gem install winrm winrm-fs stringio`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
@@ -87,16 +93,16 @@ For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. 
 
 ## Documentation
 
-#### Clear text password
+### Clear text password
 If you don't want to put the password in clear text, you can optionally avoid to set `-p` argument and the password will be prompted preventing to be shown.
 
-#### Ipv6
+### Ipv6
 To use IPv6, the address must be added to /etc/hosts. Just put the already set name of the host after `-i` argument instead of an IP address.
 
-#### Basic commands
- - **upload**: local files can be auto-completed using tab key. 
+### Basic commands
+ - **upload**: local files can be auto-completed using tab key.
    - usage: `upload local_filename` or `upload local_filename destination_filename`
- - **download**: 
+ - **download**:
    - usage: `download remote_filename` or `download remote_filename destination_filename`
 
  __Notes about paths (upload/download)__:
@@ -108,12 +114,12 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    ![menu](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image2.png)
 
-#### Load powershell scripts
+### Load powershell scripts
  - To load a ps1 file you just have to type the name (auto-completion using tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
    ![ps1](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image7.png)
 
-#### Advanced commands
+### Advanced commands
 - Invoke-Binary: allows exes compiled from c# to be executed in memory. The name can be auto-completed using tab key. Arguments for the exe file can be passed comma separated. Example: `Invoke-Binary /opt/csharp/Binary.exe 'param1, param2, param3'`. The executables must be in the path set at `-e` argument.
 
    ![Invoke-Binary](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image3.png)
@@ -130,7 +136,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    ![Donut-Loader](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image8.png)
 
     You can use this [donut-maker] to generate the payload.bin if you don't use Windows.
-    This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: 
+    This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip:
 
       `pip3 install donut-shellcode`
 
@@ -140,7 +146,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
       ![amsi](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/image11.png)
 
-#### Kerberos
+### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
 
  - To generate ticket there are many ways:
@@ -151,7 +157,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
    * If you get a kirbi ticket using [Rubeus] or [Mimikatz] you have to convert to ccache using [ticket_converter.py]:
 
-      `python ticket_converter.py ticket.kirbi ticket.ccache` 
+      `python ticket_converter.py ticket.kirbi ticket.ccache`
 
  - Add ccache ticket. There are 2 ways:
 
@@ -170,6 +176,103 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - Check Kerberos tickets with `klist`
  - To remove ticket use: `kdestroy`
  - For more information about Kerberos check this [cheatsheet]
+
+### Remote path completion
+This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
+
+#### Method1 (compile the needed extension)
+
+Using this method you'll compile ruby with the needed readline feature but to use only the library without changing the default ruby version on your system. Because of this, is the most recommended method.
+
+Let's suppose that you have in your Debian based system ruby 2.7.3:
+
+```
+# Install needed package
+apt install libreadline-dev
+
+# Check your ruby version
+ruby --version
+ruby 2.7.3p183 (2021-04-05 revision 6847ee089d) [x86_64-linux-gnu]
+
+# Download ruby source code (2.7.3 in this case):
+wget https://ftp.ruby-lang.org/pub/ruby/2.7/ruby-2.7.3.tar.gz
+
+# Extract source code
+tar -xf ruby-2.7.3.tar.gz
+
+# Compile the readline extension:
+cd ruby-2.7.3/ext/readline
+ruby ./extconf.rb
+make
+
+# Patch current version of the ruby readline extension:
+sudo cp /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so.bk
+sudo cp -f readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so
+```
+
+#### Method2 (Install ruby to use it only for evil-winrm using rbenv)
+
+Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using zsh. This script will automatize it. You'll need to launch it from the same dir where evil-winrm.rb and Gemfile is located (the evil-winrm created dir after a git clone for example):
+
+```
+#!/usr/bin/env zsh
+
+# Uninstall possible current installed versions
+sudo gem uninstall evil-winrm -q
+gem uninstall evil-winrm -q
+
+# Install rbenv
+sudo apt install rbenv
+
+# Config rbenv on zshrc config file
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(rbenv init -)"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install ruby with readline support
+export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/include/readline"
+rbenv install 2.7.1
+
+# Create file '.ruby-version' to set right ruby version
+rbenv local 2.7.1
+
+# Install local gems
+gem install bundler
+bundle install
+
+current_evwr="$(pwd)/evil-winrm.rb"
+
+sudo bash -c "cat << 'EOF' > /usr/bin/evil-winrm
+    #!/usr/bin/env sh
+    "${current_evwr}" "\$@"
+EOF"
+
+sudo chmod +x /usr/bin/evil-winrm
+```
+
+Then you can safely launch evil-winrm using the new installed ruby with the required readline support from any location.
+
+#### Method3 (compile entire ruby)
+
+If you want to compile it yourself, you can follow these steps. Let's suppose that you want ruby 2.7.3:
+
+```
+wget -O ruby-install-0.8.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.8.1.tar.gz
+tar -xzvf ruby-install-0.8.1.tar.gz
+cd ruby-install-0.8.1/
+sudo make install
+ruby-install ruby 2.7.3 -- --with-readline-dir=/usr/include/readline
+```
+Depending of your system it will be installed at `/opt/rubies/ruby-2.7.3` or maybe at ` ~/.rubies/ruby-2.7.3`.
+
+Now just need to install evil-winrm dependencies for that new installed ruby version. The easiest way is to launch command `/opt/rubies/ruby-2.7.3/bin/gem install evil-winrm`. The gem command used must be belonging to the new ruby installation.
+
+After that, you can launch safely your new installed ruby to use it on evil-winrm: `/opt/rubies/ruby-2.7.3/bin/ruby ./evil-winrm.rb -h`
+
+It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
+
+### Logging
+This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
@@ -190,13 +293,15 @@ Hat tip to:
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
+ - [arale61] for his awesome contribution to remote path completion.
+ - [Borch] for his help adding logging feature.
  - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE).
 
-Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only. 
-Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
+Evil-WinRM should be used for authorized penetration testing and/or nonprofit educational purposes only.
+Any misuse of this software will not be the responsibility of the author or of any other collaborator.
 Use it at your own servers and/or with the server owner's permission.
 
 <!-- Github URLs -->
@@ -206,6 +311,8 @@ Use it at your own servers and/or with the server owner's permission.
 [Vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
+[arale61]: https://github.com/arale61
+[Borch]: https://github.com/Stoo0rmq
 [donut]: https://github.com/TheWover/donut
 [donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r
@@ -226,7 +333,7 @@ Use it at your own servers and/or with the server owner's permission.
 [@_Laox]: https://twitter.com/_Laox
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-2.4-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-3.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
