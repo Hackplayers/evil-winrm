@@ -14,7 +14,9 @@ LABEL \
 RUN gem install \
     winrm \
     winrm-fs \
-    stringio
+    stringio \
+    logger \
+    fileutils
 
 # Create volume for powershell scripts
 RUN mkdir /ps1_scripts
