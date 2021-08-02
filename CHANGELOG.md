@@ -1,3 +1,6 @@
+### 3.1
+ - Version released just to quick fix ruby dependencies on gem
+
 ### 3.0
  - Remote files/directories autocomplete feature (Thanks to arale61)
  - Added option to log commands and outputs to a log file (Thanks to Borch Cañavate)
