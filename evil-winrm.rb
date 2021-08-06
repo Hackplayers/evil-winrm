@@ -585,7 +585,7 @@ class EvilWinRM
                                     end
                                 end
                             rescue StandardError => err
-                                self.print_message("Error: #{err.to_s}: #{err.backtrace}", TYPE_ERROR, true, $logger)
+                                self.print_message("#{err.to_s}: #{err.backtrace}", TYPE_ERROR, true, $logger)
                                 self.print_message("Upload failed. Check filenames or paths", TYPE_ERROR, true, $logger)
                             ensure
                                 command = ""
