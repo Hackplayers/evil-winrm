@@ -29,29 +29,6 @@ TYPE_DATA = 3
 
 # Global vars
 
-# Available commands
-$LIST = ['upload', 'download', 'exit', 'menu', 'services'].sort
-$COMMANDS = $LIST.dup
-$LISTASSEM = [''].sort
-$DONUTPARAM1 = ['-process_id']
-$DONUTPARAM2 = ['-donutfile']
-
-# Colors and path completion
-$colors_enabled = true
-$check_rpath_completion = true
-
-# Path for ps1 scripts and exec files
-$scripts_path = ""
-$executables_path = ""
-
-# Connection vars initialization
-$host = ""
-$port = "5985"
-$user = ""
-$password = ""
-$url = "wsman"
-$default_service = "HTTP"
-
 # Global vars
 
 # Available commands
