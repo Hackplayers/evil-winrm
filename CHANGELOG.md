@@ -1,3 +1,7 @@
+### 3.2
+ - Fixed minor duplicated code problem
+ - Dockerfile improvements
+
 ### 3.1
  - Version released just to quick fix ruby dependencies on gem
 
