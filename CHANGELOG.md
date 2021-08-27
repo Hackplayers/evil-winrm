@@ -1,3 +1,6 @@
+### 3.3
+ - Fixed missing output messages for Invoke-Binary
+
 ### 3.2
  - Fixed minor duplicated code problem
  - Dockerfile improvements
