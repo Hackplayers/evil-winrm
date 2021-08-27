@@ -296,7 +296,7 @@ class EvilWinRM
     end
 
     # Messsage printing
-    def print_message(msg, msg_type, prefix_print=true, log=nil)
+    def print_message(msg, msg_type=TYPE_INFO, prefix_print=true, log=nil)
         if msg_type == TYPE_INFO then
             msg_prefix = "Info: "
             color = "blue"
