@@ -623,11 +623,14 @@ class EvilWinRM
                                     load_executable = Base64.strict_encode64(load_executable)
                                     if !invoke_Binary[2].to_s.empty?
                                         output = shell.run("Invoke-Binary " + load_executable + " ," + invoke_Binary[2])
+                                        puts(output.output)
                                     elsif invoke_Binary[2].to_s.empty?
                                         output = shell.run("Invoke-Binary " + load_executable)
+                                        puts(output.output)
                                     end
                                 elsif
                                     output = shell.run("Invoke-Binary")
+                                    puts(output.output)
                                 end
                             rescue StandardError => err
                                 self.print_message("Check filenames", TYPE_ERROR, true, $logger)
