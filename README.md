@@ -283,6 +283,7 @@ Staff:
  - [Cybervaca], (founder). Twitter: [@CyberVaca_]
  - [OscarAkaElvis], Twitter: [@OscarAkaElvis]
  - [Laox], Twitter: [@_Laox]
+ - [arale61], Twitter: [@arale61]
 
 Hat tip to:
 
@@ -293,7 +294,6 @@ Hat tip to:
  - [TheWover] for his awesome donut tool.
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
- - [arale61] for his awesome contribution to remote path completion.
  - [Borch] for his help adding logging feature.
  - [Hackplayers] for giving a shelter on their github to this software.
 
@@ -308,10 +308,10 @@ Use it at your own servers and/or with the server owner's permission.
 [Cybervaca]: https://github.com/cybervaca
 [OscarAkaElvis]: https://github.com/OscarAkaElvis
 [Laox]: https://github.com/jarilaos
+[arale61]: https://github.com/arale61
 [Vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
-[arale61]: https://github.com/arale61
 [Borch]: https://github.com/Stoo0rmq
 [donut]: https://github.com/TheWover/donut
 [donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
@@ -331,6 +331,7 @@ Use it at your own servers and/or with the server owner's permission.
 [@CyberVaca_]: https://twitter.com/CyberVaca_
 [@OscarAkaElvis]: https://twitter.com/OscarAkaElvis
 [@_Laox]: https://twitter.com/_Laox
+[@arale61]: https://twitter.com/arale61
 
 <!-- Badges URLs -->
 [Version-shield]: https://img.shields.io/badge/version-3.3-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
