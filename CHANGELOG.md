@@ -1,5 +1,6 @@
 ### 3.3
  - Fixed missing output messages for Invoke-Binary
+ - Extracted AMSI bypass from menu to avoid menu problems due to M$ AV signatures
 
 ### 3.2
  - Fixed minor duplicated code problem
