@@ -24,7 +24,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) assemblies bypassing some AVs
  - Load x64 payloads generated with awesome [donut] technique
- - AMSI Bypass
+ - Dynamic AMSI Bypass to avoid AV signatures
  - Pass-the-hash support
  - Kerberos auth support
  - SSL and certificates support
