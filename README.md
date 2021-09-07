@@ -471,7 +471,7 @@ Staff:
 
  - [Cybervaca], (founder). Twitter: [@CyberVaca_]
  - [OscarAkaElvis], Twitter: [@OscarAkaElvis]
- - [Laox], Twitter: [@_Laox]
+ - [Jarilaos], Twitter: [@_Laox]
  - [arale61], Twitter: [@arale61]
 
 Hat tip to:
@@ -496,7 +496,7 @@ Use it at your own servers and/or with the server owner's permission.
 <!-- Github URLs -->
 [Cybervaca]: https://github.com/cybervaca
 [OscarAkaElvis]: https://github.com/OscarAkaElvis
-[Laox]: https://github.com/jarilaos
+[Jarilaos]: https://github.com/jarilaos
 [arale61]: https://github.com/arale61
 [Vis0r]: https://github.com/vmotos
 [Alamot]: https://github.com/Alamot
