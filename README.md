@@ -65,7 +65,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 
 ## Requirements
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
-Depending of your installation method (3 availables) the installation of them could be required to be done manually.
+Depending of your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
@@ -82,7 +82,7 @@ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ho
 ```
 
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio`
+ - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it!
 ```
@@ -369,7 +369,7 @@ This script contains malicious content and has been blocked by your antivirus so
 ### Remote path completion
 This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
 
-#### Method1 (compile the needed extension)
+#### Method 1 (compile the needed extension)
 
 Using this method you'll compile ruby with the needed readline feature but to use only the library without changing the default ruby version on your system. Because of this, is the most recommended method.
 
@@ -399,7 +399,7 @@ sudo cp /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so /usr/lib/x86_64-linux-g
 sudo cp -f readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so
 ```
 
-#### Method2 (Install ruby to use it only for evil-winrm using rbenv)
+#### Method 2 (Install ruby to use it only for evil-winrm using rbenv)
 
 Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using zsh. This script will automatize it. You'll need to launch it from the same dir where evil-winrm.rb and Gemfile is located (the evil-winrm created dir after a git clone for example):
 
@@ -441,7 +441,7 @@ sudo chmod +x /usr/bin/evil-winrm
 
 Then you can safely launch evil-winrm using the new installed ruby with the required readline support from any location.
 
-#### Method3 (compile entire ruby)
+#### Method 3 (compile entire ruby)
 
 If you want to compile it yourself, you can follow these steps. Let's suppose that you want ruby 2.7.3:
 
