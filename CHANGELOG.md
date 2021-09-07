@@ -1,3 +1,8 @@
+### 3.3
+ - Fixed missing output messages for Invoke-Binary
+ - Extracted AMSI bypass from menu to avoid menu problems due to M$ AV signatures
+ - Dynamic AMSI bypass implemented to avoid AV signatures
+
 ### 3.2
  - Fixed minor duplicated code problem
  - Dockerfile improvements
@@ -7,7 +12,7 @@
  - Version released just to quick fix ruby dependencies on gem
 
 ### 3.0
- - Remote files/directories autocomplete feature (Thanks to arale61)
+ - Remote files/directories autocomplete feature
  - Added option to log commands and outputs to a log file (Thanks to Borch Cañavate)
 
 ### 2.4
