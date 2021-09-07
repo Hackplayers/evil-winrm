@@ -19,7 +19,7 @@ require 'logger'
 # Constants
 
 # Version
-VERSION = '3.3'
+VERSION = '3.4'
 
 # Msg types
 TYPE_INFO = 0
