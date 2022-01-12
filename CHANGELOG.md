@@ -1,3 +1,6 @@
+### 3.4
+ - Added CI files to be used in Github actions for Docker automated building
+
 ### 3.3
  - Fixed missing output messages for Invoke-Binary
  - Extracted AMSI bypass from menu to avoid menu problems due to M$ AV signatures
