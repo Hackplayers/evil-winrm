@@ -12,6 +12,10 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/Hackplayers/evil-winrm#readme"
   spec.required_ruby_version = ">= 2.3"
 
+  spec.metadata["homepage_uri"]    = spec.homepage
+  spec.metadata["source_code_uri"] = "https://github.com/Hackplayers/evil-winrm"
+  spec.metadata["changelog_uri"]   = "https://github.com/Hackplayers/evil-winrm/blob/master/CHANGELOG.md"
+
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
       (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
