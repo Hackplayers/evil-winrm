@@ -24,11 +24,11 @@ Gem::Specification.new do |spec|
   spec.bindir = "bin"
   spec.executables = ["evil-winrm"]
 
-  spec.add_dependency "winrm",     ">= 2.3.2"
-  spec.add_dependency "winrm-fs",  ">= 1.3.2"
-  spec.add_dependency "stringio",  ">= 0.0.2"
-  spec.add_dependency "logger",    ">= 1.4.3"
-  spec.add_dependency "fileutils", ">= 0.7.2"
+  spec.add_dependency "winrm",     "~> 2.3", ">= 2.3.2"
+  spec.add_dependency "winrm-fs",  "~> 1.3", ">= 1.3.2"
+  spec.add_dependency "stringio",  "~> 0.0", ">= 0.0.2"
+  spec.add_dependency "logger",    "~> 1.4", ">= 1.4.3"
+  spec.add_dependency "fileutils", "~> 0.7", ">= 0.7.2"
 
   spec.add_development_dependency "bundler", "~> 2.0"
 
