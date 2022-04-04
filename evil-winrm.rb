@@ -916,8 +916,8 @@ class EvilWinRM
 
     def normalize_path(str)
         p_str = str || ""
-        p_str = str.gsub('\\', '/')
-        p_str = Regexp.escape(str)
+        p_str = p_str.gsub('\\', '/')
+        p_str = Regexp.escape(p_str)
         p_str
     end
 
