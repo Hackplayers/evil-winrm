@@ -30,5 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "logger",    ">= 1.4.3"
   spec.add_dependency "fileutils", ">= 0.7.2"
 
+  spec.add_development_dependency "bundler", "~> 2.0"
+
   spec.post_install_message = "Happy hacking! :)"
 end
