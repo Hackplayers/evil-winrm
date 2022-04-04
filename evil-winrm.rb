@@ -915,10 +915,7 @@ class EvilWinRM
     end
 
     def normalize_path(str)
-        p_str = str || ""
-        p_str = str.gsub('\\', '/')
-        p_str = Regexp.escape(str)
-        p_str
+        Regexp.escape(str.to_s.gsub('\\', '/'))
     end
 
     def get_dir_parts(n_path)
