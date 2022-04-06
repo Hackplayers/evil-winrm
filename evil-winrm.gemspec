@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "winrm",     "~> 2.3", ">= 2.3.2"
   spec.add_dependency "winrm-fs",  "~> 1.3", ">= 1.3.2"
-  spec.add_dependency "stringio",  "~> 0.0", ">= 0.0.2"
+  spec.add_dependency "stringio",  "~> 3.0"
   spec.add_dependency "logger",    "~> 1.4", ">= 1.4.3"
   spec.add_dependency "fileutils", "~> 1.0"
 
