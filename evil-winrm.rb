@@ -53,8 +53,9 @@ $host = ""
 $port = "5985"
 $user = ""
 $password = ""
-$url = "wsman"
+$url = "wsman?PSVersion=5.1.19041.1237"
 $default_service = "HTTP"
+$USER_AGENT = 'Microsoft WinRM Client'
 $full_logging_path = ENV["HOME"]+"/evil-winrm-logs"
 
 # Redefine download method from winrm-fs
@@ -267,6 +268,7 @@ class EvilWinRM
                     transport: :ssl,
                     client_cert: $pub_key,
                     client_key: $priv_key,
+                    user_agent: $USER_AGENT,
                 )
             else
                 $conn = WinRM::Connection.new(
@@ -274,7 +276,8 @@ class EvilWinRM
                     user: $user,
                     password: $password,
                     :no_ssl_peer_verification => true,
-                    transport: :ssl
+                    transport: :ssl,
+                    user_agent: $USER_AGENT,
                 )
             end
 
@@ -285,15 +288,17 @@ class EvilWinRM
                 password: "",
                 transport: :kerberos,
                 realm: $realm,
-                service: $service
-            )
+                service: $service,
+                user_agent: $USER_AGENT,
+                )
         else
             $conn = WinRM::Connection.new(
                 endpoint: "http://#{$host}:#{$port}/#{$url}",
                 user: $user,
                 password: $password,
-                :no_ssl_peer_verification => true
-            )
+                :no_ssl_peer_verification => true,
+                user_agent: $USER_AGENT,
+                )
         end
     end
 
