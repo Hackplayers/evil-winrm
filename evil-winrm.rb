@@ -30,8 +30,6 @@ TYPE_SUCCESS = 4
 
 # Global vars
 
-# Global vars
-
 # Available commands
 $LIST = ['Bypass-4MSI', 'services', 'upload', 'download', 'menu', 'exit']
 $COMMANDS = $LIST.dup
