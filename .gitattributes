@@ -1,0 +1,16 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Text files and source code
+*.txt text
+*.yml text
+*.rb text
+*.md text
+*.gemspec text
+
+# Executable binaries/packages
+*.deb binary
+*.xz binary
+
+# Binary image formats
+*.png binary
