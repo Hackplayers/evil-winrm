@@ -1,6 +1,7 @@
 ### 3.4
  - Added CI files to be used in Github actions for Docker automated building
  - Improvements on dynamic AMSI bypass
+ - Added gemspec file to repo for gem building
 
 ### 3.3
  - Fixed missing output messages for Invoke-Binary
