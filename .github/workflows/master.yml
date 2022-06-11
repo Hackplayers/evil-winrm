@@ -1,0 +1,35 @@
+#Workflow for docker autobuild in master branch
+
+name: 'Docker CI master'
+
+on:
+  push:
+    branches: master
+    paths:
+      - '**.md'
+      - '**.rb'
+      - 'Dockerfile'
+
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker Hub login
+        uses: docker/login-action@v1
+        with:
+          username: oscarakaelvis
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          logout: true
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          tags: oscarakaelvis/evil-winrm:latest
+          context: .
+          no-cache: true
+          push: true

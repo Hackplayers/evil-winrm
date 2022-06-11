@@ -1,3 +1,8 @@
+### 3.4
+ - Added CI files to be used in Github actions for Docker automated building
+ - Improvements on dynamic AMSI bypass
+ - Added gemspec file to repo for gem building
+
 ### 3.3
  - Fixed missing output messages for Invoke-Binary
  - Extracted AMSI bypass from menu to avoid menu problems due to M$ AV signatures
@@ -6,7 +11,7 @@
 ### 3.2
  - Fixed minor duplicated code problem
  - Dockerfile improvements
- - Amsi bypass update
+ - AMSI bypass update
 
 ### 3.1
  - Version released just to quick fix ruby dependencies on gem
