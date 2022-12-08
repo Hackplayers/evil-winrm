@@ -11,3 +11,4 @@ desktop.ini
 vendor/
 .bundle/
 .vscode/
+*.gem
