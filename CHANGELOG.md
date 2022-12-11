@@ -1,3 +1,6 @@
+### 3.5
+ - Improvements on powershell functions loading
+
 ### 3.4
  - Added CI files to be used in Github actions for Docker automated building
  - Improvements on dynamic AMSI bypass
