@@ -55,39 +55,6 @@ $url = "wsman"
 $default_service = "HTTP"
 $full_logging_path = ENV["HOME"]+"/evil-winrm-logs"
 
-# Redefine download method from winrm-fs
-module WinRM
-    module FS
-        class FileManager
-            def download(remote_path, local_path, chunk_size = 1024 * 1024, first = true, size: -1)
-                @logger.debug("downloading: #{remote_path} -> #{local_path} #{chunk_size}")
-                index = 0
-                output = _output_from_file(remote_path, chunk_size, index)
-                return download_dir(remote_path, local_path, chunk_size, first) if output.exitcode == 2
-
-                return false if output.exitcode >= 1
-
-                File.open(local_path, 'wb') do |fd|
-                    out = _write_file(fd, output)
-                    index += out.length
-                    until out.empty?
-                        if size != -1
-                            yield index, size
-                        end
-                        output = _output_from_file(remote_path, chunk_size, index)
-                        return false if output.exitcode >= 1
-
-                        out = _write_file(fd, output)
-                        index += out.length
-                    end
-                end
-            end
-
-            true
-        end
-    end
-end
-
 # Class creation
 class EvilWinRM
 
