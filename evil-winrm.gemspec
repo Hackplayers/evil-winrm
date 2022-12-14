@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Gem::Specification.new do |spec|
-  spec.name = "evil-winrm"
+  spec.name = 'evil-winrm'
   spec.version = '3.5'
   spec.license = 'LGPL-3.0'
   spec.authors = %w[CyberVaca OscarAkaElvis Jarilaos Arale61]
