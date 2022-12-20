@@ -1,5 +1,6 @@
 ### 3.5
  - Improvements on powershell functions loading
+ - Improvements on gemspec file and in ruby code using Rubocop (Thanks noraj)
 
 ### 3.4
  - Added CI files to be used in Github actions for Docker automated building
