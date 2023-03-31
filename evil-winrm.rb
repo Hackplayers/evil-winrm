@@ -65,20 +65,25 @@ module WinRM
         @logger.debug("downloading: #{remote_path} -> #{local_path} #{chunk_size}")
         index = 0
         output = _output_from_file(remote_path, chunk_size, index)
-        return download_dir(remote_path, local_path, chunk_size, first) if output.exitcode == 2
 
+        return download_dir(remote_path, local_path, chunk_size, first) if output.exitcode == 2
         return false if output.exitcode >= 1
 
         File.open(local_path, 'wb') do |fd|
-          out = _write_file(fd, output)
-          index += out.length
-          until out.empty?
-            yield index, size if size != -1
-              output = _output_from_file(remote_path, chunk_size, index)
-              return false if output.exitcode >= 1
+          begin
+            out = _write_file(fd, output)
+            index += out.length
+            until out.empty?
+                yield index, size if size != -1
+                output = _output_from_file(remote_path, chunk_size, index)
+                return false if output.exitcode >= 1
 
-              out = _write_file(fd, output)
-              index += out.length
+                out = _write_file(fd, output)
+                index += out.length
+            end
+          rescue EstandardError => err
+            @logger.debug("IO Failed: " + err.to_s)
+            raise
           end
         end
       end
@@ -591,32 +596,36 @@ class EvilWinRM
               if command.start_with?('upload')
                 if docker_detection
                     puts
-                    print_message(
-                      'Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger
-                    )
+                    print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
                 end
+                begin
+                  source_s = ""
+                  dest_s = ""
+                  paths = get_paths_from_command(command, pwd)
 
-                  begin
-                    paths = get_upload_paths(command, pwd)
-                    right_path = paths.pop
-                    left_path = paths.pop
-
-                    print_message("Uploading #{left_path} to #{right_path}", TYPE_INFO, true, $logger)
-                    file_manager.upload(left_path, right_path) do |bytes_copied, total_bytes|
-                        progress_bar(bytes_copied, total_bytes)
-                        if bytes_copied == total_bytes
-                            puts('                                                             ')
-                            print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied",
-                                          TYPE_DATA, true, $logger)
-                            print_message('Upload successful!', TYPE_INFO, true, $logger)
-                        end
-                    end
-                rescue StandardError => e
-                    print_message("#{e}: #{e.backtrace}", TYPE_ERROR, true, $logger)
-                    print_message('Upload failed. Check filenames or paths', TYPE_ERROR, true, $logger)
-                ensure
-                    command = ''
+                  if paths.length == 2
+                    dest_s = paths.pop
+                    source_s = paths.pop
+                  elsif paths.length == 1
+                    source_s = paths.pop
+                    dest_s = "#{pwd}\\#{extract_filename(dest_s.gsub("\\", '/'))}"
                   end
+
+                  print_message("Uploading #{source_s} to #{dest_s}", TYPE_INFO, true, $logger)
+                  file_manager.upload(source_s, dest_s) do |bytes_copied, total_bytes|
+                    progress_bar(bytes_copied, total_bytes)
+                    if bytes_copied == total_bytes
+                      puts('                                                             ')
+                      print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
+                      print_message('Upload successful!', TYPE_INFO, true, $logger)
+                    end
+                  end
+                rescue StandardError => e
+                  print_message("#{e}: #{e.backtrace}", TYPE_ERROR, true, $logger)
+                  print_message('Upload failed. Check filenames or paths', TYPE_ERROR, true, $logger)
+                ensure
+                  command = ''
+                end
               elsif command.start_with?('download')
                 if docker_detection
                     puts
@@ -625,25 +634,34 @@ class EvilWinRM
                     )
                 end
 
-                  begin
-                    paths = get_download_paths(command, pwd)
-                    right_path = paths.pop
-                    left_path = paths.pop
+                begin
+                  dest = ""
+                  source = ""
+                  paths = get_paths_from_command(command, pwd)
 
-                    print_message("Downloading #{left_path} to #{right_path}", TYPE_INFO, true,
-                                  $logger)
-                    size = filesize(shell, left_path)
-                    file_manager.download(left_path, right_path, size: size) do |index, size|
-                        progress_bar(index, size)
-                    end
-                    puts('                                                             ')
+                  if paths.length == 2
+                    dest = paths.pop
+                    source = paths.pop
+                  elsif paths.length == 1
+                    source = paths.pop
+                    dest = "#{extract_filename(source.gsub("\\", '/'))}"
+                  end
+                  print_message("Downloading #{source} to #{dest}", TYPE_INFO, true, $logger)
+                  size = filesize(shell, source)
+                  downloaded = file_manager.download(source, dest, size: size) do |index, size|
+                    progress_bar(index, size)
+                  end
+                  puts('                                                             ')
+                  if downloaded != false
                     print_message('Download successful!', TYPE_INFO, true, $logger)
+                  else
+                    print_message('Download failed. Check filenames or paths', TYPE_ERROR, true, $logger)
+                  end
                 rescue StandardError => e
-                    print_message('Download failed. Check filenames or paths', TYPE_ERROR, true,
-                                  $logger)
+                    print_message('Download failed. Check filenames or paths: ' + e.to_s, TYPE_ERROR, true, $logger)
                 ensure
                     command = ''
-                  end
+                end
               elsif command.start_with?('Invoke-Binary')
                 begin
                     invoke_Binary = command.tokenize
@@ -860,6 +878,7 @@ class EvilWinRM
   end
 
   def extract_filename(path)
+    path = path || ""
     path.split('/')[-1]
   end
 
@@ -870,42 +889,11 @@ class EvilWinRM
     cmd_with_quoted_path[begin_i + 1, next_i]
   end
 
-  def get_upload_paths(upload_command, pwd)
-    quotes = upload_command.count('"')
-    result = []
-    if quotes.zero? || quotes.odd?
-      result = upload_command.split
-      result.delete_at(0)
-    else
-      quoted_path = extract_next_quoted_path(upload_command)
-      upload_command = upload_command.gsub("\"#{quoted_path}\"", '')
-      result = upload_command.split
-      result.delete_at(0)
-      result.push(quoted_path) unless quoted_path.nil? || quoted_path.empty?
-    end
-    result.push("#{pwd}\\#{extract_filename(result[0])}") if result.length == 1
-    result
-  end
-
-  def get_download_paths(download_command, _pwd)
-    quotes = download_command.count('"')
-    result = []
-    if quotes.zero? || quotes.odd?
-      result = download_command.split
-      result.delete_at(0)
-    else
-      quoted_path = extract_next_quoted_path(download_command)
-      download_command = download_command.gsub("\"#{quoted_path}\"", '')
-      result.push(quoted_path)
-      rest = download_command.split
-      unless rest.nil? || rest.empty?
-        rest.delete_at(0)
-        result.push(rest[0]) if rest.length == 1
-      end
-    end
-
-    result.push("./#{extract_filename(result[0])}") if result.length == 1
-    result
+  def get_paths_from_command(command, pwd)
+    parts = command.split
+    parts.delete_at(0)
+    parts.each { |p| p.gsub!('"', '') }
+    return parts
   end
 
   def get_from_cache(n_path)
@@ -932,9 +920,11 @@ class EvilWinRM
     @directories[a_path] = { 'time' => current_time, 'files' => paths }
   end
 
-  def normalize_path(str)
-    Regexp.escape(str.to_s.gsub('\\', '/'))
+  def normalize_path(str, escape=true)
+    p = str.to_s.gsub('\\', '/')
+    Regexp.escape(p) if escape
   end
+
 
   def get_dir_parts(n_path)
     return [n_path, ''] unless (n_path[-1] =~ %r{/$}).nil?
