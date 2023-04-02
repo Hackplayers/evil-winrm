@@ -99,6 +99,7 @@ module WinRM
 
         FileUtils.mkdir_p(local_path) unless File.directory?(local_path)
         command = "Get-ChildItem #{remote_path} | Select-Object Name"
+
         @connection.shell(:powershell) { |e| e.run(command) }.stdout.strip.split(/\n/).drop(2).each do |file|
           download(File.join(remote_file_path.to_s, file.strip), File.join(local_path, file.strip), chunk_size, false)
         end
@@ -622,7 +623,7 @@ class EvilWinRM
                   source_s = paths.pop
                 elsif paths.length == 1
                   source_s = paths.pop
-                  dest_s = "#{pwd}\\#{extract_filename(dest_s)}"
+                  dest_s = "#{pwd}\\#{extract_filename(source_s)}"
                 end
                 if extract_filename(source_s).empty? || extract_filename(source_s).include?("*")
                   print_message("A filename must be specified!", TYPE_ERROR, true, $logger)
@@ -657,10 +658,21 @@ class EvilWinRM
                 if paths.length == 2
                   dest = paths.pop
                   source = paths.pop
-                elsif paths.length == 1
+                else
                   source = paths.pop
+                  dest = ""
+                end
+
+                if source.match(/^\.[\\\/]/)
+                  source = source.gsub(/^\./, "")
+                end
+                unless source.match(/^[a-zA-Z]:[\\\/]/) then
+                  source = pwd  + '\\' + source.gsub(/^[\\\/]/, '')
+                end
+
+                if dest.empty?
                   source_expr_i = source.index(/(\*\.|\*\*|\.\*|\*)/) || -1
-                  if source_expr_i < 0
+                  if source_expr_i <= 0
                     dest = "#{extract_filename(source)}"
                   else
                     index_last_folder = source.rindex(/[\\\/]/, source_expr_i)
@@ -668,7 +680,7 @@ class EvilWinRM
                   end
                 end
 
-                if dest.match?(/(\.\/|\/)$/)
+                if dest.match?(/^(\.[\\\/]|\.)$/)
                   dest = "#{extract_filename(source)}"
                 end
 
@@ -676,6 +688,7 @@ class EvilWinRM
                   print_message("A filename or folder must be specified!", TYPE_ERROR, true, $logger)
                 else
                   size = filesize(shell, source)
+                  source = source.gsub("/", "\\") if Gem.win_platform?
                   dest = dest.gsub("\\", "/") unless Gem.win_platform?
                   print_message("Downloading #{source} to #{dest}", TYPE_INFO, true, $logger)
                   downloaded = file_manager.download(source, dest, size: size) do |index, size|
