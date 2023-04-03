@@ -610,7 +610,7 @@ class EvilWinRM
 
             if command.start_with?('upload')
               if docker_detection
-                puts("")
+                puts
                 print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
               end
               begin
@@ -648,7 +648,7 @@ class EvilWinRM
               end
             elsif command.start_with?('download')
               if docker_detection
-                puts("")
+                puts
                 print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
               end
               begin
@@ -796,7 +796,7 @@ class EvilWinRM
               command = ''
               timeToWait = (time + 20) - Time.now.to_i
               if timeToWait.positive?
-                puts("")
+                puts
                 print_message('AV could be still watching for suspicious activity. Waiting for patching...', TYPE_WARNING, true, $logger)
                 @blank_line = true
                 sleep(timeToWait)
