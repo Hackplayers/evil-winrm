@@ -950,9 +950,8 @@ class EvilWinRM
     @directories[a_path] = { 'time' => current_time, 'files' => paths }
   end
 
-  def normalize_path(str, escape=true)
-    p = str.to_s.gsub('\\', '/')
-    Regexp.escape(p) if escape
+  def normalize_path(str)
+    Regexp.escape(str.to_s.gsub('\\', '/'))
   end
 
 
