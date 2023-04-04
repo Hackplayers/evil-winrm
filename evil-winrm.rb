@@ -479,14 +479,12 @@ class EvilWinRM
 
   # Progress bar
   def progress_bar(bytes_done, total_bytes)
-    $stdout.sync = true
     progress = ((bytes_done.to_f / total_bytes) * 100).round
     progress_bar = (progress / 10).round
     progress_string = '▓' * (progress_bar - 1).clamp(0, 9)
     progress_string = "#{progress_string}▒#{'░' * (10 - progress_bar)}"
     message = "Progress: #{progress}% : |#{progress_string}|          \r"
     print message
-    sleep 0.1
   end
 
   # Get filesize
@@ -623,22 +621,60 @@ class EvilWinRM
                   source_s = paths.pop
                 elsif paths.length == 1
                   source_s = paths.pop
-                  dest_s = "#{pwd}\\#{extract_filename(source_s)}"
                 end
-                if extract_filename(source_s).empty? || extract_filename(source_s).include?("*")
+
+                unless source_s.match(Dir.pwd) then
+                  if source_s.match(/^\.[\\\/]/)
+                    source_s = source_s.gsub(/^\./, "")
+                  end
+                  source_s = Dir.pwd  + '/' + source_s
+                end
+
+                if dest_s.empty?
+                  source_expr_i = source_s.index(/(\*\.|\*\*|\.\*|\*)/) || -1
+                  if source_expr_i <= 0
+                    dest_s = "#{pwd}\\#{extract_filename(source_s)}"
+                  else
+                    index_last_folder = source_s.rindex(/[\/]/, source_expr_i )
+                    dest_s = "#{extract_filename(source_s[0..index_last_folder])}"
+                  end
+                end
+
+                unless dest_s.match(/^[a-zA-Z]:[\\\/]/) then
+                  dest_s = pwd  + '\\' + dest_s.gsub(/^([\\\/]|\.\/)/, '')
+                end
+
+                if extract_filename(source_s).empty?
                   print_message("A filename must be specified!", TYPE_ERROR, true, $logger)
                 else
                   source_s = source_s.gsub("\\", "/") unless Gem.win_platform?
                   dest_s = dest_s.gsub("/", "\\")
-                  print_message("Uploading #{source_s} to #{dest_s}", TYPE_INFO, true, $logger)
-                  upl_result = file_manager.upload(source_s, dest_s) do |bytes_copied, total_bytes, x, y|
-                    progress_bar(bytes_copied, total_bytes)
-                    if bytes_copied == total_bytes
-                      puts('                                                             ')
-                      print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
+                  source_expr_i = source_s.index(/(\*\.|\*\*|\.\*|\*)/) || -1
+                  sources = []
+
+                  if source_expr_i == -1
+                    sources.push(source_s)
+                  else
+                    Dir[source_s].each do |filename|
+                      sources.push(filename)
                     end
                   end
-                  print_message('Upload successful!', TYPE_INFO, true, $logger)
+
+                  sources.each do |s|
+                    d = dest_s
+                    if sources.length > 1 || source_expr_i != -1
+                      d = dest_s + "\\" + extract_filename(s)
+                    end
+                    print_message("Uploading #{s} to #{d}", TYPE_INFO, true, $logger)
+                    upl_result = file_manager.upload(s, d) do |bytes_copied, total_bytes, x, y|
+                      progress_bar(bytes_copied, total_bytes)
+                      if bytes_copied == total_bytes
+                        # puts('                                                             ')
+                        print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
+                      end
+                    end
+                    print_message('Upload successful!', TYPE_INFO, true, $logger)
+                  end
                 end
               rescue StandardError => e
                 $logger.info("#{e}: #{e.backtrace}") unless $logger.nil?
