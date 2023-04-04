@@ -641,7 +641,7 @@ class EvilWinRM
                   print_message('Upload successful!', TYPE_INFO, true, $logger)
                 end
               rescue StandardError => e
-                $logger.info("#{e}: #{e.backtrace}")
+                $logger.info("#{e}: #{e.backtrace}") unless $logger.nil?
                 print_message('Upload failed. Check filenames or paths: ' + e.to_s, TYPE_ERROR, true, $logger)
               ensure
                 command = ''
