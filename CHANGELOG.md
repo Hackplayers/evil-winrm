@@ -1,6 +1,8 @@
 ### 3.5
  - Improvements on powershell functions loading
  - Improvements on gemspec file and in ruby code using Rubocop (Thanks noraj)
+ - Fixed issues with download and upload commands
+ - Added support for simple wildcard usage in upload and download commands
 
 ### 3.4
  - Added CI files to be used in Github actions for Docker automated building
