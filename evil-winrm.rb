@@ -74,12 +74,12 @@ module WinRM
             out = _write_file(fd, output)
             index += out.length
             until out.empty?
-                yield index, size if size != -1
-                output = _output_from_file(remote_path, chunk_size, index)
-                return false if output.exitcode >= 1
+              yield index, size if size != -1
+              output = _output_from_file(remote_path, chunk_size, index)
+              return false if output.exitcode >= 1
 
-                out = _write_file(fd, output)
-                index += out.length
+              out = _write_file(fd, output)
+              index += out.length
             end
           rescue EstandardError => err
             @logger.debug("IO Failed: " + err.to_s)
@@ -641,8 +641,8 @@ class EvilWinRM
                   print_message('Upload successful!', TYPE_INFO, true, $logger)
                 end
               rescue StandardError => e
-                # print_message("#{e}: #{e.backtrace}", TYPE_ERROR, true, $logger)
-                print_message('Upload failed. Check filenames or paths', TYPE_ERROR, true, $logger)
+                $logger.info("#{e}: #{e.backtrace}")
+                print_message('Upload failed. Check filenames or paths: ' + e.to_s, TYPE_ERROR, true, $logger)
               ensure
                 command = ''
               end
@@ -953,7 +953,6 @@ class EvilWinRM
   def normalize_path(str)
     Regexp.escape(str.to_s.gsub('\\', '/'))
   end
-
 
   def get_dir_parts(n_path)
     return [n_path, ''] unless (n_path[-1] =~ %r{/$}).nil?
