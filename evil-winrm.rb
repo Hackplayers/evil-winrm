@@ -343,35 +343,38 @@ class EvilWinRM
   end
 
   # Messsage printing
-  def print_message(msg, msg_type = TYPE_INFO, prefix_print = true, log = nil)
-    case msg_type
-    when TYPE_INFO
-      msg_prefix = 'Info: '
-      color = 'blue'
-    when TYPE_WARNING
-      msg_prefix = 'Warning: '
-      color = 'yellow'
-    when TYPE_ERROR
-      msg_prefix = 'Error: '
-      color = 'red'
-    when TYPE_DATA
-      msg_prefix = 'Data: '
+  def print_message(msg, msg_type=TYPE_INFO, prefix_print=true, log=nil)
+    if msg_type == TYPE_INFO then
+      msg_prefix = "Info: "
+      color = "blue"
+    elsif msg_type == TYPE_WARNING then
+      msg_prefix = "Warning: "
+      color = "yellow"
+    elsif msg_type == TYPE_ERROR then
+      msg_prefix = "Error: "
+      color = "red"
+    elsif msg_type == TYPE_DATA then
+      msg_prefix = "Data: "
       color = 'magenta'
-    when TYPE_SUCCESS
+    elsif msg_type == TYPE_SUCCESS then
       color = 'green'
     else
-      msg_prefix = ''
-      color = 'default'
+      msg_prefix = ""
+      color = "default"
     end
 
-    msg_prefix = '' unless prefix_print
-    if $colors_enabled
-      puts(colorize("#{msg_prefix}#{msg}", color))
+    if !prefix_print then
+      msg_prefix = ""
+    end
+    if $colors_enabled then
+      puts(self.colorize("#{msg_prefix}#{msg}", color))
     else
       puts("#{msg_prefix}#{msg}")
     end
 
-    log&.info("#{msg_prefix}#{msg}")
+    if !log.nil?
+      log.info("#{msg_prefix}#{msg}")
+    end
     puts
   end
 
@@ -625,23 +628,24 @@ class EvilWinRM
 
                 unless source_s.match(Dir.pwd) then
                   if source_s.match(/^\.[\\\/]/)
-                    source_s = source_s.gsub(/^\./, "")
+                    source_s = source_s.gsub(/^\.[\\\/]/, "")
                   end
                   source_s = Dir.pwd  + '/' + source_s
                 end
 
+                source_expr_i = source_s.index(/(\*\.|\*\*|\.\*|\*)/) || -1
+
                 if dest_s.empty?
-                  source_expr_i = source_s.index(/(\*\.|\*\*|\.\*|\*)/) || -1
-                  if source_expr_i <= 0
+                  if source_expr_i == -1
                     dest_s = "#{pwd}\\#{extract_filename(source_s)}"
                   else
                     index_last_folder = source_s.rindex(/[\/]/, source_expr_i )
-                    dest_s = "#{extract_filename(source_s[0..index_last_folder])}"
+                    dest_s = pwd
                   end
                 end
 
                 unless dest_s.match(/^[a-zA-Z]:[\\\/]/) then
-                  dest_s = pwd  + '\\' + dest_s.gsub(/^([\\\/]|\.\/)/, '')
+                  dest_s = "#{pwd}\\#{dest_s.gsub(/^([\\\/]|\.\/)/, '')}"
                 end
 
                 if extract_filename(source_s).empty?
@@ -649,7 +653,6 @@ class EvilWinRM
                 else
                   source_s = source_s.gsub("\\", "/") unless Gem.win_platform?
                   dest_s = dest_s.gsub("/", "\\")
-                  source_expr_i = source_s.index(/(\*\.|\*\*|\.\*|\*)/) || -1
                   sources = []
 
                   if source_expr_i == -1
@@ -658,23 +661,23 @@ class EvilWinRM
                     Dir[source_s].each do |filename|
                       sources.push(filename)
                     end
+                    if sources.length > 0
+                      shell.run("mkdir #{dest_s} -ErrorAction SilentlyContinue")
+                    else
+                      raise "There are no files to upload at #{source_s}"
+                    end
                   end
 
-                  sources.each do |s|
-                    d = dest_s
-                    if sources.length > 1 || source_expr_i != -1
-                      d = dest_s + "\\" + extract_filename(s)
+                  print_message("Uploading #{source_s} to #{dest_s}", TYPE_INFO, true, $logger)
+                  upl_result = file_manager.upload(sources, dest_s) do |bytes_copied, total_bytes, x, y|
+                    progress_bar(bytes_copied, total_bytes)
+                    if bytes_copied == total_bytes
+                      puts('                                                             ')
+                      print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
                     end
-                    print_message("Uploading #{s} to #{d}", TYPE_INFO, true, $logger)
-                    upl_result = file_manager.upload(s, d) do |bytes_copied, total_bytes, x, y|
-                      progress_bar(bytes_copied, total_bytes)
-                      if bytes_copied == total_bytes
-                        # puts('                                                             ')
-                        print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
-                      end
-                    end
-                    print_message('Upload successful!', TYPE_INFO, true, $logger)
                   end
+                  puts('                                                             ')
+                  print_message('Upload successful!', TYPE_INFO, true, $logger)
                 end
               rescue StandardError => e
                 $logger.info("#{e}: #{e.backtrace}") unless $logger.nil?
