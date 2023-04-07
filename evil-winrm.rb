@@ -668,15 +668,17 @@ class EvilWinRM
                     end
                   end
 
+                  upload_size = false
                   print_message("Uploading #{source_s} to #{dest_s}", TYPE_INFO, true, $logger)
                   upl_result = file_manager.upload(sources, dest_s) do |bytes_copied, total_bytes, x, y|
                     progress_bar(bytes_copied, total_bytes)
                     if bytes_copied == total_bytes
                       puts('                                                             ')
                       print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
+                      upload_size = true
                     end
                   end
-                  puts('                                                             ')
+                  puts('                                                             ') unless upload_size
                   print_message('Upload successful!', TYPE_INFO, true, $logger)
                 end
               rescue StandardError => e
@@ -709,9 +711,9 @@ class EvilWinRM
                   source = pwd  + '\\' + source.gsub(/^[\\\/]/, '')
                 end
 
+                source_expr_i = source.index(/(\*\.|\*\*|\.\*|\*)/) || -1
                 if dest.empty?
-                  source_expr_i = source.index(/(\*\.|\*\*|\.\*|\*)/) || -1
-                  if source_expr_i <= 0
+                  if source_expr_i == -1
                     dest = "#{extract_filename(source)}"
                   else
                     index_last_folder = source.rindex(/[\\\/]/, source_expr_i)
@@ -733,8 +735,8 @@ class EvilWinRM
                   downloaded = file_manager.download(source, dest, size: size) do |index, size|
                     progress_bar(index, size)
                   end
-                  puts('                                                             ')
                   if downloaded != false
+                    puts('                                                             ')
                     print_message('Download successful!', TYPE_INFO, true, $logger)
                   else
                     print_message('Download failed. Check filenames or paths', TYPE_ERROR, true, $logger)
@@ -848,7 +850,7 @@ class EvilWinRM
 
             output = shell.run(command) do |stdout, stderr|
               stdout&.each_line do |line|
-                $stdout.puts(line.rstrip!)
+                $stdout.puts(line.rstrip)
               end
               $stderr.print(stderr)
             end
