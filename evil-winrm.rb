@@ -120,7 +120,6 @@ class EvilWinRM
     @executables = []
     @functions = []
     @Bypass_4MSI_loaded = false
-    @blank_line = false
     @bypass_amsi_words_random_case = [
       '[Runtime.InteropServices.Marshal]',
       'function ',
@@ -145,11 +144,8 @@ class EvilWinRM
         @completion_enabled = true
       rescue NotImplementedError, NoMethodError => e
         @completion_enabled = false
-           print_message("Remote path completions is disabled due to ruby limitation: #{e}",
-                         TYPE_WARNING)
-           print_message(
-             'For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion', TYPE_DATA
-           )
+           print_message("Remote path completions is disabled due to ruby limitation: #{e}", TYPE_WARNING)
+           print_message('For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion', TYPE_DATA)
       end
     else
       @completion_enabled = false
@@ -190,9 +186,7 @@ class EvilWinRM
       opts.on('-H', '--hash HASH', 'NTHash') do |val|
         if !options[:password].nil? && !val.nil?
           print_header
-          print_message(
-            'You must choose either password or hash auth. Both at the same time are not allowed', TYPE_ERROR
-          )
+          print_message('You must choose either password or hash auth. Both at the same time are not allowed', TYPE_ERROR)
           custom_exit(1, false)
         end
         unless val.match(/^[a-fA-F0-9]{32}$/)
@@ -221,8 +215,8 @@ class EvilWinRM
       end
       opts.on('-h', '--help', 'Display this help message') do
         print_header
-        puts(opts)
         puts
+        puts(opts)
         custom_exit(0, false)
       end
     end
@@ -239,8 +233,8 @@ class EvilWinRM
     rescue OptionParser::InvalidOption, OptionParser::MissingArgument
       print_header
       print_message($ERROR_INFO.to_s, TYPE_ERROR, true, $logger)
-      puts(optparse)
       puts
+      puts(optparse)
       custom_exit(1, false)
     end
 
@@ -281,7 +275,6 @@ class EvilWinRM
 
   # Print script header
   def print_header
-    puts
     print_message("Evil-WinRM shell v#{VERSION}", TYPE_INFO, false)
   end
 
@@ -366,6 +359,9 @@ class EvilWinRM
     if !prefix_print then
       msg_prefix = ""
     end
+
+    puts('                                        ')
+
     if $colors_enabled then
       puts(self.colorize("#{msg_prefix}#{msg}", color))
     else
@@ -375,31 +371,24 @@ class EvilWinRM
     if !log.nil?
       log.info("#{msg_prefix}#{msg}")
     end
-    puts
   end
 
   # Certificates validation
   def check_certs(pub_key, priv_key)
     unless File.file?(pub_key)
-      print_message(
-        "Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger
-      )
+      print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger)
       custom_exit(1)
     end
 
     return if File.file?($priv_key)
-
-    print_message(
-      "Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger
-    )
+    print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger)
     custom_exit(1)
   end
 
   # Directories validation
   def check_directories(path, purpose)
     if path == ''
-      print_message("The directory used for #{purpose} can't be empty. Please set a path", TYPE_ERROR, true,
-                    $logger)
+      print_message("The directory used for #{purpose} can't be empty. Please set a path", TYPE_ERROR, true, $logger)
       custom_exit(1)
     end
 
@@ -466,12 +455,10 @@ class EvilWinRM
     if message_print
       case exit_code
       when 0
-        puts
         print_message("Exiting with code #{exit_code}", TYPE_INFO, true, $logger)
       when 1
         print_message("Exiting with code #{exit_code}", TYPE_ERROR, true, $logger)
       when 130
-        puts
         print_message('Exiting...', TYPE_INFO, true, $logger)
       else
         print_message("Exiting with code #{exit_code}", TYPE_ERROR, true, $logger)
@@ -521,8 +508,7 @@ class EvilWinRM
     end
 
     if !$password.nil? && !$realm.nil?
-      print_message('Password is not needed for Kerberos auth. Ticket will be used', TYPE_WARNING, true,
-                    $logger)
+      print_message('Password is not needed for Kerberos auth. Ticket will be used', TYPE_WARNING, true, $logger)
     end
 
     if $realm.nil? && !$service.nil?
@@ -611,7 +597,6 @@ class EvilWinRM
 
             if command.start_with?('upload')
               if docker_detection
-                puts
                 print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
               end
               begin
@@ -668,17 +653,13 @@ class EvilWinRM
                     end
                   end
 
-                  upload_size = false
                   print_message("Uploading #{source_s} to #{dest_s}", TYPE_INFO, true, $logger)
                   upl_result = file_manager.upload(sources, dest_s) do |bytes_copied, total_bytes, x, y|
                     progress_bar(bytes_copied, total_bytes)
                     if bytes_copied == total_bytes
-                      puts('                                                             ')
                       print_message("#{bytes_copied} bytes of #{total_bytes} bytes copied", TYPE_DATA, true, $logger)
-                      upload_size = true
                     end
                   end
-                  puts('                                                             ') unless upload_size
                   print_message('Upload successful!', TYPE_INFO, true, $logger)
                 end
               rescue StandardError => e
@@ -689,7 +670,6 @@ class EvilWinRM
               end
             elsif command.start_with?('download')
               if docker_detection
-                puts
                 print_message('Remember that in docker environment all local paths should be at /data and it must be mapped correctly as a volume on docker run command', TYPE_WARNING, true, $logger)
               end
               begin
@@ -736,7 +716,6 @@ class EvilWinRM
                     progress_bar(index, size)
                   end
                   if downloaded != false
-                    puts('                                                             ')
                     print_message('Download successful!', TYPE_INFO, true, $logger)
                   else
                     print_message('Download failed. Check filenames or paths', TYPE_ERROR, true, $logger)
@@ -837,9 +816,7 @@ class EvilWinRM
               command = ''
               timeToWait = (time + 20) - Time.now.to_i
               if timeToWait.positive?
-                puts
                 print_message('AV could be still watching for suspicious activity. Waiting for patching...', TYPE_WARNING, true, $logger)
-                @blank_line = true
                 sleep(timeToWait)
               end
               unless @Bypass_4MSI_loaded
@@ -863,11 +840,11 @@ class EvilWinRM
             $logger.info(output_logger)
           end
         rescue Errno::EACCES => e
-          puts("\n\n")
+          puts
           print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR, true, $logger)
           retry
         rescue Interrupt
-          puts("\n\n")
+          puts
           print_message('Press "y" to exit, press any other key to continue', TYPE_WARNING, true, $logger)
           if $stdin.getch.downcase == 'y'
             custom_exit(130)
@@ -939,7 +916,6 @@ class EvilWinRM
   def load_Bypass_4MSI(shell)
     bypass = get_Bypass_4MSI
 
-    puts unless @blank_line
     print_message('Patching 4MSI, please be patient...', TYPE_INFO, true)
     bypass.split('#jump').each do |item|
       output = shell.run(item)
