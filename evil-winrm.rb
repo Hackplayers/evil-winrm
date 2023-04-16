@@ -373,16 +373,24 @@ class EvilWinRM
     end
   end
 
-  # Certificates validation
-  def check_certs(pub_key, priv_key)
-    unless File.file?(pub_key)
-      print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger)
-      custom_exit(1)
-    end
+  # SSL validation
+  def check_ssl(pub_key, priv_key)
+    pub_key = pub_key.to_s
+    priv_key = priv_key.to_s
+    if $ssl
+      unless pub_key.empty? && priv_key.empty? then
+        unless [pub_key, priv_key].all? {|f| File.exists?(f) } then
+          print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exists?(pub_key)
 
-    return if File.file?($priv_key)
-    print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger)
-    custom_exit(1)
+          print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exists?(priv_key)
+
+          custom_exit(1)
+        end
+      end
+      print_message('SSL enabled', TYPE_WARNING)
+    else
+      print_message("Useless cert/s provided, SSL is not enabled", TYPE_WARNING, true, $logger) unless pub_key.empty? && priv_key.empty?
+    end
   end
 
   # Directories validation
@@ -494,13 +502,7 @@ class EvilWinRM
     print_message("Logging Enabled. Log file: #{$filepath}", TYPE_WARNING, true) unless $log.nil?
 
     # SSL checks
-    if !$ssl && ($pub_key || $priv_key)
-      print_message('Useless cert/s provided, SSL is not enabled', TYPE_WARNING, true, $logger)
-    elsif $ssl
-      print_message('SSL enabled', TYPE_WARNING)
-    end
-
-    check_certs($pub_key, $priv_key) if $ssl && ($pub_key || $priv_key)
+    check_ssl($pub_key, $priv_key)
 
     # Kerberos checks
     if !$user.nil? && !$realm.nil?
