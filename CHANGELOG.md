@@ -4,6 +4,7 @@
  - Fixed issues with download and upload commands
  - Added support for simple wildcard usage in upload and download commands
  - Fixed non-controlled error on wrong certificates path when SSL enabled
+ - Docker image improved to support remote path completion
 
 ### 3.4
  - Added CI files to be used in Github actions for Docker automated building
