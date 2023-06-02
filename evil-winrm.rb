@@ -17,6 +17,7 @@ require 'io/console'
 require 'time'
 require 'fileutils'
 require 'logger'
+require 'shellwords'
 
 # Constants
 
@@ -678,6 +679,7 @@ class EvilWinRM
                 dest = ""
                 source = ""
                 paths = get_paths_from_command(command, pwd)
+
                 if paths.length == 2
                   dest = paths.pop
                   source = paths.pop
@@ -939,9 +941,8 @@ class EvilWinRM
   end
 
   def get_paths_from_command(command, pwd)
-    parts = command.split
+    parts = Shellwords.shellsplit(command)
     parts.delete_at(0)
-    parts.each { |p| p.gsub!('"', '') }
     return parts
   end
 
