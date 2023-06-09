@@ -1,3 +1,6 @@
+### 3.6
+ - Improvements of paths parsing
+
 ### 3.5
  - Improvements on powershell functions loading
  - Improvements on gemspec file and in ruby code using Rubocop (Thanks noraj)
