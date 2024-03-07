@@ -461,7 +461,42 @@ After that, you can launch safely your new installed ruby to use it on evil-winr
 It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
 
 ### Logging
-This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions
+
+This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions.
+
+### Known problems. OpenSSL errors
+
+Sometimes, you could face an error like this:
+
+```
+Error: An error of type OpenSSL::Digest::DigestError happened, message is Digest initialization failed: initialization error
+```
+
+The error is caused because the OpenSSL 3.0 version retired some legacy functions like MD4 which are needed to run this tool. There are different existing workarounds to deal with this situation:
+
+ - Update your system to the latest. Likely, this problem was automatically fixed on latest Ruby versions that are using newer OpenSSL versions.
+ - Compile your own Ruby using old OpenSSL 1.x instead of OpenSSL 3.0 or compile it using OpenSSL > 3.0 to avoid the problematic 3.0 version.
+ - The easiest one. Edit your `/etc/ssl/openssl.cnf` config file and be sure the config is like this:
+
+```
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+
+[provider_sect]
+default = default_sect
+legacy = legacy_sect
+
+[default_sect]
+activate = 1
+
+[legacy_sect]
+activate = 1
+```
+
+ - As an alternative for the last workaround, if your system is using LibreSSL instead of OpenSSL or maybe you just don't want to modify your system config file. Create a simple file containing the above content. Any name can be used, for example `evil-tls.conf`. After that, export an environment var to force the system to use it: `export OPENSSL_CONF="/path/to/evil-tls.conf"`. And then launch the tool, the error will disappear.
+
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
@@ -469,10 +504,10 @@ Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.gi
 ## Credits:
 Staff:
 
- - [Cybervaca], (founder). Twitter: [@CyberVaca_]
- - [OscarAkaElvis], Twitter: [@OscarAkaElvis]
- - [Jarilaos], Twitter: [@_Laox]
- - [arale61], Twitter: [@arale61]
+ - [Cybervaca], (founder). Twitter (X): [@CyberVaca_]
+ - [OscarAkaElvis], Twitter (X): [@OscarAkaElvis]
+ - [Jarilaos], Twitter (X): [@_Laox]
+ - [arale61], Twitter (X): [@arale61]
 
 Hat tip to:
 
