@@ -65,7 +65,7 @@ module WinRM
       def download(remote_path, local_path, chunk_size = 1024 * 1024, first = true, size: -1)
         @logger.debug("downloading: #{remote_path} -> #{local_path} #{chunk_size}")
         index = 0
-        return download_dir(remote_path, local_path, chunk_size, false) if remote_path.match?(/(\*\.|\*\*|\.\*|\*)/)
+        return download_dir(remote_path, local_path, chunk_size, false) if remote_path.match?(/(\*\.?|\*\*|\.?\*|\*)/)
         output = _output_from_file(remote_path, chunk_size, index)
         return download_dir(remote_path, local_path, chunk_size, true) if output.exitcode == 2
         return false if output.exitcode >= 1
@@ -90,7 +90,7 @@ module WinRM
       end
 
       def download_dir(remote_path, local_path, chunk_size, first)
-        index_exp = remote_path.index(/(\*\.|\*\*|\.\*|\*)/) || 0
+        index_exp = remote_path.index(/(\*\.?|\*\*|\.?\*|\*)/) || 0
         remote_file_path = remote_path
 
         if index_exp > 0

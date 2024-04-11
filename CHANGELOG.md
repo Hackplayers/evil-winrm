@@ -1,5 +1,6 @@
 ### 3.6
  - Improvements of paths parsing
+ - Fixed bug downloading files without extension
 
 ### 3.5
  - Improvements on powershell functions loading
