@@ -57,6 +57,9 @@ $password = ''
 $url = 'wsman'
 $default_service = 'HTTP'
 $full_logging_path = "#{Dir.home}/evil-winrm-logs"
+# Encoding
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -592,9 +595,11 @@ class EvilWinRM
           until command == 'exit' do
             pwd = shell.run('(get-location).path').output.strip
             if $colors_enabled
-              command = Readline.readline( "#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ", true)
+              print("#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ")
+              command = STDIN.gets.chomp
             else
-              command = Readline.readline("*Evil-WinRM* PS #{pwd}> ", true)
+              print("*Evil-WinRM* PS #{pwd}> ", true)
+              command = STDIN.gets.chomp
             end
             $logger&.info("*Evil-WinRM* PS #{pwd} > #{command}")
 
