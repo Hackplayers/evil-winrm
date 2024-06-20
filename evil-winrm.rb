@@ -379,10 +379,10 @@ class EvilWinRM
     priv_key = priv_key.to_s
     if $ssl
       unless pub_key.empty? && priv_key.empty? then
-        unless [pub_key, priv_key].all? {|f| File.exists?(f) } then
-          print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exists?(pub_key)
+        unless [pub_key, priv_key].all? {|f| File.exist?(f) } then
+          print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exist?(pub_key)
 
-          print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exists?(priv_key)
+          print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exist?(priv_key)
 
           custom_exit(1)
         end
