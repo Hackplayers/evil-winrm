@@ -1,6 +1,7 @@
 ### 3.6
  - Improvements of paths parsing
  - Fixed bug downloading files without extension
+ - Replaced deprecated File.exists by File.exist function to avoid errors on newer Ruby versions
 
 ### 3.5
  - Improvements on powershell functions loading
