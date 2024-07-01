@@ -2,7 +2,7 @@
  - Improvements of paths parsing
  - Fixed bug downloading files without extension
  - Replaced deprecated File.exists by File.exist function to avoid errors on newer Ruby versions
- - Added useragent option
+ - Added user-agent option (Thanks gmkbenjamin)
 
 ### 3.5
  - Improvements on powershell functions loading

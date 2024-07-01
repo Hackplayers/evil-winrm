@@ -38,6 +38,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Optional logging feature
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
+ - Customizable user-agent using legitimate Windows default one
 
 ## Help
 ```
@@ -55,7 +56,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -p, --password PASS              Password
     -H, --hash HASH                  NTHash
     -P, --port PORT                  Remote host port (default 5985)
-    -a, --user-agent                 Specify connection useragent (default Microsoft WinRM Client)
+    -a, --user-agent                 Specify connection user-agent (default Microsoft WinRM Client)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
     -N, --no-rpath-completion        Disable remote path completion
