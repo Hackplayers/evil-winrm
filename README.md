@@ -55,6 +55,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -p, --password PASS              Password
     -H, --hash HASH                  NTHash
     -P, --port PORT                  Remote host port (default 5985)
+    -a, --user-agent                 Specify connection useragent (default Microsoft WinRM Client)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
     -N, --no-rpath-completion        Disable remote path completion
@@ -64,7 +65,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
 Depending of your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.

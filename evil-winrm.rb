@@ -57,6 +57,7 @@ $password = ''
 $url = 'wsman'
 $default_service = 'HTTP'
 $full_logging_path = "#{Dir.home}/evil-winrm-logs"
+$user_agent = "Microsoft WinRM Client"
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -156,12 +157,15 @@ class EvilWinRM
 
   # Arguments
   def arguments
-    options = { port: $port, url: $url, service: $service }
+    options = { port: $port, url: $url, service: $service, user_agent: $user_agent }
     optparse = OptionParser.new do |opts|
-      opts.banner = 'Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]'
+      opts.banner = 'Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a USERAGENT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]'
       opts.on('-S', '--ssl', 'Enable ssl') do |_val|
         $ssl = true
         options[:port] = '5986'
+      end
+      opts.on('-a', '--user-agent USERAGENT', 'Specify connection useragent (default Microsoft WinRM Client)') do |val|
+        options[:user_agent] = val
       end
       opts.on('-c', '--pub-key PUBLIC_KEY_PATH', 'Local path to public key certificate') do |val|
         options[:pub_key] = val
@@ -254,6 +258,7 @@ class EvilWinRM
     $priv_key = options[:priv_key]
     $realm = options[:realm]
     $service = options[:service]
+    $user_agent = options[:user_agent]
     unless $log.nil?
 
       FileUtils.mkdir_p $full_logging_path
@@ -290,7 +295,8 @@ class EvilWinRM
                   no_ssl_peer_verification: true,
                   transport: :ssl,
                   client_cert: $pub_key,
-                  client_key: $priv_key
+                  client_key: $priv_key,
+                  user_agent: $user_agent
                 )
               else
                 WinRM::Connection.new(
@@ -298,7 +304,8 @@ class EvilWinRM
                   user: $user,
                   password: $password,
                   no_ssl_peer_verification: true,
-                  transport: :ssl
+                  transport: :ssl,
+                  user_agent: $user_agent
                 )
               end
 
@@ -309,14 +316,16 @@ class EvilWinRM
         password: '',
         transport: :kerberos,
         realm: $realm,
-        service: $service
+        service: $service,
+        user_agent: $user_agent
       )
     else
       $conn = WinRM::Connection.new(
         endpoint: "http://#{$host}:#{$port}/#{$url}",
         user: $user,
         password: $password,
-        no_ssl_peer_verification: true
+        no_ssl_peer_verification: true,
+        user_agent: $user_agent
       )
     end
   end
