@@ -38,6 +38,8 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Optional logging feature
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
+ - Customizable user-agent using legitimate Windows default one
+ - ETW (Event Tracing for Windows) bypass
 
 ## Help
 ```
@@ -55,6 +57,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -p, --password PASS              Password
     -H, --hash HASH                  NTHash
     -P, --port PORT                  Remote host port (default 5985)
+    -a, --user-agent                 Specify connection user-agent (default Microsoft WinRM Client)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
     -N, --no-rpath-completion        Disable remote path completion
@@ -64,7 +67,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.2`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
 Depending of your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
@@ -461,7 +464,42 @@ After that, you can launch safely your new installed ruby to use it on evil-winr
 It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
 
 ### Logging
-This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions
+
+This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions.
+
+### Known problems. OpenSSL errors
+
+Sometimes, you could face an error like this:
+
+```
+Error: An error of type OpenSSL::Digest::DigestError happened, message is Digest initialization failed: initialization error
+```
+
+The error is caused because the OpenSSL 3.0 version retired some legacy functions like MD4 which are needed to run this tool. There are different existing workarounds to deal with this situation:
+
+ - Update your system to the latest. Likely, this problem was automatically fixed on latest Ruby versions that are using newer OpenSSL versions.
+ - Compile your own Ruby using old OpenSSL 1.x instead of OpenSSL 3.0 or compile it using OpenSSL > 3.0 to avoid the problematic 3.0 version.
+ - The easiest one. Edit your `/etc/ssl/openssl.cnf` config file and be sure the config is like this:
+
+```
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+
+[provider_sect]
+default = default_sect
+legacy = legacy_sect
+
+[default_sect]
+activate = 1
+
+[legacy_sect]
+activate = 1
+```
+
+ - As an alternative for the last workaround, if your system is using LibreSSL instead of OpenSSL or maybe you just don't want to modify your system config file. Create a simple file containing the above content. Any name can be used, for example `evil-tls.conf`. After that, export an environment var to force the system to use it: `export OPENSSL_CONF="/path/to/evil-tls.conf"`. And then launch the tool, the error will disappear.
+
 
 ## Changelog:
 Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
@@ -469,10 +507,10 @@ Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.gi
 ## Credits:
 Staff:
 
- - [Cybervaca], (founder). Twitter: [@CyberVaca_]
- - [OscarAkaElvis], Twitter: [@OscarAkaElvis]
- - [Jarilaos], Twitter: [@_Laox]
- - [arale61], Twitter: [@arale61]
+ - [Cybervaca], (founder). Twitter (X): [@CyberVaca_]
+ - [OscarAkaElvis], Twitter (X): [@OscarAkaElvis]
+ - [Jarilaos], Twitter (X): [@_Laox]
+ - [arale61], Twitter (X): [@arale61]
 
 Hat tip to:
 
@@ -523,8 +561,8 @@ Use it at your own servers and/or with the server owner's permission.
 [@arale61]: https://twitter.com/arale61
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-3.5-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-3.6-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
-[Docker-shield]: https://img.shields.io/docker/cloud/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
+[Docker-shield]: https://img.shields.io/docker/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
 [Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"

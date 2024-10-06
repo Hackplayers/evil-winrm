@@ -1,3 +1,12 @@
+### 3.6
+ - Improvements of paths parsing
+ - Fixed bug downloading files without extension
+ - Replaced deprecated File.exists by File.exist function to avoid errors on newer Ruby versions
+ - Added user-agent option (Thanks gmkbenjamin)
+ - AMSI bypass refactor
+ - ETW bypasss added
+ - Fixed Donut-Loader feature
+
 ### 3.5
  - Improvements on powershell functions loading
  - Improvements on gemspec file and in ruby code using Rubocop (Thanks noraj)

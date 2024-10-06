@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'evil-winrm'
-  spec.version = '3.5'
+  spec.version = '3.6'
   spec.license = 'LGPL-3.0'
   spec.authors = %w[CyberVaca OscarAkaElvis Jarilaos Arale61]
   spec.email = ['oscar.alfonso.diaz@gmail.com']
@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'fileutils', '~> 1.0'
   spec.add_dependency 'logger',    '~> 1.4', '>= 1.4.3'
   spec.add_dependency 'stringio',  '~> 3.0'
-  spec.add_dependency 'winrm',     '~> 2.3', '>= 2.3.2'
+  spec.add_dependency 'winrm',     '~> 2.3', '>= 2.3.7'
   spec.add_dependency 'winrm-fs',  '~> 1.3', '>= 1.3.2'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
