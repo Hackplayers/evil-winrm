@@ -39,6 +39,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Docker support (prebuilt images available at [Dockerhub])
  - Trap capturing to avoid accidental shell exit on Ctrl+C
  - Customizable user-agent using legitimate Windows default one
+ - ETW (Event Tracing for Windows) bypass
 
 ## Help
 ```
