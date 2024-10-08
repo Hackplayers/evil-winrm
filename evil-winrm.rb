@@ -134,7 +134,17 @@ class EvilWinRM
       'Reflection.BindingFlags',
       'NonPublic',
       'Static',
-      'GetValue'
+      'GetValue',
+      'LookupFunc',
+      'AppDomain',
+      'CurrentDomain',
+      'GetAssemblies',
+      'getDelegateType',
+      'DefineConstructor',
+      'Reflection.AssemblyName',
+      'DefineMethod',
+      'GetDelegateForFunctionPointer',
+      'MakeByRefType'
     ]
   end
 
