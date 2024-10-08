@@ -1,3 +1,6 @@
+### 3.7
+ - Hotfix release. Fixed menu command to avoid being detected as malware
+
 ### 3.6
  - Improvements of paths parsing
  - Fixed bug downloading files without extension

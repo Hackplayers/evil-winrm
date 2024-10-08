@@ -22,7 +22,7 @@ require 'shellwords'
 # Constants
 
 # Version
-VERSION = '3.6'
+VERSION = '3.7'
 
 # Msg types
 TYPE_INFO = 0
