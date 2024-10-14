@@ -1,3 +1,8 @@
+### 3.7
+ - Fixed menu command to avoid being detected as malware
+ - Improved EDR evasion randomizing powershell function names and variables
+ - Added progress bar for AMSI bypass
+
 ### 3.6
  - Improvements of paths parsing
  - Fixed bug downloading files without extension
