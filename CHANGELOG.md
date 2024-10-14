@@ -1,5 +1,7 @@
 ### 3.7
- - Hotfix release. Fixed menu command to avoid being detected as malware
+ - Fixed menu command to avoid being detected as malware
+ - Improved EDR evasion randomizing powershell function names and variables
+ - Added progress bar for AMSI bypass
 
 ### 3.6
  - Improvements of paths parsing
