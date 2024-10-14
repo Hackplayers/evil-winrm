@@ -1001,7 +1001,7 @@ class EvilWinRM
       else
         result += "+\"|\"+" + generate_random_type_string(word)
       end
-      
+
     end
     template.gsub!(to_replace, result)
   end
@@ -1077,7 +1077,7 @@ class EvilWinRM
 
   def wait_for(time_to_wait)
     thread = Thread.new do
-        sleep(time_to_wait) 
+        sleep(time_to_wait)
     end
     thread.join
   end
