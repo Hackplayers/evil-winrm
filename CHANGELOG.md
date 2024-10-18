@@ -1,3 +1,6 @@
+### 4.0
+ - Integrated AI
+
 ### 3.7
  - Fixed menu command to avoid being detected as malware
  - Improved EDR evasion randomizing powershell function names and variables
