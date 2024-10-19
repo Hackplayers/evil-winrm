@@ -623,7 +623,7 @@ class EvilWinRM
     arguments
     if has_llm_params
       begin
-        print_message("Evil-WinRm - Experimental - AI LLM support", TYPE_WARNING, true)
+        print_message("Evil-WinRm - Experimental - AI LLM support enabled", TYPE_WARNING, true)
         initialize_llm_connection
         initialize_llm
       rescue StandardError => e
