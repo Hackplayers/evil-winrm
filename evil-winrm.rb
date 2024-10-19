@@ -230,13 +230,28 @@ class EvilWinRM
     }]
     @llm_messages.concat(initial_messages)
     begin
-      @llm.chat(
-        model: $llm_model,
-        messages: @llm_messages
-      ) do | resp |
-        unless resp.chat_completion.nil? || resp.chat_completion.empty?
-          @llm_messages << resp.chat_completion
+      case $llm_provider.to_s.downcase
+      when "ollama"
+        @llm.chat(
+          model: $llm_model,
+          messages: @llm_messages
+        ) do | resp |
+          unless resp.chat_completion.nil? || resp.chat_completion.empty?
+            @llm_messages << resp.chat_completion
+          end
         end
+      when "openai"
+        unless $llm_model.nil? || $llm_model.empty?
+          params = {
+            messages: @llm_messages,
+            model: $llm_model
+          }
+        else
+          params = {
+            messages: @llm_messages
+          }
+        end
+        resp = @llm.chat(params=params)
       end
     rescue StandardError => e
       print_message("Error in initializing LLM: #{e}", TYPE_ERROR, true)
@@ -263,14 +278,34 @@ class EvilWinRM
     print_message("Generating commands...", TYPE_INFO, true)
     command =""
     begin
-      @llm.chat(
-        model: $llm_model,
-        messages: @llm_messages
-      ) do |resp|
+      case $llm_provider.to_s.downcase
+      when "ollama" then
+        @llm.chat(
+          model: $llm_model,
+          messages: @llm_messages
+        ) do |resp|
+          command_part = resp.chat_completion
+          unless command_part.nil? || command_part.empty?
+            print command_part
+            command += command_part
+          end
+        end
+      when "openai"
+        unless $llm_model.nil? || $llm_model.empty?
+          params = {
+            messages: @llm_messages,
+            model: $llm_model
+          }
+        else
+          params = {
+            messages: @llm_messages
+          }
+        end
+        resp = @llm.chat(params)
         command_part = resp.chat_completion
         unless command_part.nil? || command_part.empty?
           print command_part
-          command += command_part
+          command = command_part
         end
       end
     rescue StandardError => e
