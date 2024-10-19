@@ -190,15 +190,15 @@ class EvilWinRM
 
   def initialize_llm
     @llm_messages=[]
-    initial_messages = [{ 
+    initial_messages = [{
       role: 'system',
       content: 'You are an Advanced Powershell Assistant. You process prompts and return powershell commands as a result. Raw Powershell commands that will be executed. Return raw powershell commands and functions for satisfaction of the prompts.'
-    }, { 
+    }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Assistant. You process User prompts and return powershell commands as a result.You return as content one or a set of raw Powershell commands that will be executed. No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
-    }, { 
+      content: 'You are an Advanced Powershell Assistant. You process User prompts and return powershell commands as a result. You return as content one or a set of raw Powershell commands that will be executed. No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
+    }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline characters.'
+      content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline or carriage return characters.'
     }]
     @llm_messages.concat(initial_messages)
     @llm.chat({
@@ -230,7 +230,7 @@ class EvilWinRM
     print_message("Generating commands...", TYPE_INFO, true)
     command =""
     @llm.chat(
-      { 
+      {
         model: $llm_model,
         messages: @llm_messages
       }
@@ -618,7 +618,7 @@ class EvilWinRM
     arguments
     if has_llm_params
       begin
-        print_message("Evil-WinRm - Experimental - LLM support", TYPE_WARNING, true)
+        print_message("Evil-WinRm - Experimental - AI LLM support", TYPE_WARNING, true)
         initialize_llm_connection
         initialize_llm
       rescue StandardError => e
@@ -989,7 +989,7 @@ class EvilWinRM
                 end
               else
                 command = ""
-                print_message('No LLM options provided. Check the --help option while trying to run evil-winrm.', TYPE_WARNING, true, $logger)
+                print_message('No LLM options provided. Check the --help option while trying to run Evil-WinRM', TYPE_WARNING, true, $logger)
               end
             end
 
