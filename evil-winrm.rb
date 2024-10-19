@@ -239,7 +239,7 @@ class EvilWinRM
         end
       end
     rescue StandardError => e
-      print_message("Error in initializing LLM: #{e}")
+      print_message("Error in initializing LLM: #{e}", TYPE_ERROR, true)
     end
   end
 
