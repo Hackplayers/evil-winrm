@@ -285,10 +285,15 @@ class EvilWinRM
       opts.on('-s', '--scripts PS_SCRIPTS_PATH', 'Powershell scripts local path') do |val|
         options[:scripts] = val
       end
-      opts.on('--llm LLM_URL', 'The url of LLM service') do |val|
+      opts.on('--llm-url LLM_URL', 'The URL of the AI LLM service') do |val|
         options[:llm_url] = val
+       if !(options[:llm_url] =~ /\Ahttps?:\/\/(?:[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3})(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?(?:\/[^\s]*)?\z/)
+          print_header
+          print_message('You must enter a valid URL for the AI LLM service', TYPE_ERROR)
+          custom_exit(1, false)
+        end
       end
-      opts.on('--llm-model LLM_MODEL_NAME', 'The LLM model to use') do |val|
+      opts.on('--llm-model LLM_MODEL_NAME', 'The AI LLM model to use') do |val|
         options[:llm_model] = val
       end
       opts.on('--spn SPN_PREFIX', 'SPN prefix for Kerberos auth (default HTTP)') { |val| options[:service] = val }
