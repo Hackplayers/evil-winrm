@@ -21,7 +21,12 @@ require 'shellwords'
 
 # ai...
 require 'ollama-ai'
+require 'openai'
+require "langchain"
 
+
+
+Langchain.logger.level = Logger::ERROR
 # Constants
 
 # Version
@@ -174,39 +179,67 @@ class EvilWinRM
     @executables = []
     @functions = []
     @Bypass_4MSI_loaded = false
+    @llm_messages = []
   end
 
   def has_llm_params
-    return !($llm_url.nil? || $llm_url.empty? || $llm_model.nil? || $llm_model.empty?)
+    if $llm_provider.nil? || $llm_provider.empty?
+      return false
+    end
+    case $llm_provider.to_s.downcase
+      when "ollama"
+        return !($llm_url.nil? || $llm_url.empty? || $llm_model.nil? || $llm_model.empty?)
+      when "openai"
+        return !($llm_api_key.nil? || $llm_api_key.empty?)
+      else
+        return false
+    end
   end
 
   def initialize_llm_connection
-    @llm = Ollama.new(
-      credentials: { address: $llm_url },
-      options: { server_sent_events: true }
-    )
+    case $llm_provider.to_s.downcase
+      when "ollama" then
+        @llm = Langchain::LLM::Ollama.new(
+          url: $llm_url,
+          default_options: {
+            temperature: 0.0,
+            chat_completion_model_name: $llm_model
+          }
+        )
+      when "openai" then
+        @llm = Langchain::LLM::OpenAI.new(
+          api_key: $llm_api_key,
+          llm_options: {}, # Available options: https://github.com/alexrudall/ruby-openai/blob/main/lib/openai/client.rb#L5-L13
+          default_options: {}
+        )
+    end
     @llm_messages = []
   end
 
   def initialize_llm
     @llm_messages=[]
-    initial_messages = [{ 
+    initial_messages = [{
       role: 'system',
       content: 'You are an Advanced Powershell Assistant. You process prompts and return powershell commands as a result. Raw Powershell commands that will be executed. Return raw powershell commands and functions for satisfaction of the prompts.'
-    }, { 
+    }, {
       role: 'system',
       content: 'You are an Advanced Powershell Assistant. You process User prompts and return powershell commands as a result.You return as content one or a set of raw Powershell commands that will be executed. No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
-    }, { 
+    }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline characters.'
+      content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline characters. Adhere strictly to powershell syntax and rules.'
     }]
     @llm_messages.concat(initial_messages)
-    @llm.chat({
-      model: $llm_model,
-      messages: @llm_messages
-    }) do | event, raw|
-      #...
-      @llm_messages << event['message']
+    begin
+      @llm.chat(
+        model: $llm_model,
+        messages: @llm_messages
+      ) do | resp |
+        unless resp.chat_completion.nil? || resp.chat_completion.empty?
+          @llm_messages << resp.chat_completion
+        end
+      end
+    rescue StandardError => e
+      print_message("Error in initializing LLM: #{e}")
     end
   end
 
@@ -229,15 +262,20 @@ class EvilWinRM
     add_message_to_llm_messages(llm_message)
     print_message("Generating commands...", TYPE_INFO, true)
     command =""
-    @llm.chat(
-      { 
+    begin
+      @llm.chat(
         model: $llm_model,
         messages: @llm_messages
-      }
-    ) do |event, raw|
-      command_part = event['message']['content']
-      print command_part
-      command += command_part.chomp
+      ) do |resp|
+        command_part = resp.chat_completion
+        unless command_part.nil? || command_part.empty?
+          print command_part
+          command += command_part
+        end
+      end
+    rescue StandardError => e
+      command = ""
+      print_message("Error in LLM: #{e}", TYPE_ERROR)
     end
     puts
     command
@@ -251,8 +289,8 @@ class EvilWinRM
         @completion_enabled = true
       rescue NotImplementedError, NoMethodError => e
         @completion_enabled = false
-           print_message("Remote path completions is disabled due to ruby limitation: #{e}", TYPE_WARNING)
-           print_message('For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion', TYPE_DATA)
+          print_message("Remote path completions is disabled due to ruby limitation: #{e}", TYPE_WARNING)
+          print_message('For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion', TYPE_DATA)
       end
     else
       @completion_enabled = false
@@ -285,11 +323,17 @@ class EvilWinRM
       opts.on('-s', '--scripts PS_SCRIPTS_PATH', 'Powershell scripts local path') do |val|
         options[:scripts] = val
       end
-      opts.on('--llm LLM_URL', 'The url of LLM service') do |val|
-        options[:llm_url] = val
+      opts.on('--llm LLM_NAME', 'Name for the LLM provider to use (Ollama/OpenAI)') do |val|
+        options[:llm_provider] = val
       end
       opts.on('--llm-model LLM_MODEL_NAME', 'The LLM model to use') do |val|
         options[:llm_model] = val
+      end
+      opts.on('--llm-url LLM_URL', 'The url of LLM service (used by Ollama and other local LLM providers)') do |val|
+        options[:llm_url] = val
+      end
+      opts.on('--llm-api-key LLM_API_KEY', 'The LLM api key to use') do |val|
+        options[:llm_api_key] = val
       end
       opts.on('--spn SPN_PREFIX', 'SPN prefix for Kerberos auth (default HTTP)') { |val| options[:service] = val }
       opts.on('-e', '--executables EXES_PATH', 'C# executables local path') { |val| options[:executables] = val }
@@ -372,6 +416,8 @@ class EvilWinRM
     $user_agent = options[:user_agent]
     $llm_url = options[:llm_url]
     $llm_model = options[:llm_model]
+    $llm_provider = options[:llm_provider]
+    $llm_api_key = options[:llm_api_key]
     unless $log.nil?
 
       FileUtils.mkdir_p $full_logging_path
@@ -452,8 +498,7 @@ class EvilWinRM
 
   # Define colors
   def colorize(text, color = 'default')
-    colors = { 'default' => '38', 'blue' => '34', 'red' => '31', 'yellow' => '1;33', 'magenta' => '35',
-               'green' => '1;32' }
+    colors = { 'default' => '38', 'blue' => '34', 'red' => '31', 'yellow' => '1;33', 'magenta' => '35', 'green' => '1;32' }
     color_code = colors[color]
     "\001\033[0;#{color_code}m\002#{text}\001\033[0m\002"
   end
@@ -974,18 +1019,22 @@ class EvilWinRM
               if has_llm_params
                 prompt = command.split(':')[1]
                 command_generated = process_message_llm(prompt)
-                print_message('Do you want to execute the generated command(s)? [y/N] ', TYPE_WARNING, true, $logger)
-                while true
-                  answer_command = Readline.readline().chomp
-                  case answer_command
-                  when /y/i
-                    command = command_generated
-                    break
-                  else
-                    print_message('Skipping commands generated by AI', TYPE_INFO, true, $logger)
-                    command = ""
-                    break
+                unless command_generated.nil? || command_generated.empty?
+                  print_message('Do you want to execute the generated command(s)? [y/N] ', TYPE_WARNING, true, $logger)
+                  while true
+                    answer_command = Readline.readline().chomp
+                    case answer_command
+                    when /y/i
+                      command = command_generated
+                      break
+                    else
+                      print_message('Skipping commands generated by AI', TYPE_INFO, true, $logger)
+                      command = ""
+                      break
+                    end
                   end
+                else
+                    command = ""
                 end
               else
                 command = ""
