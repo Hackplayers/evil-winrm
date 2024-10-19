@@ -288,10 +288,22 @@ class EvilWinRM
       opts.on('--llm-url LLM_URL', 'The URL of the AI LLM service') do |val|
         options[:llm_url] = val
        if !(options[:llm_url] =~ /\Ahttps?:\/\/(?:[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3})(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?(?:\/[^\s]*)?\z/)
-          print_header
-          print_message('You must enter a valid URL for the AI LLM service', TYPE_ERROR)
-          custom_exit(1, false)
-        end
+         print_header
+         print_message('You must enter a valid URL for the AI LLM service', TYPE_ERROR)
+         custom_exit(1, false)
+       else
+         begin
+            response = Net::HTTP.get_response(URI.parse(options[:llm_url]))
+
+            if !(response.is_a?(Net::HTTPSuccess) && response.body.include?('Ollama is running'))
+              print_message('The provided URL is not providing an AI LLM service', TYPE_ERROR)
+              custom_exit(1, false)
+            end
+         rescue SocketError, Timeout::Error, Errno::ECONNREFUSED => e
+           print_message("Failed to connect to the AI LLM service: #{e.message}", TYPE_ERROR)
+           custom_exit(1, false)
+         end
+       end
       end
       opts.on('--llm-model LLM_MODEL_NAME', 'The AI LLM model to use') do |val|
         options[:llm_model] = val
