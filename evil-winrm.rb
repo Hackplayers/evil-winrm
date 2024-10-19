@@ -226,7 +226,7 @@ class EvilWinRM
       content: 'You are an Advanced Powershell Assistant. You process User prompts and return powershell commands as a result.You return as content one or a set of raw Powershell commands that will be executed. No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
     }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline characters. Adhere strictly to powershell syntax and rules.'
+      content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline characters or carriage return character. Adhere strictly to powershell syntax and rules.'
     }]
     @llm_messages.concat(initial_messages)
     begin
@@ -663,7 +663,7 @@ class EvilWinRM
     arguments
     if has_llm_params
       begin
-        print_message("Evil-WinRm - Experimental - LLM support", TYPE_WARNING, true)
+        print_message("Evil-WinRM - Experimental - AI LLM support enabled", TYPE_WARNING, true)
         initialize_llm_connection
         initialize_llm
       rescue StandardError => e
@@ -1034,11 +1034,11 @@ class EvilWinRM
                     end
                   end
                 else
-                    command = ""
+                  command = ""
                 end
               else
                 command = ""
-                print_message('No LLM options provided. Check the --help option while trying to run evil-winrm.', TYPE_WARNING, true, $logger)
+                print_message('No LLM options provided. Check the --help option while trying to run Evil-WinRM', TYPE_WARNING, true, $logger)
               end
             end
 
