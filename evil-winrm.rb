@@ -19,16 +19,6 @@ require 'fileutils'
 require 'logger'
 require 'shellwords'
 
-# ai...
-require 'ollama-ai'
-require 'openai'
-require 'anthropic'
-require 'mistral-ai'
-require "langchain"
-
-
-
-Langchain.logger.level = Logger::ERROR
 # Constants
 
 # Version
@@ -203,6 +193,8 @@ class EvilWinRM
   def initialize_llm_connection
     case $llm_provider.to_s.downcase
       when "ollama"
+        require 'ollama-ai'
+
         @llm = Langchain::LLM::Ollama.new(
           url: $llm_url,
           default_options: {
@@ -211,14 +203,20 @@ class EvilWinRM
           }
         )
       when "openai"
+        require 'openai'
+
         @llm = Langchain::LLM::OpenAI.new(
           api_key: $llm_api_key,
           llm_options: {}, # Available options: https://github.com/alexrudall/ruby-openai/blob/main/lib/openai/client.rb#L5-L13
           default_options: {}
         )
       when "anthropic"
+        require 'anthropic'
+
         @llm = Langchain::LLM::Anthropic.new(api_key: $llm_api_key)
       when "mistral-ai"
+        require 'mistral-ai'
+
         @llm = Langchain::LLM::MistralAI.new(api_key: $llm_api_key)
     end
     @llm_messages = []
@@ -725,6 +723,10 @@ class EvilWinRM
     arguments
     if has_llm_params
       begin
+        require "langchain"
+
+        Langchain.logger.level = Logger::ERROR
+
         print_message("Evil-WinRM - Experimental - AI LLM support enabled", TYPE_WARNING, true)
         initialize_llm_connection
       rescue StandardError => e
