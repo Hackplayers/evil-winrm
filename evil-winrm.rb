@@ -22,6 +22,8 @@ require 'shellwords'
 # ai...
 require 'ollama-ai'
 require 'openai'
+require 'anthropic'
+require 'mistral-ai'
 require "langchain"
 
 
@@ -189,16 +191,18 @@ class EvilWinRM
     case $llm_provider.to_s.downcase
       when "ollama"
         return !($llm_url.nil? || $llm_url.empty? || $llm_model.nil? || $llm_model.empty?)
-      when "openai"
-        return !($llm_api_key.nil? || $llm_api_key.empty?)
       else
-        return false
+        return !($llm_api_key.nil? || $llm_api_key.empty?)
     end
+  end
+
+  def is_llm_model_defined
+    !($llm_model.nil? || $llm_model.empty?)
   end
 
   def initialize_llm_connection
     case $llm_provider.to_s.downcase
-      when "ollama" then
+      when "ollama"
         @llm = Langchain::LLM::Ollama.new(
           url: $llm_url,
           default_options: {
@@ -206,19 +210,22 @@ class EvilWinRM
             chat_completion_model_name: $llm_model
           }
         )
-      when "openai" then
+      when "openai"
         @llm = Langchain::LLM::OpenAI.new(
           api_key: $llm_api_key,
           llm_options: {}, # Available options: https://github.com/alexrudall/ruby-openai/blob/main/lib/openai/client.rb#L5-L13
           default_options: {}
         )
+      when "anthropic"
+        @llm = Langchain::LLM::Anthropic.new(api_key: $llm_api_key)
+      when "mistral-ai"
+        @llm = Langchain::LLM::MistralAI.new(api_key: $llm_api_key)
     end
     @llm_messages = []
   end
 
-  def initialize_llm
-    @llm_messages=[]
-    initial_messages = [{
+  def get_system_messages
+    [{
       role: 'system',
       content: 'You are an Advanced Powershell Assistant. You process prompts and return powershell commands as a result. Raw Powershell commands that will be executed. Return raw powershell commands and functions for satisfaction of the prompts.'
     }, {
@@ -228,34 +235,10 @@ class EvilWinRM
       role: 'system',
       content: 'You are an Advanced Powershell Assistant. When more than one command is returned use ";" for separating commands and never use newline characters or carriage return character. Adhere strictly to powershell syntax and rules.'
     }]
-    @llm_messages.concat(initial_messages)
-    begin
-      case $llm_provider.to_s.downcase
-      when "ollama"
-        @llm.chat(
-          model: $llm_model,
-          messages: @llm_messages
-        ) do | resp |
-          unless resp.chat_completion.nil? || resp.chat_completion.empty?
-            @llm_messages << resp.chat_completion
-          end
-        end
-      when "openai"
-        unless $llm_model.nil? || $llm_model.empty?
-          params = {
-            messages: @llm_messages,
-            model: $llm_model
-          }
-        else
-          params = {
-            messages: @llm_messages
-          }
-        end
-        resp = @llm.chat(params=params)
-      end
-    rescue StandardError => e
-      print_message("Error in initializing LLM: #{e}", TYPE_ERROR, true)
-    end
+  end
+
+  def system_initial_system_prompt
+    get_system_messages.map {|m| m[:content]}.join(" ")
   end
 
   def get_message_for_llm(prompt_text)
@@ -266,47 +249,91 @@ class EvilWinRM
   end
 
   def add_message_to_llm_messages(message)
+    if @llm_messages.nil? || @llm_messages.empty?
+      @llm_messages.concat(get_system_messages)
+    end
     if @llm_messages.length > 4
-      initialize_llm
+      @llm_messages = []
+      @llm_messages.concat(get_system_messages)
     end
     @llm_messages << message
   end
 
-  def process_message_llm(prompt_text)
+  def process_message_ollama(prompt_text)
     llm_message = get_message_for_llm(prompt_text)
     add_message_to_llm_messages(llm_message)
-    print_message("Generating commands...", TYPE_INFO, true)
     command =""
+    @llm.chat(
+      model: $llm_model,
+      messages: @llm_messages
+    ) do |resp|
+      command_part = resp.chat_completion
+      unless command_part.nil? || command_part.empty?
+        print command_part
+        command += command_part
+      end
+    end
+    command
+  end
+
+  def process_message_llm_standard(prompt_text)
+    llm_message = get_message_for_llm(prompt_text)
+    add_message_to_llm_messages(llm_message)
+    command =""
+    if is_llm_model_defined
+      params = {
+        model: $llm_moodel,
+        messages: @llm_messages
+      }
+    else
+      params = {
+        messages: @llm_messages
+      }
+    end
+    resp = @llm.chat(params)
+    command_part = resp.chat_completion
+    unless command_part.nil? || command_part.empty?
+      print command_part
+      command = command_part
+    end
+    command
+  end
+
+  def process_message_with_system_prompt(prompt_text)
+    # System instructions. Used by Cohere, Anthropic and Google Gemini.
+    system_prompt = system_initial_system_prompt
+    command =""
+    if is_llm_model_defined
+      params = {
+        model: $llm_moodel,
+        messages: [prompt_text],
+        system: system_prompt
+      }
+    else
+      params = {
+        messages: [prompt_text],
+        system: system_prompt
+      }
+    end
+    resp = @llm.chat(params)
+    command_part = resp.chat_completion
+    unless command_part.nil? || command_part.empty?
+      print command_part
+      command = command_part
+    end
+    command
+  end
+
+  def process_message_llm(prompt_text)
+    print_message("Generating commands...", TYPE_INFO, true)
     begin
       case $llm_provider.to_s.downcase
-      when "ollama" then
-        @llm.chat(
-          model: $llm_model,
-          messages: @llm_messages
-        ) do |resp|
-          command_part = resp.chat_completion
-          unless command_part.nil? || command_part.empty?
-            print command_part
-            command += command_part
-          end
-        end
-      when "openai"
-        unless $llm_model.nil? || $llm_model.empty?
-          params = {
-            messages: @llm_messages,
-            model: $llm_model
-          }
-        else
-          params = {
-            messages: @llm_messages
-          }
-        end
-        resp = @llm.chat(params)
-        command_part = resp.chat_completion
-        unless command_part.nil? || command_part.empty?
-          print command_part
-          command = command_part
-        end
+      when "ollama"
+        command = process_message_ollama(prompt_text)
+      when "anthropic" || "cohere" || "gemini"
+        command = process_message_with_system_prompt(prompt_text)
+      else
+        command = process_message_llm_standard(prompt_text)
       end
     rescue StandardError => e
       command = ""
@@ -700,7 +727,6 @@ class EvilWinRM
       begin
         print_message("Evil-WinRM - Experimental - AI LLM support enabled", TYPE_WARNING, true)
         initialize_llm_connection
-        initialize_llm
       rescue StandardError => e
         print_message("LLM connection failed: #{e}", TYPE_ERROR, true)
         custom_exit(130)
