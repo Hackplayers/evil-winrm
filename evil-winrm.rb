@@ -283,7 +283,7 @@ class EvilWinRM
     command =""
     if is_llm_model_defined
       params = {
-        model: $llm_moodel,
+        model: $llm_model,
         messages: @llm_messages
       }
     else
@@ -306,7 +306,7 @@ class EvilWinRM
     command =""
     if is_llm_model_defined
       params = {
-        model: $llm_moodel,
+        model: $llm_model,
         messages: [prompt_text],
         system: system_prompt
       }
