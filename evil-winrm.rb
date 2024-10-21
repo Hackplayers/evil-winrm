@@ -108,6 +108,9 @@ $default_service = 'HTTP'
 $full_logging_path = "#{Dir.home}/evil-winrm-logs"
 $user_agent = "Microsoft WinRM Client"
 
+# Supported AI LLM providers
+$supported_llm_providers = ["ollama", "openai", "anthropic", "mistral-ai"]
+
 # Redefine download method from winrm-fs
 module WinRM
   module FS
@@ -178,8 +181,8 @@ class EvilWinRM
     if $llm_provider.nil? || $llm_provider.empty?
       return false
     end
-    case $llm_provider.to_s.downcase
-      when "ollama"
+    case $llm_provider
+      when $supported_llm_providers[0]
         return !($llm_url.nil? || $llm_url.empty? || $llm_model.nil? || $llm_model.empty?)
       else
         return !($llm_api_key.nil? || $llm_api_key.empty?)
@@ -191,8 +194,8 @@ class EvilWinRM
   end
 
   def initialize_llm_connection
-    case $llm_provider.to_s.downcase
-      when "ollama"
+    case $llm_provider
+      when $supported_llm_providers[0]
         require 'ollama-ai'
 
         @llm = Langchain::LLM::Ollama.new(
@@ -202,7 +205,7 @@ class EvilWinRM
             chat_completion_model_name: $llm_model
           }
         )
-      when "openai"
+      when $supported_llm_providers[1]
         require 'openai'
 
         @llm = Langchain::LLM::OpenAI.new(
@@ -210,11 +213,11 @@ class EvilWinRM
           llm_options: {}, # Available options: https://github.com/alexrudall/ruby-openai/blob/main/lib/openai/client.rb#L5-L13
           default_options: {}
         )
-      when "anthropic"
+      when $supported_llm_providers[2]
         require 'anthropic'
 
         @llm = Langchain::LLM::Anthropic.new(api_key: $llm_api_key)
-      when "mistral-ai"
+      when $supported_llm_providers[3]
         require 'mistral-ai'
 
         @llm = Langchain::LLM::MistralAI.new(api_key: $llm_api_key)
@@ -325,10 +328,10 @@ class EvilWinRM
   def process_message_llm(prompt_text)
     print_message("Generating commands...", TYPE_INFO, true)
     begin
-      case $llm_provider.to_s.downcase
-      when "ollama"
+      case $llm_provider
+      when $supported_llm_providers[0]
         command = process_message_ollama(prompt_text)
-      when "anthropic" || "cohere" || "gemini"
+      when $supported_llm_providers[2] || "cohere" || "gemini" # TODO pending to add these to the initial LLM providers array as they are not supported yet
         command = process_message_with_system_prompt(prompt_text)
       else
         command = process_message_llm_standard(prompt_text)
@@ -383,13 +386,18 @@ class EvilWinRM
       opts.on('-s', '--scripts PS_SCRIPTS_PATH', 'Powershell scripts local path') do |val|
         options[:scripts] = val
       end
-      opts.on('--llm LLM_NAME', 'Name for the LLM provider to use (Ollama/OpenAI)') do |val|
-        options[:llm_provider] = val
+      opts.on('--llm LLM_NAME', 'Name for the LLM provider to use (' + $supported_llm_providers.map(&:capitalize).join(', ') + ')') do |val|
+        options[:llm_provider] = val.downcase
+        if !$supported_llm_providers.map(&:downcase).include?(options[:llm_provider].downcase)
+          print_header
+          print_message('LLM provided is not supported. Supported providers are: ' + $supported_llm_providers.map(&:capitalize).join(', '), TYPE_ERROR)
+          custom_exit(1, false)
+        end
       end
       opts.on('--llm-model LLM_MODEL_NAME', 'The LLM model to use') do |val|
         options[:llm_model] = val
       end
-      opts.on('--llm-url LLM_URL', 'The url of LLM service (used by Ollama and other local LLM providers)') do |val|
+      opts.on('--llm-url LLM_URL', 'The url of LLM service (used by ' + $supported_llm_providers[0].capitalize + ' and other local LLM providers)') do |val|
         options[:llm_url] = val
       end
       opts.on('--llm-api-key LLM_API_KEY', 'The LLM api key to use') do |val|
