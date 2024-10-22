@@ -274,12 +274,13 @@ class EvilWinRM
   end
 
   def add_message_to_llm_messages(message)
+    system_messages = get_system_messages
     if @llm_messages.nil? || @llm_messages.empty?
-      @llm_messages.concat(get_system_messages)
+      @llm_messages.concat(system_messages)
     end
-    if @llm_messages.length > 4
+    if @llm_messages.length > system_messages.length
       @llm_messages = []
-      @llm_messages.concat(get_system_messages)
+      @llm_messages.concat(system_messages)
     end
     @llm_messages << message
   end
