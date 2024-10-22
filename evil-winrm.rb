@@ -363,7 +363,7 @@ class EvilWinRM
       end
     rescue StandardError => e
       command = ""
-      print_message("Error in LLM: #{e}", TYPE_ERROR)
+      print_message("Error in LLM: #{e}.\nPlease refer to the --help option to find the required parameters for using LLM", TYPE_ERROR)
     end
     puts
     command
@@ -762,7 +762,7 @@ class EvilWinRM
         print_message("Evil-WinRM - Experimental - AI LLM support enabled", TYPE_WARNING, true)
         initialize_llm_connection
       rescue StandardError => e
-        print_message("LLM error: #{e}", TYPE_ERROR, true)
+        print_message("LLM error: #{e}.\nPlease refer to the --help option to find the required parameters for using LLM", TYPE_ERROR, true)
         custom_exit(130)
       end
     end
