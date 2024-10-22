@@ -278,7 +278,7 @@ class EvilWinRM
     if @llm_messages.nil? || @llm_messages.empty?
       @llm_messages.concat(system_messages)
     end
-    if @llm_messages.length > system_messages.length+1
+    if @llm_messages.length > system_messages.length
       @llm_messages = []
       @llm_messages.concat(system_messages)
     end
