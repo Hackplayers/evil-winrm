@@ -1,6 +1,6 @@
 ### 4.0
  - Integrated AI LLM support
- - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI and Gemini
+ - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI, AzureOpenAI and Gemini
  - Added AI LLM suggested commands history
  - Added AI LLM debug mode
  - Updated documentation

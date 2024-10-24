@@ -50,7 +50,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
     -s, --scripts PS_SCRIPTS_PATH    PowerShell scripts local path
-        --llm LLM_NAME               Name for the LLM provider to use (Ollama, Openai, Anthropic, Mistral-ai, Gemini)
+        --llm LLM_NAME               Name for the LLM provider to use (Ollama, Openai, Anthropic, Mistral-ai, Gemini, AzureOpenAI)
         --llm-model LLM_MODEL_NAME   The LLM model to use
         --llm-url LLM_URL            The url of LLM service (used by Ollama and other local LLM providers)
         --llm-api-key LLM_API_KEY    The LLM api key to use
@@ -75,7 +75,7 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 
 ## Requirements
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
-If you are planning to use AI LLM features, this ruby gem is mandatory: `langchainrb >= 0.18.0`, and in addition, depending on the LLM to use, more ruby gems will be needed:, `ollama-ai >= 1.3.0`, `anthropic >= 0.3.2`, `mistral-ai >= 1.2.0`
+If you are planning to use AI LLM features, this ruby gem is mandatory: `langchainrb >= 0.18.0`, and in addition, depending on the LLM to use, more ruby gems will be needed:, `ollama-ai >= 1.3.0`, `anthropic >= 0.3.2`, `mistral-ai >= 1.2.0`, `ruby-openai >= 7.3.1`
 Depending on your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
@@ -481,13 +481,19 @@ This feature allow users to leverage AI for generating and suggesting PowerShell
 
 ```
 # Ollama, specifying an LLM model setting the URL of the listener containing the Ollama service
-~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm ollama --llm-url http://192.168.1.2:11434 --llm-model llama3.1:latest
+~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm ollama --llm-url 'http://192.168.1.2:11434' --llm-model llama3.1:latest
 
 # OpenAI, specifying an LLM model and enabling the LLM commands history
-evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm openai --llm-api-key xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx --llm-history --llm-model gpt-4o
+~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm openai --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-history --llm-model gpt-4o
 
-# Gemini, just using it without any special option
-evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm gemini --llm-api-key xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx
+# Gemini, just using it enabling debug mode
+~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm gemini --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-debug
+
+# Mistral-AI, specifying an LLM model
+~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm mistral-ai --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-model open-mistral-7b
+
+# AzureOpenAI, specifying the LLM URL using your Azure subdomain (resource name), your deployment name (like gtp-4o for example) and the date (2024-02-15 for example)
+~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm azureopenai --llm-url 'https://xxxxxx.openai.azure.com/openai/deployments/xxxxxx/chat/completions?api-version=yyyy-mm-dd' --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx'
 ```
 
 Once inside the Evil-WinRM shell with the AI feature enabled, the `ai:` prefix must be used to ask to the AI about command suggestions. An example:
