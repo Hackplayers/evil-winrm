@@ -1,5 +1,5 @@
 ### 3.8
- - TODO
+ - Updated logo
 
 ### 3.7
  - Fixed menu command to avoid being detected as malware
