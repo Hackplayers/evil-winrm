@@ -1,5 +1,9 @@
 ### 4.0
- - Integrated AI
+ - Integrated AI LLM support
+ - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI and Gemini
+ - Added AI LLM suggested commands history
+ - Added AI LLM debug mode
+ - Updated documentation
 
 ### 3.7
  - Fixed menu command to avoid being detected as malware
