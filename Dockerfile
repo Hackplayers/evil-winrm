@@ -61,12 +61,17 @@ COPY . /opt/evil-winrm
 #ENV BRANCH="dev"
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
-# Install Evil-WinRM ruby dependencies
+# Install Evil-WinRM ruby dependencies including AI ruby gems
 RUN gem install winrm \
     winrm-fs \
     stringio \
     logger \
-    fileutils
+    fileutils \
+    langchainrb \
+    ollama-ai \
+    anthropic \
+    mistral-ai \
+    ruby-openai
 
 # Clean and remove useless files
 RUN rm -rf /opt/evil-winrm/resources > /dev/null 2>&1 && \

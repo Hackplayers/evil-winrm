@@ -3,6 +3,8 @@
  - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI, AzureOpenAI and Gemini
  - Added AI LLM suggested commands history
  - Added AI LLM debug mode
+ - Created separated ruby gem for AI version
+ - Created Docker ai tagged autobuild image
  - Updated documentation
 
 ### 3.8
