@@ -44,15 +44,16 @@ protocol, it is using PSRP (PowerShell Remoting Protocol) for initializing runsp
 
 ## Help
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a USERAGENT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
     -S, --ssl                        Enable ssl
+    -a, --user-agent USERAGENT       Specify connection user-agent (default Microsoft WinRM Client)
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
     -s, --scripts PS_SCRIPTS_PATH    PowerShell scripts local path
-        --llm LLM_NAME               Name for the LLM provider to use (Ollama, Openai, Anthropic, Mistral-ai, Gemini, AzureOpenAI)
+        --llm LLM_NAME               Name for the LLM provider to use (Ollama, Openai, Anthropic, Mistral-ai, Gemini, Azureopenai)
         --llm-model LLM_MODEL_NAME   The LLM model to use
-        --llm-url LLM_URL            The url of LLM service (used by Ollama and other local LLM providers)
+        --llm-url LLM_URL            The url of LLM service (used by Ollama and Azureopenai)
         --llm-api-key LLM_API_KEY    The LLM api key to use
         --llm-history                Enable LLM generated commands to be saved in history (default false)
         --llm-debug                  Enable LLM logging (default false)
@@ -64,7 +65,6 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -p, --password PASS              Password
     -H, --hash HASH                  NTHash
     -P, --port PORT                  Remote host port (default 5985)
-    -a, --user-agent                 Specify connection user-agent (default Microsoft WinRM Client)
     -V, --version                    Show version
     -n, --no-colors                  Disable colors
     -N, --no-rpath-completion        Disable remote path completion
