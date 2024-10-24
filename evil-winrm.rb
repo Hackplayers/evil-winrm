@@ -267,13 +267,13 @@ class EvilWinRM
   def get_system_messages
     [{
       role: 'system',
-      content: 'You are an Advanced Powershell Command and expressions Generator. You process user prompts and return powershell commands as a result. Raw Powershell commands that will be executed. Return raw powershell commands and functions for satisfaction of the prompts.'
+      content: 'You are an Advanced Powershell Command and expressions Generator. You process user prompts and return powershell commands as a result. Raw Powershell commands ready for be executed by another tool. Return raw powershell commands and functions for satisfaction of the prompts.'
     }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Command and expressions Generator. You return one or more raw Powershell commands that will be executed. No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
+      content: 'You are an Advanced Powershell Command and expressions Generator. You return one or more raw Powershell commands concatenated with ";". No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
     }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Command and expressions Generator. When more than one command is returned use ";" for separating commands and never use newline characters or carriage return character. Adhere strictly to powershell syntax and rules. Markdown code blocks are not allowed. Never return markdown result only powershell text content is allowed. Never return markdown results like "```powershell" or "```"'
+      content: 'You are an Advanced Powershell Command and expressions Generator. When more than one command is returned use ";" for separating commands and never use newline characters or carriage return character. Adhere strictly to powershell syntax and rules. Markdown code blocks are not allowed. Never return markdown result only powershell text content is allowed. Never return markdown results like "```powershell" or "```" or "`" are not allowed'
     }]
   end
 
@@ -300,13 +300,53 @@ class EvilWinRM
     @llm_messages << message
   end
 
-  def process_message_ollama(prompt_text)
-    llm_message = get_message_for_llm(prompt_text)
-    add_message_to_llm_messages(llm_message)
-    command =""
+  def get_llm_params(prompt_text)
+    params = {}
+    case $llm_provider
+    when SupportedLLMProviders::Gemini
+      gemini_messages = []
+      system_parts = get_system_messages.map {|msg| {"text": msg[:content]} }
+      gemini_messages << {
+        'role': 'model',
+        'parts':system_parts
+      }
+      gemini_messages << {
+        'role': 'user',
+        'parts': [
+          {
+            "text": prompt_text
+          }
+        ]
+      }
+      params[:messages] = gemini_messages
+
+    when SupportedLLMProviders::Anthropic
+      system_prompt = system_initial_system_prompt
+      command =""
+      params = {
+        "message": [prompt_text],
+        "system": system_prompt
+      }
+    else
+      llm_message = get_message_for_llm(prompt_text)
+      add_message_to_llm_messages(llm_message)
+      command =""
+      params = {
+        "messages": @llm_messages
+      }
+    end
+    if is_llm_model_defined
+      params["model"] = $llm_model
+    end
+    return params
+  end
+
+  def process_message_llm_ollama(prompt_text)
+    params = get_llm_params(prompt_text)
+    command = ""
     @llm.chat(
-      model: $llm_model,
-      messages: @llm_messages
+      model: params[:model],
+      messages: params[:messages]
     ) do |resp|
       command_part = resp.chat_completion
       unless command_part.nil? || command_part.empty?
@@ -317,83 +357,10 @@ class EvilWinRM
     command
   end
 
-  def process_message_llm_standard(prompt_text)
-    llm_message = get_message_for_llm(prompt_text)
-    add_message_to_llm_messages(llm_message)
-    command =""
-    if is_llm_model_defined
-      params = {
-        model: $llm_model,
-        messages: @llm_messages
-      }
-    else
-      params = {
-        messages: @llm_messages
-      }
-    end
+  def process_message_llm_sync(prompt_text)
+    params = get_llm_params(prompt_text)
     resp = @llm.chat(params)
-    command_part = resp.chat_completion
-    unless command_part.nil? || command_part.empty?
-      print command_part
-      command = command_part
-    end
-    command
-  end
-
-  def process_message_llm_gemini(prompt_text)
-    llm_message = get_message_for_llm(prompt_text)
-    gemini_messages = []
-    system_parts = get_system_messages.map {|msg| {"text": msg[:content]} }
-    gemini_messages << {
-      'role': 'model',
-      'parts': system_parts
-    }
-    gemini_messages << {
-      'role': 'user',
-      'parts': [
-        {
-          "text": prompt_text
-        }
-      ]
-    }
-    command =""
-
-    if is_llm_model_defined
-      params = {
-        model: $llm_model,
-        messages: gemini_messages
-      }
-    else
-      params = {
-        messages: gemini_messages
-      }
-    end
-    resp = @llm.chat(params)
-    command_part = resp.chat_completion
-    unless command_part.nil? || command_part.empty?
-      print command_part
-      command = command_part
-    end
-    command
-  end
-
-  def process_message_with_system_prompt(prompt_text)
-    # System instructions. Used by some LLM providers such as Cohere, Anthropic and Google Gemini
-    system_prompt = system_initial_system_prompt
-    command =""
-    if is_llm_model_defined
-      params = {
-        model: $llm_model,
-        messages: [prompt_text],
-        system: system_prompt
-      }
-    else
-      params = {
-        messages: [prompt_text],
-        system: system_prompt
-      }
-    end
-    resp = @llm.chat(params)
+    command = ""
     command_part = resp.chat_completion
     unless command_part.nil? || command_part.empty?
       print command_part
@@ -407,19 +374,14 @@ class EvilWinRM
     begin
       case $llm_provider
       when SupportedLLMProviders::Ollama
-        command = process_message_ollama(prompt_text)
-      when SupportedLLMProviders::Anthropic #|| "cohere"
-        command = process_message_with_system_prompt(prompt_text)
-      when SupportedLLMProviders::Gemini
-        command = process_message_llm_gemini(prompt_text)
+        command = process_message_llm_ollama(prompt_text)
       else
-        command = process_message_llm_standard(prompt_text)
+        command = process_message_llm_sync(prompt_text)
       end
     rescue StandardError => e
       command = ""
       print_message("Error in LLM: #{e.class} -> #{e}.\nPlease refer to the --help option to find the required parameters for using LLM", TYPE_ERROR)
     end
-    puts
     command
   end
 
