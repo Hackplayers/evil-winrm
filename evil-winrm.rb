@@ -449,7 +449,7 @@ class EvilWinRM
       opts.on('--llm-model LLM_MODEL_NAME', 'The LLM model to use') do |val|
         options[:llm_model] = val
       end
-      opts.on('--llm-url LLM_URL', "The url of LLM service (used by #{SupportedLLMProviders::Ollama.capitalize} and other local LLM providers)") do |val|
+      opts.on('--llm-url LLM_URL', "The url of LLM service (used by #{SupportedLLMProviders::Ollama.capitalize} and #{SupportedLLMProviders::AzureOpenAI.capitalize})") do |val|
         options[:llm_url] = val
       end
       opts.on('--llm-api-key LLM_API_KEY', 'The LLM api key to use') do |val|
