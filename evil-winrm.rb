@@ -462,7 +462,7 @@ class EvilWinRM
               'Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }') do |val|
         options[:realm] = val.upcase
       end
-      opts.on('-s', '--scripts PS_SCRIPTS_PATH', 'Powershell scripts local path') do |val|
+      opts.on('-s', '--scripts PS_SCRIPTS_PATH', 'PowerShell scripts local path') do |val|
         options[:scripts] = val
       end
       opts.on('--llm LLM_NAME', "Name for the LLM provider to use (#{SupportedLLMProviders::get_description})") do |val|
@@ -471,7 +471,7 @@ class EvilWinRM
       opts.on('--llm-model LLM_MODEL_NAME', 'The LLM model to use') do |val|
         options[:llm_model] = val
       end
-      opts.on('--llm-url LLM_URL', "The url of LLM service (used by #{SupportedLLMProviders::Ollama} and other local LLM providers)") do |val|
+      opts.on('--llm-url LLM_URL', "The url of LLM service (used by #{SupportedLLMProviders::Ollama.capitalize} and other local LLM providers)") do |val|
         options[:llm_url] = val
       end
       opts.on('--llm-api-key LLM_API_KEY', 'The LLM api key to use') do |val|

@@ -16,11 +16,11 @@ phase. The purpose of this program is to provide nice and easy-to-use features f
 purposes by system administrators as well but the most of its features are focused on hacking/pentesting stuff.
 
 It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM
-protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
+protocol, it is using PSRP (PowerShell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
 
 ## Features
  - Compatible to Linux and Windows client systems
- - Load in memory Powershell scripts
+ - Load in memory PowerShell scripts
  - Load in memory dll files bypassing some AVs
  - Load in memory C# (C Sharp) assemblies bypassing some AVs
  - Load x64 payloads generated with awesome [donut] technique
@@ -40,6 +40,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Trap capturing to avoid accidental shell exit on Ctrl+C
  - Customizable user-agent using legitimate Windows default one
  - ETW (Event Tracing for Windows) bypass
+ - Integrated LLM AI support to generate and suggest PowerShell commands
 
 ## Help
 ```
@@ -48,7 +49,13 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
-    -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
+    -s, --scripts PS_SCRIPTS_PATH    PowerShell scripts local path
+        --llm LLM_NAME               Name for the LLM provider to use (Ollama, Openai, Anthropic, Mistral-ai, Gemini)
+        --llm-model LLM_MODEL_NAME   The LLM model to use
+        --llm-url LLM_URL            The url of LLM service (used by Ollama and other local LLM providers)
+        --llm-api-key LLM_API_KEY    The LLM api key to use
+        --llm-history                Enable LLM generated commands to be saved in history (default false)
+        --llm-debug                  Enable LLM logging (default false)
         --spn SPN_PREFIX             SPN prefix for Kerberos auth (default HTTP)
     -e, --executables EXES_PATH      C# executables local path
     -i, --ip IP                      Remote host IP or hostname. FQDN for Kerberos auth (required)
@@ -68,7 +75,8 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p P
 
 ## Requirements
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
-Depending of your installation method (4 availables) the installation of them could be required to be done manually.
+If you are planning to use AI LLM features, this ruby gem is mandatory: `langchainrb >= 0.18.0`, and in addition, depending on the LLM to use, more ruby gems will be needed:, `ollama-ai >= 1.3.0`, `anthropic >= 0.3.2`, `mistral-ai >= 1.2.0`
+Depending on your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
@@ -154,7 +162,7 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
 
 ```
 
-### Load powershell scripts
+### Load powerShell scripts
  - To load a ps1 file you just have to type the name (auto-completion using tab allowed). The scripts must be in the path set at `-s` argument. Type menu again and see the loaded functions. Very large files can take a long time to be loaded.
 
 ```
@@ -466,6 +474,49 @@ It is recommended to use this new installed ruby only to launch evil-winrm. If y
 ### Logging
 
 This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions.
+
+### Integrated AI LLM support
+
+This feature allow users to leverage AI for generating and suggesting PowerShell commands. With the `--llm*` parameters, you can now interact with a powerful LLM (Large Language Model) directly within the application, streamlining command creation and providing intelligent suggestions based on your input. Examples of different command lines to enable the feature:
+
+```
+# Ollama, specifying an LLM model setting the URL of the listener containing the Ollama service
+~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm ollama --llm-url http://192.168.1.2:11434 --llm-model llama3.1:latest
+
+# OpenAI, specifying an LLM model and enabling the LLM commands history
+evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm openai --llm-api-key xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx --llm-history --llm-model gpt-4o
+
+# Gemini, just using it without any special option
+evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm gemini --llm-api-key xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx
+```
+
+Once inside the Evil-WinRM shell with the AI feature enabled, the `ai:` prefix must be used to ask to the AI about command suggestions. An example:
+
+```
+Warning: Evil-WinRM - Experimental - AI LLM support enabled
+
+Evil-WinRM shell v4.0
+
+Info: Establishing connection to remote endpoint
+*Evil-WinRM* PS C:\Users\Administrator\Documents> ai:enumerate local users
+
+Info: Generating commands...
+Get-LocalUser | Select-Object Name, LastLogon, Enabled
+
+Warning: Do you want to execute or [k]eep the generated command/s? [y/N/k]
+y
+
+Name               LastLogon             Enabled
+----               ---------             -------
+Administrator      10/24/2024 1:39:26 PM    True
+DefaultAccount                             False
+Guest                                      False
+WDAGUtilityAccount                         False
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents>
+```
+
+After generating a command with the AI LLM, it will never be executed automatically. You will always be asked whether you want to run it or not, with "no" being the default answer if Enter key is pressed. The "keep" option will not execute the command but will save it in the history, allowing you to review or manually modify it later.
 
 ### Known problems. OpenSSL errors
 
