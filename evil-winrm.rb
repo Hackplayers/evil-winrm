@@ -115,6 +115,7 @@ class SupportedLLMProviders
   Anthropic = "Anthropic".downcase.freeze
   MistralAI = "Mistral-AI".downcase.freeze
   Gemini = "Gemini".downcase.freeze
+  AzureOpenAI = "AzureOpenAI".downcase.freeze
 
   def self.all_providers
     [
@@ -122,7 +123,8 @@ class SupportedLLMProviders
       OpenAI,
       Anthropic,
       MistralAI,
-      Gemini
+      Gemini,
+      AzureOpenAI
     ]
   end
 
@@ -239,6 +241,23 @@ class EvilWinRM
           api_key: $llm_api_key,
           llm_options: llm_options, # Available options: https://github.com/alexrudall/ruby-openai/blob/main/lib/openai/client.rb#L5-L13
           default_options: {}
+        )
+      when SupportedLLMProviders::AzureOpenAI
+        require 'openai'
+
+        azure_url_parts = $llm_url.split('/chat/completions?api-version=')
+        azure_chat_endpoint = azure_url_parts[0]
+        azure_chat_version = azure_url_parts[1]
+
+        llm_options = {}
+        llm_options[:log_errors] = $llm_log_level
+        llm_options[:api_type] = :azure
+        llm_options[:api_version] = azure_chat_version
+
+        @llm = Langchain::LLM::Azure.new(
+          api_key: $llm_api_key,
+          chat_deployment_url: azure_chat_endpoint,
+          llm_options: llm_options # Available options: https://github.com/alexrudall/ruby-openai/blob/main/lib/openai/client.rb#L5-L13
         )
       when SupportedLLMProviders::Anthropic
         require 'anthropic'
