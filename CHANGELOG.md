@@ -5,6 +5,9 @@
  - Added AI LLM debug mode
  - Updated documentation
 
+### 3.8
+ - Updated logo
+
 ### 3.7
  - Fixed menu command to avoid being detected as malware
  - Improved EDR evasion randomizing powershell function names and variables
