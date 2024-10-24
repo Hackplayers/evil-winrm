@@ -199,9 +199,6 @@ class EvilWinRM
         $ssl = true
         options[:port] = '5986'
       end
-      opts.on('-a', '--user-agent USERAGENT', 'Specify connection user-agent (default Microsoft WinRM Client)') do |val|
-        options[:user_agent] = val
-      end
       opts.on('-c', '--pub-key PUBLIC_KEY_PATH', 'Local path to public key certificate') do |val|
         options[:pub_key] = val
       end
@@ -237,6 +234,9 @@ class EvilWinRM
         options[:password] = "00000000000000000000000000000000:#{val}"
       end
       opts.on('-P', '--port PORT', 'Remote host port (default 5985)') { |val| options[:port] = val }
+      opts.on('-a', '--user-agent USERAGENT', 'Specify connection user-agent (default Microsoft WinRM Client)') do |val|
+        options[:user_agent] = val
+      end
       opts.on('-V', '--version', 'Show version') do |_val|
         puts("v#{VERSION}")
         custom_exit(0, false)
