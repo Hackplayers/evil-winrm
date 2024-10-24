@@ -114,13 +114,15 @@ class SupportedLLMProviders
   OpenAI = "OpenAI".downcase.freeze
   Anthropic = "Anthropic".downcase.freeze
   MistralAI = "Mistral-AI".downcase.freeze
+  Gemini = "Gemini".downcase.freeze
 
   def self.all_providers
     [
       Ollama,
       OpenAI,
       Anthropic,
-      MistralAI
+      MistralAI,
+      Gemini
     ]
   end
 
@@ -252,6 +254,10 @@ class EvilWinRM
           api_key: $llm_api_key,
           default_options: {}
         )
+      when SupportedLLMProviders::Gemini
+        require 'net/http'
+
+        @llm = Langchain::LLM::GoogleGemini.new(api_key: $llm_api_key)
       else
         raise "LLM provider #{$llm_provider} not supported. Supported providers are: #{SupportedLLMProviders::get_description}"
     end
@@ -334,8 +340,45 @@ class EvilWinRM
     command
   end
 
+  def process_message_llm_gemini(prompt_text)
+    llm_message = get_message_for_llm(prompt_text)
+    gemini_messages = []
+    system_parts = get_system_messages.map {|msg| {"text": msg[:content]} }
+    gemini_messages << {
+      'role': 'model',
+      'parts': system_parts
+    }
+    gemini_messages << {
+      'role': 'user',
+      'parts': [
+        {
+          "text": prompt_text
+        }
+      ]
+    }
+    command =""
+
+    if is_llm_model_defined
+      params = {
+        model: $llm_model,
+        messages: gemini_messages
+      }
+    else
+      params = {
+        messages: gemini_messages
+      }
+    end
+    resp = @llm.chat(params)
+    command_part = resp.chat_completion
+    unless command_part.nil? || command_part.empty?
+      print command_part
+      command = command_part
+    end
+    command
+  end
+
   def process_message_with_system_prompt(prompt_text)
-    # System instructions. Used by Cohere, Anthropic and Google Gemini.
+    # System instructions. Used by some LLM providers such as Cohere, Anthropic and Google Gemini
     system_prompt = system_initial_system_prompt
     command =""
     if is_llm_model_defined
@@ -365,8 +408,10 @@ class EvilWinRM
       case $llm_provider
       when SupportedLLMProviders::Ollama
         command = process_message_ollama(prompt_text)
-      when SupportedLLMProviders::Anthropic #|| "cohere" || "gemini"
+      when SupportedLLMProviders::Anthropic #|| "cohere"
         command = process_message_with_system_prompt(prompt_text)
+      when SupportedLLMProviders::Gemini
+        command = process_message_llm_gemini(prompt_text)
       else
         command = process_message_llm_standard(prompt_text)
       end
