@@ -286,13 +286,13 @@ class EvilWinRM
   def get_system_messages
     [{
       role: 'system',
-      content: 'You are an Advanced Powershell Command and expressions Generator. You process user prompts and return powershell commands as a result. Raw Powershell commands ready for be executed by another tool. Return raw powershell commands and functions for satisfaction of the prompts.'
+      content: 'You are an Advanced Powershell Command and expressions Generator. You process user prompts and return only raw powershell commands as a result. Raw Powershell commands ready for be executed by another tool chained. Evaluate potential options and return the single best option for the user.'
     }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Command and expressions Generator. You return one or more raw Powershell commands concatenated with ";". No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
+      content: 'You are an Advanced Powershell Command and expressions Generator. You return one or more raw powershell commands related with the user prompt subject according the best option, concatenated with ";". No comments or explanations are allowed. Only commands as response are allowed. If no commands are suitable a powershell comment is returned to the user.'
     }, {
       role: 'system',
-      content: 'You are an Advanced Powershell Command and expressions Generator. When more than one command is returned use ";" for separating commands and never use newline characters or carriage return character. Adhere strictly to powershell syntax and rules. Markdown code blocks are not allowed. Never return markdown result only powershell text content is allowed. Never return markdown results like "```powershell" or "```" or "`" are not allowed'
+      content: 'You are an Advanced Powershell Command and expressions Generator. never use newline characters or carriage return character. Adhere strictly to powershell syntax and rules. Markdown code blocks are not allowed. Never return markdown result only powershell text content is allowed. Never return markdown results like "```powershell" or "```" or "`" are not allowed'
     }]
   end
 
