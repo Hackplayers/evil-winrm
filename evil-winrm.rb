@@ -319,10 +319,8 @@ class EvilWinRM
         ]
       }
       params[:messages] = gemini_messages
-
     when SupportedLLMProviders::Anthropic
       system_prompt = system_initial_system_prompt
-      command =""
       params = {
         "message": [prompt_text],
         "system": system_prompt
@@ -330,7 +328,6 @@ class EvilWinRM
     else
       llm_message = get_message_for_llm(prompt_text)
       add_message_to_llm_messages(llm_message)
-      command =""
       params = {
         "messages": @llm_messages
       }
