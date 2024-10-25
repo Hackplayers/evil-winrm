@@ -99,8 +99,6 @@ RUN apk --no-cache add \
     readline \
     yaml \
     libffi \
-    zlib \
-    openssl \
     libcurl
 
 # Make the ruby and Evil-WinRM paths available
