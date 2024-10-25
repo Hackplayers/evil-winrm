@@ -1,5 +1,6 @@
 ### 3.8
  - Updated logo
+ - Fixed minor problem in Dockerfile, updated to new alpine version
 
 ### 3.7
  - Fixed menu command to avoid being detected as malware

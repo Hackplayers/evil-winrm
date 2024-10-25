@@ -1,8 +1,8 @@
 # Evil-WinRM Dockerfile
 
 # Base image
-FROM alpine:3.14 AS final
-FROM alpine:3.14 AS build
+FROM alpine:3.20.3 AS final
+FROM alpine:3.20.3 AS build
 
 # Credits & Data
 LABEL \
@@ -93,9 +93,7 @@ FROM final
 RUN apk --no-cache add \
     readline \
     yaml \
-    libffi \
-    zlib \
-    openssl
+    libffi
 
 # Make the ruby and Evil-WinRM paths available
 ENV PATH=$PATH:/opt/rubies/ruby-3.2.2/bin:/opt/evil-winrm
