@@ -18,6 +18,12 @@ purposes by system administrators as well but the most of its features are focus
 It is based mainly in the WinRM Ruby library which changed its way to work since its version 2.0. Now instead of using WinRM
 protocol, it is using PSRP (PowerShell Remoting Protocol) for initializing runspace pools as well as creating and processing pipelines.
 
+## This Branch of Evil-WinRM Includes AI Support!
+
+Bear in mind that this version of Evil-WinRM is a special one on which the AI LLM support is enabled!
+To check the instructions about how to use it, check the section [Integrated AI LLM support](#integrated-ai-llm-support)
+If you don't know what you are doing, it is recommended to use the traditional version.
+
 ## Features
  - Compatible to Linux and Windows client systems
  - Load in memory PowerShell scripts
@@ -86,15 +92,15 @@ The remote path completion feature will work only if your ruby was compiled enab
 ## Installation & Quick Start (4 methods)
 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
- - Step 1. Install it (it will install automatically dependencies): ```gem install evil-winrm```
+ - Step 1. Install it (it will install automatically dependencies): ```gem install evil-winrm-ai```
  - Step 2. Ready. Just launch it!
 ```
 evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
 ```
 
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils`
- - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
+ - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils langchainrb ollama-ai anthropic mistral-ai ruby-openai`
+ - Step 2. Clone the repo: `git clone -b ai https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it!
 ```
 cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
@@ -102,7 +108,7 @@ cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySupe
 
 ### Method 3. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
  - Step 1. Install bundler: `gem install bundler`
- - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
+ - Step 2. Clone the repo: `git clone -b ai https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
  - Step 4. Launch it with bundler:
 ```
@@ -418,8 +424,8 @@ Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using
 #!/usr/bin/env zsh
 
 # Uninstall possible current installed versions
-sudo gem uninstall evil-winrm -q
-gem uninstall evil-winrm -q
+sudo gem uninstall evil-winrm-ai -q
+gem uninstall evil-winrm-ai -q
 
 # Install rbenv
 sudo apt install rbenv
