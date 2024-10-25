@@ -15,8 +15,13 @@ Please note we have a [Code of Conduct], please follow it in all your interactio
 5. Any branch will be finally merged to [Dev], there it will be reviewed and tested deeply before being merged to [Master].
 6. All merges from [Dev] to [Master] are a new `evil-winrm` release. This merges to [Master] will be performed and reviewed exclusively by the staff.
 
+## AI branch
+
+This branch is special as it will not be merged with others for now. So any desired change specifically regarding AI LLM features, should be sent directly to [AI] branch.
+
 ---
 
 [Code of Conduct]: CODE_OF_CONDUCT.md
 [Master]: https://github.com/Hackplayers/evil-winrm/tree/master
 [Dev]: https://github.com/Hackplayers/evil-winrm/tree/dev
+[AI]: https://github.com/Hackplayers/evil-winrm/tree/ai
