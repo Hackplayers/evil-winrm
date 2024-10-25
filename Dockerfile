@@ -56,9 +56,8 @@ COPY . /opt/evil-winrm
 
 # Evil-WinRM install method 2 (only one method can be used, other must be commented)
 # Install Evil-WinRM (manual image build)
-# Uncomment git clone line and one of the ENV vars to select branch (master->latest, dev->beta)
-#ENV BRANCH="master"
-#ENV BRANCH="dev"
+# Uncomment git clone line and the ENV var to select ai branch
+#ENV BRANCH="ai"
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
 # Install Evil-WinRM ruby dependencies including AI ruby gems
@@ -88,8 +87,8 @@ RUN rm -rf /opt/evil-winrm/resources > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/bin > /dev/null 2>&1
 
 # Rename script name
-RUN mv /opt/evil-winrm/evil-winrm.rb /opt/evil-winrm/evil-winrm && \
-    chmod +x /opt/evil-winrm/evil-winrm
+RUN mv /opt/evil-winrm/evil-winrm-ai.rb /opt/evil-winrm/evil-winrm-ai && \
+    chmod +x /opt/evil-winrm/evil-winrm-ai
 
 # Base final image
 FROM final
@@ -123,4 +122,4 @@ VOLUME /data
 WORKDIR /data
 
 # Start command (launching Evil-WinRM)
-ENTRYPOINT ["evil-winrm"]
+ENTRYPOINT ["evil-winrm-ai"]
