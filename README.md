@@ -50,7 +50,7 @@ If you don't know what you are doing, it is recommended to use the traditional v
 
 ## Help
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a USERAGENT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
+Usage: evil-winrm-ai -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a USERAGENT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
     -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
@@ -95,7 +95,7 @@ The remote path completion feature will work only if your ruby was compiled enab
  - Step 1. Install it (it will install automatically dependencies): ```gem install evil-winrm-ai```
  - Step 2. Ready. Just launch it!
 ```
-evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
+evil-winrm-ai -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
 ```
 
 ### Method 2. Git clone and install dependencies on your system manually
@@ -103,21 +103,21 @@ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ho
  - Step 2. Clone the repo: `git clone -b ai https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it!
 ```
-cd evil-winrm && ruby evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
+cd evil-winrm && ruby evil-winrm-ai.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
 ```
 
-### Method 3. Using bundler (dependencies will not be installed on your system, just to use evil-winrm)
+### Method 3. Using bundler (dependencies will not be installed on your system, just to use evil-winrm-ai)
  - Step 1. Install bundler: `gem install bundler`
  - Step 2. Clone the repo: `git clone -b ai https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Install dependencies with bundler: `cd evil-winrm && bundle install --path vendor/bundle`
  - Step 4. Launch it with bundler:
 ```
-bundle exec evil-winrm.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
+bundle exec evil-winrm-ai.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
 ```
 ### Method 4. Using Docker
  - Step 1. Launch docker container based on already built (":ai" tagged if you want to enable AI LLM support) image:
 ```
-docker run --rm -ti --name evil-winrm -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/foo/data:/data oscarakaelvis/evil-winrm:ai -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'
+docker run --rm -ti --name evil-winrm-ai -v /home/foo/ps1_scripts:/ps1_scripts -v /home/foo/exe_files:/exe_files -v /home/foo/data:/data oscarakaelvis/evil-winrm:ai -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ps1_scripts/' -e '/exe_files/'
 ```
 
 ## Documentation
@@ -416,9 +416,9 @@ sudo cp /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so /usr/lib/x86_64-linux-g
 sudo cp -f readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so
 ```
 
-#### Method 2 (Install ruby to use it only for evil-winrm using rbenv)
+#### Method 2 (Install ruby to use it only for evil-winrm-ai using rbenv)
 
-Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using zsh. This script will automatize it. You'll need to launch it from the same dir where evil-winrm.rb and Gemfile is located (the evil-winrm created dir after a git clone for example):
+Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using zsh. This script will automatize it. You'll need to launch it from the same dir where evil-winrm-ai.rb and Gemfile is located (the evil-winrm created dir after a git clone for example):
 
 ```
 #!/usr/bin/env zsh
@@ -446,17 +446,17 @@ rbenv local 2.7.1
 gem install bundler
 bundle install
 
-current_evwr="$(pwd)/evil-winrm.rb"
+current_evwr="$(pwd)/evil-winrm-ai.rb"
 
-sudo bash -c "cat << 'EOF' > /usr/bin/evil-winrm
+sudo bash -c "cat << 'EOF' > /usr/bin/evil-winrm-ai
     #!/usr/bin/env sh
     "${current_evwr}" "\$@"
 EOF"
 
-sudo chmod +x /usr/bin/evil-winrm
+sudo chmod +x /usr/bin/evil-winrm-ai
 ```
 
-Then you can safely launch evil-winrm using the new installed ruby with the required readline support from any location.
+Then you can safely launch evil-winrm-ai using the new installed ruby with the required readline support from any location.
 
 #### Method 3 (compile entire ruby)
 
@@ -471,11 +471,11 @@ ruby-install ruby 2.7.3 -- --with-readline-dir=/usr/include/readline
 ```
 Depending of your system it will be installed at `/opt/rubies/ruby-2.7.3` or maybe at ` ~/.rubies/ruby-2.7.3`.
 
-Now just need to install evil-winrm dependencies for that new installed ruby version. The easiest way is to launch command `/opt/rubies/ruby-2.7.3/bin/gem install evil-winrm`. The gem command used must be belonging to the new ruby installation.
+Now just need to install evil-winrm-ai dependencies for that new installed ruby version. The easiest way is to launch command `/opt/rubies/ruby-2.7.3/bin/gem install evil-winrm-ai`. The gem command used must be belonging to the new ruby installation.
 
-After that, you can launch safely your new installed ruby to use it on evil-winrm: `/opt/rubies/ruby-2.7.3/bin/ruby ./evil-winrm.rb -h`
+After that, you can launch safely your new installed ruby to use it on evil-winrm-ai: `/opt/rubies/ruby-2.7.3/bin/ruby ./evil-winrm-ai.rb -h`
 
-It is recommended to use this new installed ruby only to launch evil-winrm. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
+It is recommended to use this new installed ruby only to launch evil-winrm-ai. If you set it up as your default ruby for your system, bear in mind that it has no dependency gems installed. Some ruby based software like Metasploit or others could not start correctly due dependencies problems.
 
 ### Logging
 
@@ -487,19 +487,19 @@ This feature allow users to leverage AI for generating and suggesting PowerShell
 
 ```
 # Ollama, specifying an LLM model setting the URL of the listener containing the Ollama service
-~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm ollama --llm-url 'http://192.168.1.2:11434' --llm-model llama3.1:latest
+~# evil-winrm-ai -u Administrator -p 'MySuperSecr3tPass123!' -i 192.168.1.1 --llm ollama --llm-url 'http://192.168.1.2:11434' --llm-model llama3.1:latest
 
 # OpenAI, specifying an LLM model and enabling the LLM commands history
-~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm openai --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-history --llm-model gpt-4o
+~# evil-winrm-ai -u Administrator -p 'MySuperSecr3tPass123!' -i 192.168.1.1 --llm openai --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-history --llm-model gpt-4o
 
 # Gemini, just using it enabling debug mode
-~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm gemini --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-debug
+~# evil-winrm-ai -u Administrator -p 'MySuperSecr3tPass123!' -i 192.168.1.1 --llm gemini --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-debug
 
 # Mistral-AI, specifying an LLM model
-~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm mistral-ai --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-model open-mistral-7b
+~# evil-winrm-ai -u Administrator -p 'MySuperSecr3tPass123!' -i 192.168.1.1 --llm mistral-ai --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx' --llm-model open-mistral-7b
 
 # AzureOpenAI, specifying the LLM URL using your Azure subdomain (resource name), your deployment name (like gtp-4o for example) and the date (2024-02-15 for example)
-~# evil-winrm -u Administrator -p 'P@ssw0rd!' -i 192.168.1.1 --llm azureopenai --llm-url 'https://xxxxxx.openai.azure.com/openai/deployments/xxxxxx/chat/completions?api-version=yyyy-mm-dd' --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx'
+~# evil-winrm-ai -u Administrator -p 'MySuperSecr3tPass123!' -i 192.168.1.1 --llm azureopenai --llm-url 'https://xxxxxx.openai.azure.com/openai/deployments/xxxxxx/chat/completions?api-version=yyyy-mm-dd' --llm-api-key 'xxXXXxxXXXXXxxxXXXxxxXXXXxxxXXXxxxxXXXXx'
 ```
 
 Once inside the Evil-WinRM shell with the AI feature enabled, the `ai:` prefix must be used to ask to the AI about command suggestions. An example:
@@ -565,7 +565,7 @@ activate = 1
 
 
 ## Changelog:
-Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/CHANGELOG.md)
+Changelog and project changes can be checked here: [CHANGELOG.md](https://raw.githubusercontent.com/Hackplayers/evil-winrm/ai/CHANGELOG.md)
 
 ## Credits:
 Staff:
@@ -624,8 +624,8 @@ Use it at your own servers and/or with the server owner's permission.
 [@arale61]: https://twitter.com/arale61
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-4.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-4.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "AI version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
-[Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
+[Gem-Version]: https://badge.fury.io/rb/evil-winrm-ai.svg "Ruby gem"
