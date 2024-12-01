@@ -84,6 +84,7 @@ RUN apk --no-cache add \
     readline \
     yaml \
     libffi \
+    krb5-libs \
     zlib \
     openssl
 
