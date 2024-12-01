@@ -93,6 +93,7 @@ FROM final
 RUN apk --no-cache add \
     readline \
     yaml \
+    krb5-libs \
     libffi
 
 # Make the ruby and Evil-WinRM paths available
