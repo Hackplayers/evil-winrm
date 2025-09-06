@@ -71,8 +71,8 @@ RUN gem install anthropic \
     ollama-ai \
     ruby-openai \
     stringio \
-	syslog \
-	winrm \
+    syslog \
+    winrm \
     winrm-fs
 
 # Clean and remove useless files
