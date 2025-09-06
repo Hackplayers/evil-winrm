@@ -62,11 +62,14 @@ COPY . /opt/evil-winrm
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
 # Install Evil-WinRM ruby dependencies
-RUN gem install winrm \
-    winrm-fs \
-    stringio \
+RUN gem install benchmark \
+    csv \
+    fileutils \
     logger \
-    fileutils
+    stringio \
+    syslog \
+    winrm \
+    winrm-fs
 
 # Clean and remove useless files
 RUN rm -rf /opt/evil-winrm/resources > /dev/null 2>&1 && \

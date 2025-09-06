@@ -25,9 +25,12 @@ Gem::Specification.new do |spec|
   spec.bindir = "bin"
   spec.executables = ["evil-winrm"]
 
+  spec.add_dependency 'benchmark', '>= 0.1.0'
+  spec.add_dependency 'csv',       '>= 2.4.8'
   spec.add_dependency 'fileutils', '~> 1.0'
   spec.add_dependency 'logger',    '~> 1.4', '>= 1.4.3'
   spec.add_dependency 'stringio',  '~> 3.0'
+  spec.add_dependency 'syslog',    '>= 2.1.0'
   spec.add_dependency 'winrm',     '~> 2.3', '>= 2.3.7'
   spec.add_dependency 'winrm-fs',  '~> 1.3', '>= 1.3.2'
 
