@@ -1,7 +1,8 @@
 ### 3.8
  - Updated logo
  - Fixed minor problem in Dockerfile, updated to new alpine version
- - Addeed dependency to Dockerfile to make Kerberos to work (thanks ArchiMoebius)
+ - Added dependency to Dockerfile to make Kerberos to work (thanks ArchiMoebius)
+ - Added dependencies to Dockerfile and gemspec file to make it compatible with newer Ruby versions
 
 ### 3.7
  - Fixed menu command to avoid being detected as malware
