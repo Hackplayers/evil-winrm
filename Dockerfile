@@ -61,16 +61,19 @@ COPY . /opt/evil-winrm
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
 # Install Evil-WinRM ruby dependencies including AI ruby gems
-RUN gem install winrm \
-    winrm-fs \
-    stringio \
-    logger \
+RUN gem install anthropic \
+    benchmark \
+    csv \
     fileutils \
     langchainrb \
-    ollama-ai \
-    anthropic \
+    logger \
     mistral-ai \
-    ruby-openai
+    ollama-ai \
+    ruby-openai \
+    stringio \
+	syslog \
+	winrm \
+    winrm-fs
 
 # Clean and remove useless files
 RUN rm -rf /opt/evil-winrm/resources > /dev/null 2>&1 && \
@@ -95,10 +98,11 @@ FROM final
 
 # Install readline and other dependencies
 RUN apk --no-cache add \
-    readline \
-    yaml \
+    krb5-libs \
+    libcurl \
     libffi \
-    libcurl
+    readline \
+    yaml
 
 # Make the ruby and Evil-WinRM paths available
 ENV PATH=$PATH:/opt/rubies/ruby-3.2.2/bin:/opt/evil-winrm
