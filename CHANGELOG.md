@@ -12,6 +12,7 @@
  - Fixed minor problem in Dockerfile, updated to new alpine version
  - Added dependency to Dockerfile to make Kerberos to work (thanks ArchiMoebius)
  - Added dependencies to Dockerfile and gemspec file to make it compatible with newer Ruby versions
+ - Fix error using Kerberos and SSL at the same time (thanks birk0)
 
 ### 3.7
  - Fixed menu command to avoid being detected as malware
