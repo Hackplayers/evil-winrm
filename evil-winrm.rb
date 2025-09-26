@@ -334,7 +334,6 @@ class EvilWinRM
                   user_agent: $user_agent
                 )
               elsif !$realm.nil?
-                # try kerberos if realm specified and no cert keys provided
                 WinRM::Connection.new(
                   endpoint: "https://#{$host}:#{$port}/#{$url}",
                   user: '',
