@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'syslog',    '>= 2.1.0'
   spec.add_dependency 'winrm',     '~> 2.3', '>= 2.3.7'
   spec.add_dependency 'winrm-fs',  '~> 1.3', '>= 1.3.2'
+  spec.add_dependency 'csv'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
 
