@@ -630,7 +630,7 @@ class EvilWinRM
               if test_s.count(' ') < 2
                 complete_path(str, shell) || []
               else
-                paths = self.paths(str)
+                self.paths(str) || []
               end
             when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ %r{^"?(\./|\.\./|[a-z,A-Z]:/|~/|/)}))
               result = $COMMANDS.grep(/^#{Regexp.escape(str)}/i) || []
@@ -699,11 +699,10 @@ class EvilWinRM
                   source_s = paths.pop
                 end
 
-                unless source_s.match(Dir.pwd) then
-                  if source_s.match(/^\.[\\\/]/)
-                    source_s = source_s.gsub(/^\.[\\\/]/, "")
-                  end
-                  source_s = Dir.pwd  + '/' + source_s
+                # Resolve relative paths correctly, including paths with ../
+                unless source_s.match(/^[a-zA-Z]:[\\\/]/) || source_s.match(/^\/\//)
+                  # If it's a relative path, expand it from current directory
+                  source_s = File.expand_path(source_s, Dir.pwd)
                 end
 
                 source_expr_i = source_s.index(/(\*\.|\*\*|\.\*|\*)/) || -1
@@ -729,10 +728,17 @@ class EvilWinRM
                   sources = []
 
                   if source_expr_i == -1
+                    # Validate file exists and is readable before upload
+                    unless File.exist?(source_s)
+                      raise "Source file does not exist: #{source_s}"
+                    end
+                    unless File.readable?(source_s)
+                      raise "Source file is not readable: #{source_s}"
+                    end
                     sources.push(source_s)
                   else
                     Dir[source_s].each do |filename|
-                      sources.push(filename)
+                      sources.push(filename) if File.exist?(filename) && File.readable?(filename)
                     end
                     if sources.length > 0
                       shell.run("mkdir #{dest_s} -ErrorAction SilentlyContinue")

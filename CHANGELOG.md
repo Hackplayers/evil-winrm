@@ -1,4 +1,5 @@
 ### 3.8
+ - Fixed autocomplete logic for upload/download commands and improved relative path handling with file validation
  - Added clear/cls commands and Ctrl+L support for clearing screen
  - Updated logo
  - Fixed minor problem in Dockerfile, updated to new alpine version
