@@ -34,7 +34,7 @@ TYPE_SUCCESS = 4
 # Global vars
 
 # Available commands
-$LIST = %w[Bypass-4MSI services upload download menu exit clear cls]
+$LIST = %w[Bypass-4MSI services upload download clear cls menu exit]
 $COMMANDS = $LIST.dup
 $CMDS = $COMMANDS.clone
 $LISTASSEM = [''].sort
@@ -1560,14 +1560,14 @@ class EvilWinRM
       # Check if it's a Kerberos ticket expired error
       error_class = e.class.to_s
       error_message = e.message.to_s
-      
+
       # Detect GSSAPI/GSS errors related to expired tickets
       error_message_lower = error_message.downcase
       is_gss_error = (error_class.include?('GSSAPI') || error_class.include?('GssApi') || error_class.include?('GSS'))
-      is_expired_error = (error_message_lower.include?('ticket expired') || 
+      is_expired_error = (error_message_lower.include?('ticket expired') ||
                           (error_message_lower.include?('expired') && error_message_lower.include?('ticket')) ||
                           (error_message_lower.include?('kerberos') && error_message_lower.include?('expired')))
-      
+
       if is_gss_error && is_expired_error
         print_message("Kerberos ticket expired. The ticket file provided is no longer valid. Please generate a new Kerberos ticket and try again.", TYPE_ERROR, true, $logger)
         # Clean up KRB5CCNAME before exiting
