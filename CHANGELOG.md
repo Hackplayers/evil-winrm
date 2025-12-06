@@ -1,4 +1,5 @@
 ### 3.8
+ - Added persistent command history per user/host (stored in ~/.evil-winrm/history/)
  - Fixed autocomplete logic for upload/download commands and improved relative path handling with file validation
  - Added clear/cls commands and Ctrl+L support for clearing screen
  - Updated logo

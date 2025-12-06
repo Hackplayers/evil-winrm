@@ -550,6 +550,48 @@ class EvilWinRM
     system('clear') || system('cls') || puts("\033[2J\033[H")
   end
 
+  # Get history file path based on host and user
+  def get_history_file_path
+    history_dir = File.join(Dir.home, '.evil-winrm', 'history')
+    FileUtils.mkdir_p(history_dir) unless Dir.exist?(history_dir)
+    
+    # Create a safe filename from host and user
+    safe_host = ($host || 'unknown').gsub(/[^a-zA-Z0-9._-]/, '_')
+    safe_user = ($user || 'unknown').gsub(/[^a-zA-Z0-9._-]/, '_')
+    history_filename = "#{safe_host}_#{safe_user}.hist"
+    
+    File.join(history_dir, history_filename)
+  end
+
+  # Load history from file
+  def load_history
+    history_file = get_history_file_path
+    return unless File.exist?(history_file)
+    
+    begin
+      File.readlines(history_file).each do |line|
+        line = line.chomp
+        Readline::HISTORY.push(line) unless line.empty?
+      end
+    rescue => e
+      # Silently fail if history can't be loaded
+    end
+  end
+
+  # Save command to history file
+  def save_to_history(command)
+    return if command.nil? || command.strip.empty? || command.strip == 'exit'
+    
+    history_file = get_history_file_path
+    begin
+      File.open(history_file, 'a') do |f|
+        f.puts(command)
+      end
+    rescue => e
+      # Silently fail if history can't be saved
+    end
+  end
+
   # Main function
   def main
     arguments
@@ -666,6 +708,9 @@ class EvilWinRM
             # If binding fails, Ctrl+L will work at terminal level
           end
 
+          # Load history for this host/user
+          load_history
+
           until command == 'exit' do
             pwd = shell.run('(get-location).path').output.strip
             if $colors_enabled
@@ -680,6 +725,9 @@ class EvilWinRM
               command = ''
               next
             end
+
+            # Save command to history file
+            save_to_history(command) if command && !command.strip.empty?
 
             $logger&.info("*Evil-WinRM* PS #{pwd} > #{command}")
 

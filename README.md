@@ -468,6 +468,12 @@ It is recommended to use this new installed ruby only to launch evil-winrm. If y
 
 This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions.
 
+### Command History
+
+Evil-WinRM maintains a persistent command history for each host and user combination. The history is stored in `~/.evil-winrm/history/` directory with files named as `{host}_{user}.hist`. 
+
+When you connect to a machine you've previously accessed, you can use the arrow keys (Up/Down) to navigate through your previous commands. The history is automatically saved after each command execution and loaded when you reconnect to the same host with the same user.
+
 ### Known problems. OpenSSL errors
 
 Sometimes, you could face an error like this:
