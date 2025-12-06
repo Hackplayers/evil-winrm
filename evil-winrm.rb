@@ -1076,9 +1076,9 @@ class EvilWinRM
   # Main function
   def main
     arguments
+    print_header
     connection_initialization
     file_manager = WinRM::FS::FileManager.new($conn)
-    print_header
     completion_check
 
     # Log check
