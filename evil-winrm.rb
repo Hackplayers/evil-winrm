@@ -34,7 +34,7 @@ TYPE_SUCCESS = 4
 # Global vars
 
 # Available commands
-$LIST = %w[Bypass-4MSI services upload download menu exit]
+$LIST = %w[Bypass-4MSI services upload download menu exit clear cls]
 $COMMANDS = $LIST.dup
 $CMDS = $COMMANDS.clone
 $LISTASSEM = [''].sort
@@ -545,6 +545,11 @@ class EvilWinRM
     shell.run("(get-item '#{path}').length").output.strip.to_i
   end
 
+  # Clear screen
+  def clear_screen
+    system('clear') || system('cls') || puts("\033[2J\033[H")
+  end
+
   # Main function
   def main
     arguments
@@ -643,6 +648,24 @@ class EvilWinRM
           Readline.completion_case_fold = true
           Readline.completer_quote_characters = '"'
 
+          # Configure Ctrl+L to clear screen
+          if Readline.respond_to?(:emacs_editing_mode)
+            Readline.emacs_editing_mode
+          end
+
+          # Set up Ctrl+L binding to clear screen
+          begin
+            if Readline.respond_to?(:bind_key)
+              Readline.bind_key("\C-l") do
+                clear_screen
+                Readline.refresh_line
+                nil
+              end
+            end
+          rescue => e
+            # If binding fails, Ctrl+L will work at terminal level
+          end
+
           until command == 'exit' do
             pwd = shell.run('(get-location).path').output.strip
             if $colors_enabled
@@ -650,6 +673,14 @@ class EvilWinRM
             else
               command = Readline.readline("*Evil-WinRM* PS #{pwd}> ", true)
             end
+
+            # Handle Ctrl+L if it returns as empty or special character
+            if command == "\f" || (command.nil? && Readline.line_buffer.empty?)
+              clear_screen
+              command = ''
+              next
+            end
+
             $logger&.info("*Evil-WinRM* PS #{pwd} > #{command}")
 
             if command.start_with?('upload')
@@ -892,6 +923,9 @@ class EvilWinRM
                 load_ETW_patch(shell)
                 @Bypass_4MSI_loaded = true
               end
+            elsif command.strip.downcase == 'clear' || command.strip.downcase == 'cls'
+              command = ''
+              clear_screen
             end
 
             output = shell.run(command) do |stdout, stderr|

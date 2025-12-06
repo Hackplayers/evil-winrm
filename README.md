@@ -126,6 +126,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
  - **services**: list all services showing if there your account has permissions over each one. No administrator permissions needed to use this feature.
  - **menu**: load the `Invoke-Binary`, `Dll-Loader` and `Donut-Loader` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
+ - **clear** or **cls**: clear the terminal screen. You can also use `Ctrl+L` keyboard shortcut to clear the screen.
 
 ```
 *Evil-WinRM* PS C:\> menu

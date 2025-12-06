@@ -1,4 +1,5 @@
 ### 3.8
+ - Added clear/cls commands and Ctrl+L support for clearing screen
  - Updated logo
  - Fixed minor problem in Dockerfile, updated to new alpine version
  - Added dependency to Dockerfile to make Kerberos to work (thanks ArchiMoebius)
