@@ -8,6 +8,10 @@
  - Updated documentation
 
 ### 3.8
+ - Added support for Kerberos ticket files (ccache and kirbi formats) with -K parameter, including automatic format detection/conversion and optional reverse DNS lookup for FQDN
+ - Added persistent command history per user/host (stored in ~/.evil-winrm/history/)
+ - Fixed autocomplete logic for upload/download commands and improved relative path handling with file validation
+ - Added clear/cls commands and Ctrl+L support for clearing screen
  - Updated logo
  - Fixed minor problem in Dockerfile, updated to new alpine version
  - Added dependency to Dockerfile to make Kerberos to work (thanks ArchiMoebius)

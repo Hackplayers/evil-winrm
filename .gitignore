@@ -12,3 +12,5 @@ vendor/
 .bundle/
 .vscode/
 *.gem
+*.kirbi
+*.ccache
