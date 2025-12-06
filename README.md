@@ -43,11 +43,12 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
 
 ## Help
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [-K TICKET_FILE] [--spn SPN_PREFIX] [-l]
     -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
+    -K, --ccache TICKET_FILE        Path to Kerberos ticket file (ccache or kirbi format, auto-detected)
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
         --spn SPN_PREFIX             SPN prefix for Kerberos auth (default HTTP)
     -e, --executables EXES_PATH      C# executables local path
@@ -347,16 +348,25 @@ This script contains malicious content and has been blocked by your antivirus so
 ### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
 
- - To generate ticket there are many ways:
+- To generate ticket there are many ways:
 
    * Using [ticketer.py] from impacket
-   * If you get a kirbi ticket using [Rubeus] or [Mimikatz] you have to convert to ccache using [ticket_converter.py]
+   * Using [Rubeus] or [Mimikatz] to get kirbi tickets (automatic conversion to ccache is supported)
 
- - Add ccache ticket. There are 2 ways:
+- Add ticket file. There are 3 ways:
 
-    `export KRB5CCNAME=/foo/var/ticket.ccache`
+   `export KRB5CCNAME=/foo/var/ticket.ccache`
 
-    `cp ticket.ccache /tmp/krb5cc_0`
+   `cp ticket.ccache /tmp/krb5cc_0`
+
+   Use the `-K` parameter: `evil-winrm -i hostname -r DOMAIN.COM -K /path/to/ticket.ccache` or `evil-winrm -i hostname -r DOMAIN.COM -K /path/to/ticket.kirbi`
+
+   When using `-K`, the tool will automatically:
+   - Detect the ticket format (ccache or kirbi)
+   - Convert kirbi tickets to ccache format if needed (requires ticket_converter.py or impacket-ticketConverter)
+   - Validate the file exists and is readable
+   - Set the `KRB5CCNAME` environment variable
+   - Resolve IP addresses to FQDN for better Kerberos compatibility
 
  - Add realm to `/etc/krb5.conf` (for linux). Use of this format is important:
 
