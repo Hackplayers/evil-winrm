@@ -1557,8 +1557,34 @@ class EvilWinRM
       print_message("Check your /etc/hosts file to ensure you can resolve #{$host}", TYPE_ERROR, true, $logger)
       custom_exit(1)
     rescue Exception => e
-      print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR, true, $logger)
-      custom_exit(1)
+      # Check if it's a Kerberos ticket expired error
+      error_class = e.class.to_s
+      error_message = e.message.to_s
+      
+      # Detect GSSAPI/GSS errors related to expired tickets
+      error_message_lower = error_message.downcase
+      is_gss_error = (error_class.include?('GSSAPI') || error_class.include?('GssApi') || error_class.include?('GSS'))
+      is_expired_error = (error_message_lower.include?('ticket expired') || 
+                          (error_message_lower.include?('expired') && error_message_lower.include?('ticket')) ||
+                          (error_message_lower.include?('kerberos') && error_message_lower.include?('expired')))
+      
+      if is_gss_error && is_expired_error
+        print_message("Kerberos ticket expired. The ticket file provided is no longer valid. Please generate a new Kerberos ticket and try again.", TYPE_ERROR, true, $logger)
+        # Clean up KRB5CCNAME before exiting
+        begin
+          if defined?($original_krb5ccname) && !$original_krb5ccname.nil?
+            ENV['KRB5CCNAME'] = $original_krb5ccname
+          elsif defined?($original_krb5ccname) && $original_krb5ccname.nil?
+            ENV.delete('KRB5CCNAME') if ENV.key?('KRB5CCNAME')
+          end
+        rescue => cleanup_error
+          # Ignore cleanup errors
+        end
+        custom_exit(1, false)
+      else
+        print_message("An error of type #{e.class} happened, message is #{e.message}", TYPE_ERROR, true, $logger)
+        custom_exit(1)
+      end
     end
   end
 
