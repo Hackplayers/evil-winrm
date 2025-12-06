@@ -26,7 +26,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Load x64 payloads generated with awesome [donut] technique
  - Dynamic AMSI Bypass to avoid AV signatures
  - Pass-the-hash support
- - Kerberos auth support
+ - Kerberos auth support including also ccache and kirbi files
  - SSL and certificates support
  - Upload and download files showing progress bar
  - List remote machine services without privileges
@@ -151,6 +151,8 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
 [+] services
 [+] upload
 [+] download
+[+] clear
+[+] cls
 [+] menu
 [+] exit
 
@@ -480,7 +482,7 @@ This feature will create files on your $HOME dir saving commands and the outputs
 
 ### Command History
 
-Evil-WinRM maintains a persistent command history for each host and user combination. The history is stored in `~/.evil-winrm/history/` directory with files named as `{host}_{user}.hist`. 
+Evil-WinRM maintains a persistent command history for each host and user combination. The history is stored in `~/.evil-winrm/history/` directory with files named as `{host}_{user}.hist`.
 
 When you connect to a machine you've previously accessed, you can use the arrow keys (Up/Down) to navigate through your previous commands. The history is automatically saved after each command execution and loaded when you reconnect to the same host with the same user.
 
