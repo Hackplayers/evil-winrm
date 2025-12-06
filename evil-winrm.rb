@@ -333,12 +333,12 @@ class EvilWinRM
       print_message('Press "y" to attempt DNS resolution, press any other key to cancel', TYPE_WARNING, true, $logger)
       response = $stdin.getch.downcase
       puts
-      
+
       if response == 'y'
         print_message("Attempting reverse DNS lookup to get FQDN for Kerberos...", TYPE_INFO, true, $logger)
         fqdn = resolve_ip_to_fqdn($host, $realm)
         if fqdn
-          print_message("Resolved IP #{$host} to FQDN: #{fqdn}", TYPE_SUCCESS, true, $logger)
+          print_message("[+] Resolved IP #{$host} to FQDN: #{fqdn}", TYPE_SUCCESS, true, $logger)
           $host = fqdn
         else
           print_message("Could not resolve IP #{$host} to FQDN.", TYPE_ERROR, true, $logger)
@@ -351,30 +351,30 @@ class EvilWinRM
         custom_exit(1, false)
       end
     end
-    
+
     # Configure Kerberos ticket file if provided (supports both ccache and kirbi)
     if !$ccache_file.nil?
       expanded_path = File.expand_path($ccache_file)
-      
+
       unless File.exist?(expanded_path)
         print_message("Kerberos ticket file not found: #{expanded_path}", TYPE_ERROR, true, $logger)
         custom_exit(1, false)
       end
-      
+
       unless File.readable?(expanded_path)
         print_message("Kerberos ticket file is not readable: #{expanded_path}", TYPE_ERROR, true, $logger)
         custom_exit(1, false)
       end
-      
+
       # Check if file is not empty
       if File.size(expanded_path) == 0
         print_message("Kerberos ticket file is empty: #{expanded_path}", TYPE_ERROR, true, $logger)
         custom_exit(1, false)
       end
-      
+
       # Detect ticket type
       ticket_type = detect_ticket_type(expanded_path)
-      
+
       # Convert kirbi to ccache if needed
       if ticket_type == :kirbi
         ccache_path = convert_kirbi_to_ccache(expanded_path)
@@ -384,7 +384,7 @@ class EvilWinRM
         ccache_path = expanded_path
         ticket_type_name = "ccache"
       end
-      
+
       # Only modify ENV if it's not already set to avoid memory issues
       # If user has already set KRB5CCNAME, we'll use that instead
       if ENV['KRB5CCNAME'].nil? || ENV['KRB5CCNAME'].empty?
@@ -398,7 +398,7 @@ class EvilWinRM
         $original_krb5ccname = ENV['KRB5CCNAME']
         print_message("KRB5CCNAME is already set to: #{ENV['KRB5CCNAME']}. Using existing value instead of #{expanded_path}", TYPE_WARNING, true, $logger)
       end
-      
+
       # Register at_exit handler to clean up KRB5CCNAME before any automatic cleanup
       # This prevents malloc errors when the process exits (especially when shell is idle)
       unless $kerberos_cleanup_registered
@@ -417,7 +417,7 @@ class EvilWinRM
         $kerberos_cleanup_registered = true
       end
     end
-    
+
     if $ssl
       $conn = if $pub_key && $priv_key
                 WinRM::Connection.new(
@@ -624,7 +624,7 @@ class EvilWinRM
         print_message("Exiting with code #{exit_code}", TYPE_ERROR, true, $logger)
       end
     end
-    
+
     # Restore KRB5CCNAME environment variable before exiting to avoid memory issues
     begin
       if defined?($original_krb5ccname) && !$original_krb5ccname.nil?
@@ -636,7 +636,7 @@ class EvilWinRM
     rescue => e
       # Ignore errors during cleanup
     end
-    
+
     # Close connection explicitly before exiting to avoid memory issues with Kerberos
     begin
       if defined?($conn) && !$conn.nil?
@@ -646,7 +646,7 @@ class EvilWinRM
     rescue => e
       # Ignore errors during cleanup
     end
-    
+
     # Use exit! to bypass at_exit handlers that might cause memory issues
     # This prevents the malloc error when using Kerberos
     exit!(exit_code)
@@ -676,12 +676,12 @@ class EvilWinRM
   def get_history_file_path
     history_dir = File.join(Dir.home, '.evil-winrm', 'history')
     FileUtils.mkdir_p(history_dir) unless Dir.exist?(history_dir)
-    
+
     # Create a safe filename from host and user
     safe_host = ($host || 'unknown').gsub(/[^a-zA-Z0-9._-]/, '_')
     safe_user = ($user || 'unknown').gsub(/[^a-zA-Z0-9._-]/, '_')
     history_filename = "#{safe_host}_#{safe_user}.hist"
-    
+
     File.join(history_dir, history_filename)
   end
 
@@ -689,7 +689,7 @@ class EvilWinRM
   def load_history
     history_file = get_history_file_path
     return unless File.exist?(history_file)
-    
+
     begin
       File.readlines(history_file).each do |line|
         line = line.chomp
@@ -703,7 +703,7 @@ class EvilWinRM
   # Save command to history file
   def save_to_history(command)
     return if command.nil? || command.strip.empty? || command.strip == 'exit'
-    
+
     history_file = get_history_file_path
     begin
       File.open(history_file, 'a') do |f|
@@ -724,18 +724,18 @@ class EvilWinRM
     begin
       resolver = Resolv::DNS.new
       hostnames = []
-      
+
       # Step 0: Check /etc/hosts for manual entries (highest priority)
       if File.exist?('/etc/hosts') && File.readable?('/etc/hosts')
         begin
           File.readlines('/etc/hosts').each do |line|
             # Skip comments and empty lines
             next if line.strip.empty? || line.strip.start_with?('#')
-            
+
             # Parse line: IP hostname1 hostname2 ...
             parts = line.split
             next if parts.empty?
-            
+
             # Check if first part matches our IP
             if parts[0] == ip_address
               # Add all hostnames from this line
@@ -754,12 +754,12 @@ class EvilWinRM
           # If we can't read /etc/hosts, continue with DNS lookup
         end
       end
-      
+
       # Step 1: Get all PTR records (reverse DNS)
       begin
         ptr_name = Resolv::IPv4.create(ip_address).to_name
         ptr_records = resolver.getresources(ptr_name, Resolv::DNS::Resource::IN::PTR)
-        
+
         ptr_records.each do |ptr|
           hostname = ptr.name.to_s
           if hostname && hostname.include?('.')
@@ -777,7 +777,7 @@ class EvilWinRM
           # Continue to Socket fallback
         end
       end
-      
+
       # If no results from Resolv, try Socket.getnameinfo
       if hostnames.empty?
         begin
@@ -789,15 +789,15 @@ class EvilWinRM
           # All methods failed
         end
       end
-      
+
       # Step 2: If we only got the domain name, try to find the server FQDN
       # Remove duplicates before checking
       hostnames.uniq!
-      
+
       # Only do this if we don't already have a server FQDN (3+ parts) from /etc/hosts or DNS
       has_server_fqdn = hostnames.any? { |h| h.split('.').length >= 3 }
       domain_only = hostnames.find { |h| h.split('.').length == 2 }
-      
+
       # Only attempt forward DNS lookup if:
       # 1. We don't already have a server FQDN
       # 2. We have a domain-only result
@@ -806,7 +806,7 @@ class EvilWinRM
         # Try common DC hostname patterns
         domain = domain_only.downcase
         realm_domain = realm.downcase
-        
+
         # Common DC naming patterns
         candidates = [
           "dc01.#{domain}",
@@ -820,10 +820,10 @@ class EvilWinRM
           "ad01.#{domain}",
           "ad01.#{realm_domain}"
         ]
-        
+
         # Remove duplicates from candidates (in case we already have it)
         candidates.reject! { |c| hostnames.include?(c) }
-        
+
         # Verify each candidate with forward DNS lookup
         candidates.each do |candidate|
           begin
@@ -840,19 +840,19 @@ class EvilWinRM
           end
         end
       end
-      
+
       return nil if hostnames.empty?
-      
+
       # Step 3: Select the best FQDN
       # If we have multiple results, prioritize the server FQDN over domain name
       if hostnames.length > 1
         # Sort by: more dots first, then by length (longer = more specific)
         sorted = hostnames.sort_by { |h| [-h.count('.'), -h.length] }
-        
+
         # Prefer hostnames that look like server names (have a hostname prefix before the domain)
         # e.g., "dc01.futuristic.tech" over "futuristic.tech"
         best = sorted.find { |h| h.split('.').length >= 3 } || sorted.first
-        
+
         print_message("Multiple DNS names found: #{hostnames.join(', ')}. Selected: #{best}", TYPE_INFO, true, $logger)
         return best
       else
@@ -874,11 +874,11 @@ class EvilWinRM
     # Match IPv4 address pattern
     ipv4_pattern = /^(\d{1,3}\.){3}\d{1,3}$/
     return true if str.match?(ipv4_pattern)
-    
+
     # Match IPv6 address pattern (simplified)
     ipv6_pattern = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/
     return true if str.match?(ipv6_pattern)
-    
+
     false
   end
 
@@ -888,7 +888,7 @@ class EvilWinRM
     ext = File.extname(file_path).downcase
     return :kirbi if ext == '.kirbi'
     return :ccache if ext == '.ccache'
-    
+
     # If no extension or unknown, try to detect by file content
     # Kirbi files typically start with specific ASN.1 structures
     # CCache files have a different structure
@@ -911,28 +911,28 @@ class EvilWinRM
   def convert_kirbi_to_ccache(kirbi_path)
     # Validate input file first
     expanded_kirbi = File.expand_path(kirbi_path)
-    
+
     unless File.exist?(expanded_kirbi)
       print_message("Kirbi ticket file not found: #{expanded_kirbi}", TYPE_ERROR, true, $logger)
       custom_exit(1, false)
     end
-    
+
     unless File.readable?(expanded_kirbi)
       print_message("Kirbi ticket file is not readable: #{expanded_kirbi}", TYPE_ERROR, true, $logger)
       custom_exit(1, false)
     end
-    
+
     # Check if file is not empty
     if File.size(expanded_kirbi) == 0
       print_message("Kirbi ticket file is empty: #{expanded_kirbi}", TYPE_ERROR, true, $logger)
       custom_exit(1, false)
     end
-    
+
     # Generate output path (same directory, change extension)
     output_dir = File.dirname(expanded_kirbi)
     output_name = File.basename(expanded_kirbi, '.kirbi') + '.ccache'
     ccache_path = File.join(output_dir, output_name)
-    
+
     # Try to find ticket converter (multiple possible names)
     converter_names = [
       'ticket_converter.py',
@@ -941,15 +941,15 @@ class EvilWinRM
       'ticketConverter.py',
       'ticketConverter'
     ]
-    
+
     converter_paths = []
-    
+
     # Check in PATH for each name
     converter_names.each do |name|
       cmd = `which #{name} 2>/dev/null`.strip
       converter_paths << cmd unless cmd.empty?
     end
-    
+
     # Also check common installation paths
     converter_names.each do |name|
       converter_paths << name  # Current directory
@@ -958,11 +958,11 @@ class EvilWinRM
       converter_paths << File.join(Dir.home, '.local', 'bin', name)
       converter_paths << File.join(Dir.home, name)
     end
-    
+
     # Remove duplicates and empty strings
     converter_paths.uniq!
     converter_paths.reject!(&:empty?)
-    
+
     converter_found = nil
     converter_paths.each do |path|
       if File.exist?(path) && File.executable?(path)
@@ -970,13 +970,13 @@ class EvilWinRM
         break
       end
     end
-    
+
     unless converter_found
       print_message("Ticket converter not found. Please install one of: ticket_converter.py, impacket-ticketConverter, or impacket-ticketConverter.py.", TYPE_ERROR, true, $logger)
       print_message("Sources: https://github.com/Zer1t0/ticket_converter or https://github.com/SecureAuthCorp/impacket", TYPE_INFO, true, $logger)
       custom_exit(1, false)
     end
-    
+
     # Check if it's a Python script or shell script
     is_python = false
     begin
@@ -999,7 +999,7 @@ class EvilWinRM
       # If we can't read, check extension or assume it's executable and try directly
       is_python = (File.extname(converter_found) == '.py')
     end
-    
+
     if is_python
       # It's a Python script, need to run with python/python3
       python_cmd = nil
@@ -1009,26 +1009,26 @@ class EvilWinRM
           break
         end
       end
-      
+
       unless python_cmd
         print_message("Python not found. Please install Python 3 to convert kirbi tickets.", TYPE_ERROR, true, $logger)
         custom_exit(1, false)
       end
-      
+
       cmd = "#{python_cmd} #{converter_found} #{expanded_kirbi} #{ccache_path} 2>&1"
     else
       # It's a shell script or executable, run it directly
       cmd = "#{converter_found} #{expanded_kirbi} #{ccache_path} 2>&1"
     end
-    
+
     # Run conversion
     print_message("Converting kirbi ticket to ccache format...", TYPE_INFO, true, $logger)
     result = `#{cmd}`
-    
+
     unless $?.success?
       # Parse error output to provide a clearer message
       error_lines = result.split("\n")
-      
+
       # Check for common Python errors
       if result.include?('ModuleNotFoundError') || result.include?('No module named')
         module_match = result.match(/No module named ['"]([^'"]+)['"]/)
@@ -1054,22 +1054,22 @@ class EvilWinRM
         error_msg = error_lines.reverse.find { |line| !line.strip.empty? && !line.strip.match?(/^Traceback|File "/) }
         error_msg ||= error_lines.last || result.strip
         error_msg = error_msg.strip
-        
+
         # Limit error message length
         error_msg = error_msg[0..200] + '...' if error_msg.length > 200
-        
+
         print_message("Failed to convert kirbi to ccache using #{File.basename(converter_found)}.", TYPE_ERROR, true, $logger)
         print_message("Error: #{error_msg}", TYPE_ERROR, true, $logger)
         custom_exit(1, false)
       end
     end
-    
+
     unless File.exist?(ccache_path)
       print_message("Conversion completed but output file not found: #{ccache_path}", TYPE_ERROR, true, $logger)
       custom_exit(1, false)
     end
-    
-    print_message("Successfully converted to: #{ccache_path}", TYPE_SUCCESS, true, $logger)
+
+    print_message("[+] Successfully converted to: #{ccache_path}", TYPE_SUCCESS, true, $logger)
     ccache_path
   end
 
@@ -1204,7 +1204,7 @@ class EvilWinRM
             rescue => e
               # Handle connection/timeout errors when getting pwd
               error_msg = e.message.to_s.downcase
-              if error_msg.include?('timeout') || error_msg.include?('connection') || 
+              if error_msg.include?('timeout') || error_msg.include?('connection') ||
                  error_msg.include?('closed') || error_msg.include?('broken') ||
                  e.class.to_s.include?('Timeout') || e.class.to_s.include?('Connection')
                 puts
@@ -1226,7 +1226,7 @@ class EvilWinRM
                 pwd = "C:\\"
               end
             end
-            
+
             if $colors_enabled
               command = Readline.readline( "#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ", true)
             else
@@ -1513,7 +1513,7 @@ class EvilWinRM
             rescue => e
               # Handle connection/timeout errors gracefully
               error_msg = e.message.to_s.downcase
-              if error_msg.include?('timeout') || error_msg.include?('connection') || 
+              if error_msg.include?('timeout') || error_msg.include?('connection') ||
                  error_msg.include?('closed') || error_msg.include?('broken') ||
                  e.class.to_s.include?('Timeout') || e.class.to_s.include?('Connection')
                 puts
