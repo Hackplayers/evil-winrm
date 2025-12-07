@@ -1,7 +1,7 @@
-# Evil-WinRM [![Version-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE) [![Docker-shield]](https://hub.docker.com/r/oscarakaelvis/evil-winrm)
+# Evil-WinRM [![Version-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm) [![License-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE) [![Docker-shield]](https://hub.docker.com/r/oscarakaelvis/evil-winrm/)
 The ultimate WinRM shell for hacking/pentesting
 
-![Banner](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/resources/evil-winrm_logo.png)
+![Banner](https://raw.githubusercontent.com/Hackplayers/evil-winrm/dev/resources/evil-winrm_logo.png)
 
 ## Description & Purpose
 This shell is the ultimate WinRM shell for hacking/pentesting.
@@ -26,7 +26,7 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
  - Load x64 payloads generated with awesome [donut] technique
  - Dynamic AMSI Bypass to avoid AV signatures
  - Pass-the-hash support
- - Kerberos auth support
+ - Kerberos auth support including also ccache and kirbi files
  - SSL and certificates support
  - Upload and download files showing progress bar
  - List remote machine services without privileges
@@ -43,11 +43,12 @@ protocol, it is using PSRP (Powershell Remoting Protocol) for initializing runsp
 
 ## Help
 ```
-Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [--spn SPN_PREFIX] [-l]
+Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a USERAGENT] [-p PASS] [-H HASH] [-U URL] [-S] [-c PUBLIC_KEY_PATH ] [-k PRIVATE_KEY_PATH ] [-r REALM] [-K TICKET_FILE] [--spn SPN_PREFIX] [-l]
     -S, --ssl                        Enable ssl
     -c, --pub-key PUBLIC_KEY_PATH    Local path to public key certificate
     -k, --priv-key PRIVATE_KEY_PATH  Local path to private key certificate
     -r, --realm DOMAIN               Kerberos auth, it has to be set also in /etc/krb5.conf file using this format -> CONTOSO.COM = { kdc = fooserver.contoso.com }
+    -K, --ccache TICKET_FILE        Path to Kerberos ticket file (ccache or kirbi format, auto-detected)
     -s, --scripts PS_SCRIPTS_PATH    Powershell scripts local path
         --spn SPN_PREFIX             SPN prefix for Kerberos auth (default HTTP)
     -e, --executables EXES_PATH      C# executables local path
@@ -126,6 +127,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
 
  - **services**: list all services showing if there your account has permissions over each one. No administrator permissions needed to use this feature.
  - **menu**: load the `Invoke-Binary`, `Dll-Loader` and `Donut-Loader` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
+ - **clear** or **cls**: clear the terminal screen. You can also use `Ctrl+L` keyboard shortcut to clear the screen.
 
 ```
 *Evil-WinRM* PS C:\> menu
@@ -149,6 +151,8 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
 [+] services
 [+] upload
 [+] download
+[+] clear
+[+] cls
 [+] menu
 [+] exit
 
@@ -346,16 +350,25 @@ This script contains malicious content and has been blocked by your antivirus so
 ### Kerberos
  - First you have to sync date with the DC: `rdate -n <dc_ip>`
 
- - To generate ticket there are many ways:
+- To generate ticket there are many ways:
 
    * Using [ticketer.py] from impacket
-   * If you get a kirbi ticket using [Rubeus] or [Mimikatz] you have to convert to ccache using [ticket_converter.py]
+   * Using [Rubeus] or [Mimikatz] to get kirbi tickets (automatic conversion to ccache is supported)
 
- - Add ccache ticket. There are 2 ways:
+- Add ticket file. There are 3 ways:
 
-    `export KRB5CCNAME=/foo/var/ticket.ccache`
+   `export KRB5CCNAME=/foo/var/ticket.ccache`
 
-    `cp ticket.ccache /tmp/krb5cc_0`
+   `cp ticket.ccache /tmp/krb5cc_0`
+
+   Use the `-K` parameter: `evil-winrm -i hostname -r DOMAIN.COM -K /path/to/ticket.ccache` or `evil-winrm -i hostname -r DOMAIN.COM -K /path/to/ticket.kirbi`
+
+   When using `-K`, the tool will automatically:
+   - Detect the ticket format (ccache or kirbi)
+   - Convert kirbi tickets to ccache format if needed (requires ticket_converter.py or impacket-ticketConverter)
+   - Validate the file exists and is readable
+   - Set the `KRB5CCNAME` environment variable
+   - Resolve IP addresses to FQDN for better Kerberos compatibility
 
  - Add realm to `/etc/krb5.conf` (for linux). Use of this format is important:
 
@@ -467,6 +480,12 @@ It is recommended to use this new installed ruby only to launch evil-winrm. If y
 
 This feature will create files on your $HOME dir saving commands and the outputs of the WinRM sessions.
 
+### Command History
+
+Evil-WinRM maintains a persistent command history for each host and user combination. The history is stored in `~/.evil-winrm/history/` directory with files named as `{host}_{user}.hist`.
+
+When you connect to a machine you've previously accessed, you can use the arrow keys (Up/Down) to navigate through your previous commands. The history is automatically saved after each command execution and loaded when you reconnect to the same host with the same user.
+
 ### Known problems. OpenSSL errors
 
 Sometimes, you could face an error like this:
@@ -561,8 +580,8 @@ Use it at your own servers and/or with the server owner's permission.
 [@arale61]: https://twitter.com/arale61
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-3.7-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
+[Version-shield]: https://img.shields.io/badge/version-3.8-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
-[Gem-Version]: https://badge.fury.io/rb/evil-winrm.svg "Ruby gem"
+[Gem-Version]: https://img.shields.io/gem/v/evil-winrm?style=flat-square&colorA=273133&colorB=46c249 "Ruby gem"
