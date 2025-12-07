@@ -526,7 +526,7 @@ Once inside the Evil-WinRM shell with the AI feature enabled, the `ai:` prefix m
 ```
 Warning: Evil-WinRM - Experimental - AI LLM support enabled
 
-Evil-WinRM shell v3.8ai
+Evil-WinRM shell v3.9ai
 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents> ai:enumerate local users
