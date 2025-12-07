@@ -1,3 +1,6 @@
+### 3.9
+ - Quick fix of a broken dependency for Ruby gem (syslog)
+
 ### 3.8
  - Added support for Kerberos ticket files (ccache and kirbi formats) with -K parameter, including automatic format detection/conversion and optional reverse DNS lookup for FQDN
  - Added persistent command history per user/host (stored in ~/.evil-winrm/history/)
