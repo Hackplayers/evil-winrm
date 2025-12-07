@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'evil-winrm-ai'
-  spec.version = '4.0'
+  spec.version = '3.8ai'
   spec.license = 'LGPL-3.0'
   spec.authors = %w[CyberVaca OscarAkaElvis Jarilaos Arale61]
   spec.email = ['oscar.alfonso.diaz@gmail.com']

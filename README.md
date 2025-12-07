@@ -526,7 +526,7 @@ Once inside the Evil-WinRM shell with the AI feature enabled, the `ai:` prefix m
 ```
 Warning: Evil-WinRM - Experimental - AI LLM support enabled
 
-Evil-WinRM shell v4.0
+Evil-WinRM shell v3.8ai
 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents> ai:enumerate local users
@@ -643,7 +643,7 @@ Use it at your own servers and/or with the server owner's permission.
 [@arale61]: https://twitter.com/arale61
 
 <!-- Badges URLs -->
-[Version-shield]: https://img.shields.io/badge/version-4.0-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "AI version"
+[Version-shield]: https://img.shields.io/badge/version-3.8ai-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "AI version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
