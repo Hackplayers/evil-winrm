@@ -1,4 +1,5 @@
-### 3.9ai
+### 3.9
+ - Same features as standard Evil-WinRM (same version number) and the following AI stuff
  - Integrated AI LLM support
  - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI, AzureOpenAI and Gemini
  - Added AI LLM suggested commands history
@@ -6,9 +7,6 @@
  - Created separated ruby gem for AI version
  - Created Docker ai tagged autobuild image
  - Updated documentation
-
-### 3.9
- - Quick fix of a broken dependency for Ruby gem (syslog)
 
 ### 3.8
  - Added support for Kerberos ticket files (ccache and kirbi formats) with -K parameter, including automatic format detection/conversion and optional reverse DNS lookup for FQDN
