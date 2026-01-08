@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'winrm',     '~> 2.3', '>= 2.3.7'
   spec.add_dependency 'winrm-fs',  '~> 1.3', '>= 1.3.2'
 
-  spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'bundler', '>= 2.0', '< 5.0'
 
   spec.post_install_message = 'Happy hacking! :)'
 end
