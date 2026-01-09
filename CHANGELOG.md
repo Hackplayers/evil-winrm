@@ -1,3 +1,6 @@
+### 4.1
+ - Enhanced compatibility with new bundler version
+
 ### 3.9
  - Same features as standard Evil-WinRM (same version number) and the following AI stuff
  - Integrated AI LLM support
