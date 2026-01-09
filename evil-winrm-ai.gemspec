@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'evil-winrm-ai'
-  spec.version = '3.9'
+  spec.version = '4.1'
   spec.license = 'LGPL-3.0'
   spec.authors = %w[CyberVaca OscarAkaElvis Jarilaos Arale61]
   spec.email = ['oscar.alfonso.diaz@gmail.com']
@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'winrm',       '~> 2.3', '>= 2.3.7'
   spec.add_dependency 'winrm-fs',    '~> 1.3', '>= 1.3.2'
 
-  spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'bundler', '>= 2.0', '< 5.0'
 
   spec.post_install_message = 'Happy hacking! AI powered :)'
 end
