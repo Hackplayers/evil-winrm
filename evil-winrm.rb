@@ -11,7 +11,7 @@ require 'winrm'
 require 'winrm-fs'
 require 'stringio'
 require 'base64'
-require 'readline'
+require 'reline'
 require 'optionparser'
 require 'io/console'
 require 'time'
@@ -180,7 +180,7 @@ class EvilWinRM
   def completion_check
     if $check_rpath_completion == true
       begin
-        Readline.quoting_detection_proc
+        Reline.quoting_detection_proc
         @completion_enabled = true
       rescue NotImplementedError, NoMethodError => e
         @completion_enabled = false
@@ -693,7 +693,7 @@ class EvilWinRM
     begin
       File.readlines(history_file).each do |line|
         line = line.chomp
-        Readline::HISTORY.push(line) unless line.empty?
+        Reline::HISTORY.push(line) unless line.empty?
       end
     rescue => e
       # Silently fail if history can't be loaded
@@ -1131,37 +1131,37 @@ class EvilWinRM
         begin
           completion = proc do |str|
             case
-            when Readline.line_buffer =~ /help.*/i
+            when Reline.line_buffer =~ /help.*/i
               puts($LIST.join("\t").to_s)
-            when Readline.line_buffer =~ /Invoke-Binary.*/i
+            when Reline.line_buffer =~ /Invoke-Binary.*/i
               result = @executables.grep(/^#{Regexp.escape(str)}/i) || []
               if result.empty?
                 paths = self.paths(str)
                 result.concat(paths.grep(/^#{Regexp.escape(str)}/i))
               end
               result.uniq
-            when Readline.line_buffer =~ /donutfile.*/i
+            when Reline.line_buffer =~ /donutfile.*/i
               paths = self.paths(str)
               paths.grep(/^#{Regexp.escape(str)}/i)
-            when Readline.line_buffer =~ /Donut-Loader -process_id.*/i
+            when Reline.line_buffer =~ /Donut-Loader -process_id.*/i
               $DONUTPARAM2.grep(/^#{Regexp.escape(str)}/i) unless str.nil?
-            when Readline.line_buffer =~ /Donut-Loader.*/i
+            when Reline.line_buffer =~ /Donut-Loader.*/i
               $DONUTPARAM1.grep(/^#{Regexp.escape(str)}/i) unless str.nil?
-            when Readline.line_buffer =~ /^upload.*/i
-              test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
+            when Reline.line_buffer =~ /^upload.*/i
+              test_s = Reline.line_buffer.gsub('\\ ', '\#\#\#\#')
               if test_s.count(' ') < 2
                 self.paths(str) || []
               else
                 complete_path(str, shell) || []
               end
-            when Readline.line_buffer =~ /^download.*/i
-              test_s = Readline.line_buffer.gsub('\\ ', '\#\#\#\#')
+            when Reline.line_buffer =~ /^download.*/i
+              test_s = Reline.line_buffer.gsub('\\ ', '\#\#\#\#')
               if test_s.count(' ') < 2
                 complete_path(str, shell) || []
               else
                 self.paths(str) || []
               end
-            when (Readline.line_buffer.empty? || !(Readline.line_buffer.include?(' ') || Readline.line_buffer =~ %r{^"?(\./|\.\./|[a-z,A-Z]:/|~/|/)}))
+            when (Reline.line_buffer.empty? || !(Reline.line_buffer.include?(' ') || Reline.line_buffer =~ %r{^"?(\./|\.\./|[a-z,A-Z]:/|~/|/)}))
               result = $COMMANDS.grep(/^#{Regexp.escape(str)}/i) || []
               result.concat(@functions.grep(/^#{Regexp.escape(str)}/i))
               result.uniq
@@ -1172,22 +1172,22 @@ class EvilWinRM
             end
           end
 
-          Readline.completion_proc = completion
-          Readline.completion_append_character = ''
-          Readline.completion_case_fold = true
-          Readline.completer_quote_characters = '"'
+          Reline.completion_proc = completion
+          Reline.completion_append_character = ''
+          Reline.completion_case_fold = true
+          Reline.completer_quote_characters = '"'
 
           # Configure Ctrl+L to clear screen
-          if Readline.respond_to?(:emacs_editing_mode)
-            Readline.emacs_editing_mode
+          if Reline.respond_to?(:emacs_editing_mode)
+            Reline.emacs_editing_mode
           end
 
           # Set up Ctrl+L binding to clear screen
           begin
-            if Readline.respond_to?(:bind_key)
-              Readline.bind_key("\C-l") do
+            if Reline.respond_to?(:bind_key)
+              Reline.bind_key("\C-l") do
                 clear_screen
-                Readline.refresh_line
+                Reline.refresh_line
                 nil
               end
             end
@@ -1228,13 +1228,13 @@ class EvilWinRM
             end
 
             if $colors_enabled
-              command = Readline.readline( "#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ", true)
+              command = Reline.readline( "#{colorize('*Evil-WinRM*', 'red')}#{colorize(' PS ', 'yellow')}#{pwd}> ", true)
             else
-              command = Readline.readline("*Evil-WinRM* PS #{pwd}> ", true)
+              command = Reline.readline("*Evil-WinRM* PS #{pwd}> ", true)
             end
 
             # Handle Ctrl+L if it returns as empty or special character
-            if command == "\f" || (command.nil? && Readline.line_buffer.empty?)
+            if command == "\f" || (command.nil? && Reline.line_buffer.empty?)
               clear_screen
               command = ''
               next
