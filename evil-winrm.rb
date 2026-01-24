@@ -94,6 +94,9 @@ $WORDS_RANDOM_CASE = [
 $colors_enabled = true
 $check_rpath_completion = true
 
+# Flush stdout after each write
+$stdout.sync = true
+
 # Path for ps1 scripts and exec files
 $scripts_path = ''
 $executables_path = ''
