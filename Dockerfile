@@ -1,8 +1,8 @@
 # Evil-WinRM Dockerfile
 
 # Base image
-FROM alpine:3.20.3 AS final
-FROM alpine:3.20.3 AS build
+FROM ruby:4.0.1-alpine3.23 AS final
+FROM ruby:4.0.1-alpine3.23 AS build
 
 # Credits & Data
 LABEL \
@@ -14,44 +14,12 @@ LABEL \
 #Env vars
 ENV EVILWINRM_URL="https://github.com/Hackplayers/evil-winrm.git"
 
-# Install dependencies for building ruby with readline and openssl support
-RUN apk --no-cache add cmake \
-    clang \
-    clang-dev \
-    make \
-    gcc \
-    g++ \
-    libc-dev \
-    linux-headers \
-    readline \
-    readline-dev \
-    yaml \
-    yaml-dev \
-    libffi \
-    libffi-dev \
-    zlib \
-    zlib-dev \
-    openssl-dev \
-    openssl \
-    bash \
-    git
-
-# Make the ruby path available
-ENV PATH=$PATH:/opt/rubies/ruby-3.2.2/bin
-
-# Get ruby-install for building ruby 3.2.2
-RUN cd /tmp/ && \
-    wget -O /tmp/ruby-install-0.8.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.8.1.tar.gz && \
-    tar -xzvf ruby-install-0.8.1.tar.gz && \
-    cd ruby-install-0.8.1/ && make install && \
-    ruby-install -c ruby 3.2.2 -- --with-readline-dir=/usr/include/readline --with-openssl-dir=/usr/include/openssl --disable-install-rdoc
-
-# Set directory for the deploy of the application
-WORKDIR /opt
+# Install git and bash for regular usefor Evil-WinRM install method 2
+RUN apk --no-cache add git bash
 
 # Evil-WinRM install method 1 (only one method can be used, other must be commented)
 # Install Evil-WinRM (DockerHub automated build process)
-RUN mkdir evil-winrm
+RUN mkdir /opt/evil-winrm
 COPY . /opt/evil-winrm
 
 # Evil-WinRM install method 2 (only one method can be used, other must be commented)
@@ -61,24 +29,14 @@ COPY . /opt/evil-winrm
 #ENV BRANCH="dev"
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
-# Install Evil-WinRM ruby dependencies
-RUN gem install benchmark \
-    csv \
-    fileutils \
-    logger \
-    stringio \
-    syslog \
-    winrm \
-    winrm-fs
-
 # Clean and remove useless files
 RUN rm -rf /opt/evil-winrm/resources > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/.github > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/CONTRIBUTING.md > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/CODE_OF_CONDUCT.md > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/Dockerfile > /dev/null 2>&1 && \
-    rm -rf /opt/evil-winrm/Gemfile* > /dev/null 2>&1 && \
-    rm -rf /opt/evil-winrm/evil-winrm.gemspec > /dev/null 2>&1 && \
+    #rm -rf /opt/evil-winrm/Gemfile* > /dev/null 2>&1 && \
+    #rm -rf /opt/evil-winrm/evil-winrm.gemspec > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/.rubocop.yml > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/.editorconfig > /dev/null 2>&1 && \
     rm -rf /opt/evil-winrm/.gitignore > /dev/null 2>&1 && \
@@ -92,18 +50,29 @@ RUN mv /opt/evil-winrm/evil-winrm.rb /opt/evil-winrm/evil-winrm && \
 # Base final image
 FROM final
 
-# Install readline and other dependencies
+# Install dependencies
 RUN apk --no-cache add \
-    readline \
     yaml \
     krb5-libs \
     libffi
 
-# Make the ruby and Evil-WinRM paths available
-ENV PATH=$PATH:/opt/rubies/ruby-3.2.2/bin:/opt/evil-winrm
+# Install build dependencies to be able to build native extensions when install ruby dependencies
+RUN apk add --no-cache --virtual build-dependencies build-base
+
+# Make the Evil-WinRM paths available
+ENV PATH=$PATH:/opt/evil-winrm
 
 # Copy built stuff from build image
 COPY --from=build /opt /opt
+
+# Set directory for the dependencies installation
+WORKDIR /opt/evil-winrm
+
+# Install Evil-WinRM ruby dependencies
+RUN bundle config set path.system true && bundle install
+
+# Remove build dependencies
+RUN apk del build-dependencies
 
 # Create volume for powershell scripts
 RUN mkdir /ps1_scripts
