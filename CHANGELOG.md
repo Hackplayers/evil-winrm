@@ -1,5 +1,7 @@
 ### 4.1
  - Enhanced compatibility with new bundler version
+ - Added Ruby 4.0 support by migrating from readline to reline, as a bonus effect there is one less system dependency
+ - Modernized Dockerfile
 
 ### 3.9
  - Quick fix of a broken dependency for Ruby gem (syslog)
