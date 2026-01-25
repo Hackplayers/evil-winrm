@@ -74,8 +74,6 @@ Depending of your installation method (4 availables) the installation of them co
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
 
-The remote path completion feature will work only if your ruby was compiled enabling the `--with-readline-dir` flag. This is enabled by default in ruby included on some Linux distributions but not in all. Check [the section below](#Remote-path-completion) for more info.
-
 ## Installation & Quick Start (4 methods)
 
 ### Method 1. Installation directly as ruby gem (dependencies will be installed automatically on your system)
@@ -383,39 +381,10 @@ This script contains malicious content and has been blocked by your antivirus so
  - For more information about Kerberos check this [cheatsheet]
 
 ### Remote path completion
-This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
 
-#### Method 1 (compile the needed extension)
+Starting from evil-winrm 4.1, this feature is no longer depending on system libraries or the ruby version used.
 
-Using this method you'll compile ruby with the needed readline feature but to use only the library without changing the default ruby version on your system. Because of this, is the most recommended method.
-
-Let's suppose that you have in your Debian based system ruby 2.7.3:
-
-```
-# Install needed package
-apt install libreadline-dev
-
-# Check your ruby version
-ruby --version
-ruby 2.7.3p183 (2021-04-05 revision 6847ee089d) [x86_64-linux-gnu]
-
-# Download ruby source code (2.7.3 in this case):
-wget https://ftp.ruby-lang.org/pub/ruby/2.7/ruby-2.7.3.tar.gz
-
-# Extract source code
-tar -xf ruby-2.7.3.tar.gz
-
-# Compile the readline extension:
-cd ruby-2.7.3/ext/readline
-ruby ./extconf.rb
-make
-
-# Patch current version of the ruby readline extension:
-sudo cp /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so.bk
-sudo cp -f readline.so /usr/lib/x86_64-linux-gnu/ruby/2.7.0/readline.so
-```
-
-#### Method 2 (Install ruby to use it only for evil-winrm using rbenv)
+#### Method 1 (Install ruby to use it only for evil-winrm using rbenv)
 
 Let's suppose that you want ruby 2.7.1 on a Debian based Linux and you are using zsh. This script will automatize it. You'll need to launch it from the same dir where evil-winrm.rb and Gemfile is located (the evil-winrm created dir after a git clone for example):
 
@@ -434,8 +403,7 @@ echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.zshrc
 echo 'eval "$(rbenv init -)"' >> ~/.zshrc
 source ~/.zshrc
 
-# Install ruby with readline support
-export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/include/readline"
+# Install ruby
 rbenv install 2.7.1
 
 # Create file '.ruby-version' to set right ruby version
@@ -455,7 +423,7 @@ EOF"
 sudo chmod +x /usr/bin/evil-winrm
 ```
 
-Then you can safely launch evil-winrm using the new installed ruby with the required readline support from any location.
+Then you can safely launch evil-winrm using the new installed ruby from any location.
 
 #### Method 3 (compile entire ruby)
 
@@ -466,7 +434,7 @@ wget -O ruby-install-0.8.1.tar.gz https://github.com/postmodern/ruby-install/arc
 tar -xzvf ruby-install-0.8.1.tar.gz
 cd ruby-install-0.8.1/
 sudo make install
-ruby-install ruby 2.7.3 -- --with-readline-dir=/usr/include/readline
+ruby-install ruby 2.7.3
 ```
 Depending of your system it will be installed at `/opt/rubies/ruby-2.7.3` or maybe at ` ~/.rubies/ruby-2.7.3`.
 
