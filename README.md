@@ -604,6 +604,7 @@ Hat tip to:
  - [byt3bl33d3r] for his python library to create donut payloads.
  - [Sh11td0wn] for inspiration about new features.
  - [Borch] for his help adding logging feature.
+ - [noraj] for his help in maintaining the tool across Ruby versions.
  - [Hackplayers] for giving a shelter on their github to this software.
 
 ## Disclaimer & License
@@ -622,6 +623,7 @@ Use it at your own servers and/or with the server owner's permission.
 [Alamot]: https://github.com/Alamot
 [3v4Si0N]: https://github.com/3v4Si0N
 [Borch]: https://github.com/Stoo0rmq
+[noraj]: https://github.com/noraj
 [donut]: https://github.com/TheWover/donut
 [donut-maker]: https://github.com/Hackplayers/Salsa-tools/blob/master/Donut-Maker/donut-maker.py
 [byt3bl33d3r]: https://twitter.com/byt3bl33d3r
