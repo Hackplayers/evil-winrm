@@ -44,7 +44,7 @@ RUN cd /tmp/ && \
     wget -O /tmp/ruby-install-0.10.2.tar.gz https://github.com/postmodern/ruby-install/archive/v0.10.2.tar.gz && \
     tar -xzvf ruby-install-0.10.2.tar.gz && \
     cd ruby-install-0.10.2/ && make install && \
-    ruby-install -c ruby 4.0.1 -- --with-readline-dir=/usr/include/readline --with-openssl-dir=/usr/include/openssl --disable-install-rdoc
+    ruby-install -c ruby 4.0.1 -- --with-readline-dir=/usr/include/readline --disable-install-rdoc
 
 # Set directory for the deploy of the application
 WORKDIR /opt
