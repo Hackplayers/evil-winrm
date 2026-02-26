@@ -1,5 +1,7 @@
 ### 4.1
  - Enhanced compatibility with new bundler version
+ - Added Ruby 4.0 support
+ - Modernized Dockerfile
 
 ### 3.9
  - Quick fix of a broken dependency for Ruby gem (syslog)
