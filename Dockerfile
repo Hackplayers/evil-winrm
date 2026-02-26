@@ -61,11 +61,8 @@ COPY . /opt/evil-winrm
 #ENV BRANCH="dev"
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
-# Install build dependencies to be able to build native extensions when installing ruby dependencies
-RUN apk add --no-cache --virtual build-dependencies build-base
-
 # Install Evil-WinRM ruby dependencies
-RUN gem install benchmark \
+RUN gem update && gem install benchmark \
     csv \
     fileutils \
     logger \
@@ -74,9 +71,6 @@ RUN gem install benchmark \
     syslog \
     winrm \
     winrm-fs
-
-# Remove build dependencies
-RUN apk del build-dependencies
 
 # Clean and remove useless files
 RUN rm -rf /opt/evil-winrm/resources > /dev/null 2>&1 && \
