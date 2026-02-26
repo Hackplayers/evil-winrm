@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'csv',       '>= 2.4.8'
   spec.add_dependency 'fileutils', '~> 1.0'
   spec.add_dependency 'logger',    '~> 1.4', '>= 1.4.3'
+  spec.add_dependency 'readline',  '~> 0.0.4'
   spec.add_dependency 'stringio',  '~> 3.0'
   spec.add_dependency 'syslog',    '>= 0.3.0'
   spec.add_dependency 'winrm',     '~> 2.3', '>= 2.3.7'
