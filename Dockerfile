@@ -62,7 +62,7 @@ COPY . /opt/evil-winrm
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
 # Install Evil-WinRM ruby dependencies
-RUN gem update && gem install benchmark \
+RUN gem update && gem install --no-document benchmark \
     csv \
     fileutils \
     logger \
