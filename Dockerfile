@@ -67,6 +67,7 @@ RUN gem update && gem install --no-document benchmark \
     fileutils \
     logger \
     readline \
+    readline-ext \
     stringio \
     syslog \
     winrm \
