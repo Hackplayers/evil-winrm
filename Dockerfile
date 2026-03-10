@@ -1,8 +1,8 @@
 # Evil-WinRM Dockerfile
 
 # Base image
-FROM alpine:3.20.3 AS final
-FROM alpine:3.20.3 AS build
+FROM alpine:3.23.3 AS final
+FROM alpine:3.23.3 AS build
 
 # Credits & Data
 LABEL \
@@ -37,14 +37,14 @@ RUN apk --no-cache add cmake \
     git
 
 # Make the ruby path available
-ENV PATH=$PATH:/opt/rubies/ruby-3.2.2/bin
+ENV PATH=$PATH:/opt/rubies/ruby-4.0.1/bin
 
-# Get ruby-install for building ruby 3.2.2
+# Get ruby-install for building ruby 4.0.1
 RUN cd /tmp/ && \
-    wget -O /tmp/ruby-install-0.8.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.8.1.tar.gz && \
-    tar -xzvf ruby-install-0.8.1.tar.gz && \
-    cd ruby-install-0.8.1/ && make install && \
-    ruby-install -c ruby 3.2.2 -- --with-readline-dir=/usr/include/readline --with-openssl-dir=/usr/include/openssl --disable-install-rdoc
+    wget -O /tmp/ruby-install-0.10.2.tar.gz https://github.com/postmodern/ruby-install/archive/v0.10.2.tar.gz && \
+    tar -xzvf ruby-install-0.10.2.tar.gz && \
+    cd ruby-install-0.10.2/ && make install && \
+    ruby-install -c ruby 4.0.1 -- --with-readline-dir=/usr/include/readline --disable-install-rdoc
 
 # Set directory for the deploy of the application
 WORKDIR /opt
@@ -62,10 +62,12 @@ COPY . /opt/evil-winrm
 #RUN git clone -b ${BRANCH} ${EVILWINRM_URL}
 
 # Install Evil-WinRM ruby dependencies
-RUN gem install benchmark \
+RUN gem update && gem install --no-document benchmark \
     csv \
     fileutils \
     logger \
+    readline \
+    readline-ext \
     stringio \
     syslog \
     winrm \
@@ -100,7 +102,7 @@ RUN apk --no-cache add \
     libffi
 
 # Make the ruby and Evil-WinRM paths available
-ENV PATH=$PATH:/opt/rubies/ruby-3.2.2/bin:/opt/evil-winrm
+ENV PATH=$PATH:/opt/rubies/ruby-4.0.1/bin:/opt/evil-winrm
 
 # Copy built stuff from build image
 COPY --from=build /opt /opt
