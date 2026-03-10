@@ -33,6 +33,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'logger',      '~> 1.4', '>= 1.4.3'
   spec.add_dependency 'ollama-ai',   '~> 1.3', '>= 1.3.0'
   spec.add_dependency 'mistral-ai',  '~> 1.2', '>= 1.2.0'
+  spec.add_dependency 'readline',     '~> 0.0.4'
+  spec.add_dependency 'readline-ext', '~> 0.2.0'
   spec.add_dependency 'ruby-openai', '~> 7.3', '>= 7.3.1'
   spec.add_dependency 'stringio',    '~> 3.0'
   spec.add_dependency 'syslog',      '>= 0.3.0'
