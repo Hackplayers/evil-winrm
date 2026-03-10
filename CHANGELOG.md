@@ -1,5 +1,7 @@
 ### 4.1
  - Enhanced compatibility with new bundler version
+ - Added Ruby 4.0 support
+ - Modernized Dockerfile
  - Same features as standard Evil-WinRM (same version number) and the following AI stuff
  - Integrated AI LLM support
  - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI, AzureOpenAI and Gemini
