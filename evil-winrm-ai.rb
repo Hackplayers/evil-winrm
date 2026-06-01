@@ -187,7 +187,10 @@ module WinRM
         command = "Get-ChildItem #{remote_path} | Select-Object Name"
 
         @connection.shell(:powershell) { |e| e.run(command) }.stdout.strip.split(/\n/).drop(2).each do |file|
-          download(File.join(remote_file_path.to_s, file.strip), File.join(local_path, file.strip), chunk_size, false)
+          sanitized_path = File.basename(file.strip)
+          next if sanitized_path.empty? || sanitized_path == '.' || sanitized_path == '..'
+
+          download(File.join(remote_file_path.to_s, file.strip), File.join(local_path, sanitized_path), chunk_size, false)
         end
       end
 
