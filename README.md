@@ -385,7 +385,8 @@ This script contains malicious content and has been blocked by your antivirus so
 ### Remote path completion
 This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
 
-Ruby 3.3+ note: ext/readline was removed from Ruby's source in 3.3 (Feature #19616), so the compile-and-swap methods below no longer apply. On 3.3 and newer, install the native readline binding directly:
+*Ruby 3.3+ note:*
+ext/readline was removed from Ruby's source in 3.3 (Feature #19616), so the compile-and-swap methods below no longer apply. On 3.3 and newer, install the native readline binding directly:
 
 ```
 sudo apt install libreadline-dev
