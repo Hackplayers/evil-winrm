@@ -656,5 +656,5 @@ Use it at your own servers and/or with the server owner's permission.
 [Version-shield]: https://img.shields.io/badge/version-4.1-blue.svg?style=flat-square&colorA=273133&colorB=0093ee "Latest version"
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
-[Docker-shield]: https://github.com/Hackplayers/evil-winrm/actions/workflows/master.yml/badge.svg?branch=ai "Docker CI ai"
+[Docker-shield]: https://github.com/Hackplayers/evil-winrm/actions/workflows/ai.yml/badge.svg?branch=ai "Docker CI ai"
 [Gem-Version]: https://img.shields.io/gem/v/evil-winrm?style=flat-square&colorA=273133&colorB=46c249 "Ruby gem"
