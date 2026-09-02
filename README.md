@@ -68,13 +68,13 @@ Usage: evil-winrm -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-a U
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`, `readline ~> 0.0.4`, `readline-ext ~> 0.2.0`.
 Depending of your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
 
-The remote path completion feature will work only if your ruby was compiled enabling the `--with-readline-dir` flag. This is enabled by default in ruby included on some Linux distributions but not in all. Check [the section below](#Remote-path-completion) for more info.
+The remote path completion feature requires the native `readline-ext` binding, which is installed automatically as an Evil-WinRM dependency. Some systems require additional development packages to compile it. Check [the section below](#Remote-path-completion) for more info.
 
 ## Installation & Quick Start (4 methods)
 
@@ -86,7 +86,7 @@ evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/ho
 ```
 
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils`
+ - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils readline readline-ext`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it!
 ```
@@ -383,16 +383,15 @@ This script contains malicious content and has been blocked by your antivirus so
  - For more information about Kerberos check this [cheatsheet]
 
 ### Remote path completion
-This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
+This feature requires the native `readline-ext` binding. Evil-WinRM declares it as a dependency, so it is installed automatically when using RubyGems or Bundler. If the native extension cannot be built, this feature will not work (a warning will be shown).
 
 *Ruby 3.3+ note:*
-ext/readline was removed from Ruby's source in 3.3 (Feature #19616), so the compile-and-swap methods below no longer apply. On 3.3 and newer, install the native readline binding directly:
+`ext/readline` was removed from Ruby's source in 3.3 (Feature #19616). Therefore, Method 1 below cannot be used with Ruby 3.3 or newer. On Debian-based systems, install the required development package before installing Evil-WinRM or its dependencies:
 
 ```
 sudo apt install libreadline-dev
-gem install readline-ext
 ```
-This makes require 'readline' load GNU readline instead of reline (which lacks quoting_detection_proc, the method Evil-WinRM checks for).
+The `readline-ext` dependency makes `require 'readline'` load GNU Readline instead of `reline`, which lacks `quoting_detection_proc`, the method Evil-WinRM checks for. The methods below target older Ruby versions and are kept for compatibility.
 
 #### Method 1 (compile the needed extension)
 
