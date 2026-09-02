@@ -385,6 +385,15 @@ This script contains malicious content and has been blocked by your antivirus so
 ### Remote path completion
 This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
 
+*Ruby 3.3+ note:*
+ext/readline was removed from Ruby's source in 3.3 (Feature #19616), so the compile-and-swap methods below no longer apply. On 3.3 and newer, install the native readline binding directly:
+
+```
+sudo apt install libreadline-dev
+gem install readline-ext
+```
+This makes require 'readline' load GNU readline instead of reline (which lacks quoting_detection_proc, the method Evil-WinRM checks for).
+
 #### Method 1 (compile the needed extension)
 
 Using this method you'll compile ruby with the needed readline feature but to use only the library without changing the default ruby version on your system. Because of this, is the most recommended method.
