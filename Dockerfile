@@ -14,7 +14,7 @@ LABEL \
 #Env vars
 ENV EVILWINRM_URL="https://github.com/Hackplayers/evil-winrm.git"
 
-# Install dependencies for building ruby with readline and openssl support
+# Install dependencies for building Ruby and native gems
 RUN apk --no-cache add cmake \
     clang \
     clang-dev \
@@ -44,7 +44,7 @@ RUN cd /tmp/ && \
     wget -O /tmp/ruby-install-0.10.2.tar.gz https://github.com/postmodern/ruby-install/archive/v0.10.2.tar.gz && \
     tar -xzvf ruby-install-0.10.2.tar.gz && \
     cd ruby-install-0.10.2/ && make install && \
-    ruby-install -c ruby 4.0.1 -- --with-readline-dir=/usr/include/readline --disable-install-rdoc
+    ruby-install -c ruby 4.0.1 -- --disable-install-rdoc
 
 # Set directory for the deploy of the application
 WORKDIR /opt

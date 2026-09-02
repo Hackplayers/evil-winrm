@@ -2,6 +2,7 @@
  - Enhanced compatibility with new bundler version
  - Added Ruby 4.0 support
  - Modernized Dockerfile
+ - Added readline-ext as a required dependency for remote path completion compatibility with Ruby 3.3 and newer
  - Fixed path traversal in download files (Thanks TristanInSec)
 
 ### 3.9
