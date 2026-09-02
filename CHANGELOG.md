@@ -3,6 +3,7 @@
  - Added Ruby 4.0 support
  - Modernized Dockerfile
  - Added readline-ext as a required dependency for remote path completion compatibility with Ruby 3.3 and newer
+ - Added quit command and Ctrl+D support for exiting the shell
  - Fixed path traversal in download files (Thanks TristanInSec)
 
 ### 3.9

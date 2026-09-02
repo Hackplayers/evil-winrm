@@ -34,7 +34,7 @@ TYPE_SUCCESS = 4
 # Global vars
 
 # Available commands
-$LIST = %w[Bypass-4MSI services upload download clear cls menu exit]
+$LIST = %w[Bypass-4MSI services upload download clear cls menu exit quit]
 $COMMANDS = $LIST.dup
 $CMDS = $COMMANDS.clone
 $LISTASSEM = [''].sort
@@ -1204,7 +1204,7 @@ class EvilWinRM
           # Load history for this host/user
           load_history
 
-          until command == 'exit' do
+          until %w[exit quit].include?(command) do
             begin
               pwd = shell.run('(get-location).path').output.strip
             rescue => e
@@ -1239,8 +1239,14 @@ class EvilWinRM
               command = Readline.readline("*Evil-WinRM* PS #{pwd}> ", true)
             end
 
-            # Handle Ctrl+L if it returns as empty or special character
-            if command == "\f" || (command.nil? && Readline.line_buffer.empty?)
+            if command.nil?
+              custom_exit(0)
+            end
+
+            break if %w[exit quit].include?(command.strip.downcase)
+
+            # Handle Ctrl+L if it returns as a special character
+            if command == "\f"
               clear_screen
               command = ''
               next
