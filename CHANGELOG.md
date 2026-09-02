@@ -2,6 +2,8 @@
  - Enhanced compatibility with new bundler version
  - Added Ruby 4.0 support
  - Modernized Dockerfile
+ - Added readline-ext as a required dependency for remote path completion compatibility with Ruby 3.3 and newer
+ - Added quit command and Ctrl+D support for exiting the shell
  - Fixed path traversal in download files (Thanks TristanInSec)
  - Same features as standard Evil-WinRM (same version number) and the following AI stuff
  - Integrated AI LLM support

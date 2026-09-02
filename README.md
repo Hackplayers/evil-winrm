@@ -1,4 +1,4 @@
-# Evil-WinRM [![Version-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm-ai) [![License-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE) [![Docker-shield]](https://hub.docker.com/r/oscarakaelvis/evil-winrm/)
+# Evil-WinRM [![Version-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/evil-winrm.rb) [![Ruby2.3-shield]](https://www.ruby-lang.org/en/news/2015/12/25/ruby-2-3-0-released/) [![Gem-Version]](https://rubygems.org/gems/evil-winrm-ai) [![License-shield]](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/LICENSE) [![Docker-shield]](https://github.com/Hackplayers/evil-winrm/actions/workflows/master.yml)
 The ultimate WinRM shell for hacking/pentesting
 
 ![Banner](https://raw.githubusercontent.com/Hackplayers/evil-winrm/ai/resources/evil-winrm_logo-ai_edition.png)
@@ -82,13 +82,12 @@ Usage: evil-winrm-ai -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-
 
 ## Requirements
 Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
-If you are planning to use AI LLM features, this ruby gem is mandatory: `langchainrb >= 0.18.0`, and in addition, depending on the LLM to use, more ruby gems will be needed:, `ollama-ai >= 1.3.0`, `anthropic >= 0.3.2`, `mistral-ai >= 1.2.0`, `ruby-openai >= 7.3.1`
-Depending on your installation method (4 availables) the installation of them could be required to be done manually.
+Depending of your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
 For some Linux like Debian based (Kali, Parrot, etc.) it is called `krb5-user`. For BlackArch it is called `krb5` and probably it could be called in a different way for other Linux distributions.
 
-The remote path completion feature will work only if your ruby was compiled enabling the `--with-readline-dir` flag. This is enabled by default in ruby included on some Linux distributions but not in all. Check [the section below](#Remote-path-completion) for more info.
+The remote path completion feature requires the native `readline-ext` binding, which is installed automatically as an Evil-WinRM dependency. Some systems require additional development packages to compile it. Check [the section below](#Remote-path-completion) for more info.
 
 ## Installation & Quick Start (4 methods)
 
@@ -100,8 +99,8 @@ evil-winrm-ai -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/
 ```
 
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils langchainrb ollama-ai anthropic mistral-ai ruby-openai`
- - Step 2. Clone the repo: `git clone -b ai https://github.com/Hackplayers/evil-winrm.git`
+ - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils`
+ - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it!
 ```
 cd evil-winrm && ruby evil-winrm-ai.rb -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/home/foo/ps1_scripts/' -e '/home/foo/exe_files/'
@@ -142,6 +141,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
  - **services**: list all services showing if there your account has permissions over each one. No administrator permissions needed to use this feature.
  - **menu**: load the `Invoke-Binary`, `Dll-Loader` and `Donut-Loader` functions that we will explain below. When a ps1 is loaded all its functions will be shown up.
  - **clear** or **cls**: clear the terminal screen. You can also use `Ctrl+L` keyboard shortcut to clear the screen.
+ - **exit** or **quit**: close the Evil-WinRM session. You can also use the `Ctrl+D` keyboard shortcut.
 
 ```
 *Evil-WinRM* PS C:\> menu
@@ -397,7 +397,15 @@ This script contains malicious content and has been blocked by your antivirus so
  - For more information about Kerberos check this [cheatsheet]
 
 ### Remote path completion
-This feature could be not available depending of the ruby you are using. It must be compiled with readline support. Otherwise, this feature will not work (a warning will be shown).
+This feature requires the native `readline-ext` binding. Evil-WinRM declares it as a dependency, so it is installed automatically when using RubyGems or Bundler. If the native extension cannot be built, this feature will not work (a warning will be shown).
+
+*Ruby 3.3+ note:*
+`ext/readline` was removed from Ruby's source in 3.3 (Feature #19616). Therefore, Method 1 below cannot be used with Ruby 3.3 or newer. On Debian-based systems, install the required development package before installing Evil-WinRM or its dependencies:
+
+```
+sudo apt install libreadline-dev
+```
+The `readline-ext` dependency makes `require 'readline'` load GNU Readline instead of `reline`, which lacks `quoting_detection_proc`, the method Evil-WinRM checks for. The methods below target older Ruby versions and are kept for compatibility.
 
 #### Method 1 (compile the needed extension)
 
@@ -649,4 +657,4 @@ Use it at your own servers and/or with the server owner's permission.
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://img.shields.io/docker/automated/oscarakaelvis/evil-winrm.svg?style=flat-square&colorA=273133&colorB=a9a9a9 "Docker rules!"
-[Gem-Version]: https://badge.fury.io/rb/evil-winrm-ai.svg "Ruby gem"
+[Gem-Version]: https://img.shields.io/gem/v/evil-winrm?style=flat-square&colorA=273133&colorB=46c249 "Ruby gem"
