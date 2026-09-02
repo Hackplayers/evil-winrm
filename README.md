@@ -81,7 +81,7 @@ Usage: evil-winrm-ai -i IP -u USER [-s SCRIPTS_PATH] [-e EXES_PATH] [-P PORT] [-
 ```
 
 ## Requirements
-Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`.
+Ruby 2.3 or higher is needed. Some ruby gems are needed as well: `winrm >=2.3.7`, `winrm-fs >=1.3.2`, `stringio >=0.0.2`, `logger >= 1.4.3`, `fileutils >= 0.7.2`, `readline ~> 0.0.4`, `readline-ext ~> 0.2.0`.
 Depending of your installation method (4 availables) the installation of them could be required to be done manually.
 
 Another important requirement only used for Kerberos auth is to install the Kerberos package used for network authentication.
@@ -99,7 +99,7 @@ evil-winrm-ai -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!' -s '/
 ```
 
 ### Method 2. Git clone and install dependencies on your system manually
- - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils`
+ - Step 1. Install dependencies manually: `sudo gem install winrm winrm-fs stringio logger fileutils readline readline-ext`
  - Step 2. Clone the repo: `git clone https://github.com/Hackplayers/evil-winrm.git`
  - Step 3. Ready. Just launch it!
 ```
@@ -657,4 +657,4 @@ Use it at your own servers and/or with the server owner's permission.
 [Ruby2.3-shield]: https://img.shields.io/badge/ruby-2.3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000 "Ruby 2.3 or later"
 [License-shield]: https://img.shields.io/badge/license-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273133&colorB=bd0000 "LGPL v3+"
 [Docker-shield]: https://github.com/Hackplayers/evil-winrm/actions/workflows/ai.yml/badge.svg?branch=ai "Docker CI ai"
-[Gem-Version]: https://img.shields.io/gem/v/evil-winrm?style=flat-square&colorA=273133&colorB=46c249 "Ruby gem"
+[Gem-Version]: https://img.shields.io/gem/v/evil-winrm-ai?style=flat-square&colorA=273133&colorB=46c249 "Ruby gem"
