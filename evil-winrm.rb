@@ -18,6 +18,7 @@ require 'time'
 require 'fileutils'
 require 'logger'
 require 'shellwords'
+require 'thread'
 
 # Constants
 
@@ -1079,6 +1080,80 @@ class EvilWinRM
     ccache_path
   end
 
+  # True when the exception indicates the WinRM session is dead or was never established
+  def connection_error?(error)
+    error_msg = error.message.to_s.downcase
+    error_class = error.class.to_s
+
+    return true if error_msg.match?(/timeout|connection|closed|broken|reset|refused|unreachable|unauthorized|digest|ssl|ntlm|spnego|kerberos|gssapi|wsman|winrm|http|401|403|500|503|expired|empty response/)
+    return true if error_class.match?(/Timeout|Connection|Socket|HTTP|WinRM|GSSAPI|GssApi|OpenSSL|Errno/)
+
+    false
+  end
+
+  # WinRM::Connection#shell is lazy: the TCP/WinRM handshake happens on the first command.
+  # Never show the interactive prompt unless that command actually succeeds.
+  def verify_remote_connection(shell)
+    result = shell.run('(get-location).path')
+    pwd = result&.output.to_s.strip
+    raise 'Empty response from remote endpoint; session is not ready' if pwd.empty?
+
+    pwd
+  rescue => e
+    print_message('Cannot establish connection to remote endpoint. Check credentials and network.', TYPE_ERROR, true, $logger)
+    print_message("#{e.class}: #{e.message}", TYPE_ERROR, true, $logger)
+    custom_exit(1, false)
+  end
+
+  def handle_lost_connection(error)
+    puts
+    print_message("Connection timeout or error occurred: #{error.class} - #{error.message}", TYPE_ERROR, true, $logger)
+    print_message('Cleaning up and exiting...', TYPE_WARNING, true, $logger)
+    custom_exit(1, false)
+  end
+
+  # Keep the remote shell active while the local prompt is idle.
+  # Without this, Windows marks the shell Disconnected after ~1 minute of ShellInactivity
+  # and the next command fails even though the prompt still looks connected.
+  def decorate_shell_with_keepalive(shell, interval = 30)
+    mutex = Mutex.new
+    state = { last_activity: Time.now, stop: false }
+    original_run = shell.method(:run)
+
+    shell.define_singleton_method(:run) do |*args, &block|
+      mutex.synchronize do
+        result = original_run.call(*args, &block)
+        state[:last_activity] = Time.now
+        result
+      end
+    end
+
+    thread = Thread.new do
+      Thread.current.abort_on_exception = false
+      until state[:stop]
+        sleep(interval)
+        break if state[:stop]
+        next if (Time.now - state[:last_activity]) < interval
+        next unless shell.shell_id
+
+        begin
+          shell.run('[void]0')
+        rescue StandardError
+          # The next user command will surface a dead session
+        end
+      end
+    end
+
+    lambda do
+      state[:stop] = true
+      begin
+        thread.wakeup
+      rescue ThreadError
+      end
+      thread.join(1)
+    end
+  end
+
   # Main function
   def main
     arguments
@@ -1134,7 +1209,14 @@ class EvilWinRM
       time = Time.now.to_i
       print_message('Establishing connection to remote endpoint', TYPE_INFO)
       $conn.shell(:powershell) do |shell|
+        stop_keepalive = nil
         begin
+          last_pwd = verify_remote_connection(shell)
+          pwd = last_pwd
+          skip_pwd_refresh = true
+          print_message('Connection successful', TYPE_INFO)
+          stop_keepalive ||= decorate_shell_with_keepalive(shell)
+
           completion = proc do |str|
             case
             when Readline.line_buffer =~ /help.*/i
@@ -1205,31 +1287,21 @@ class EvilWinRM
           load_history
 
           until %w[exit quit].include?(command) do
-            begin
-              pwd = shell.run('(get-location).path').output.strip
-            rescue => e
-              # Handle connection/timeout errors when getting pwd
-              error_msg = e.message.to_s.downcase
-              if error_msg.include?('timeout') || error_msg.include?('connection') ||
-                 error_msg.include?('closed') || error_msg.include?('broken') ||
-                 e.class.to_s.include?('Timeout') || e.class.to_s.include?('Connection')
-                puts
-                print_message("Connection timeout or error occurred: #{e.class} - #{e.message}", TYPE_ERROR, true, $logger)
-                print_message("Cleaning up and exiting...", TYPE_WARNING, true, $logger)
-                # Clean up KRB5CCNAME before exiting
-                begin
-                  if defined?($original_krb5ccname) && !$original_krb5ccname.nil?
-                    ENV['KRB5CCNAME'] = $original_krb5ccname
-                  elsif defined?($original_krb5ccname) && $original_krb5ccname.nil?
-                    ENV.delete('KRB5CCNAME') if ENV.key?('KRB5CCNAME')
-                  end
-                rescue => cleanup_error
-                  # Ignore cleanup errors
+            if skip_pwd_refresh
+              skip_pwd_refresh = false
+            else
+              begin
+                new_pwd = shell.run('(get-location).path').output.to_s.strip
+                unless new_pwd.empty?
+                  pwd = new_pwd
+                  last_pwd = pwd
                 end
-                custom_exit(1, false)
-              else
-                # For other errors, try to continue with a default pwd
-                pwd = "C:\\"
+              rescue => e
+                if connection_error?(e)
+                  handle_lost_connection(e)
+                else
+                  pwd = last_pwd
+                end
               end
             end
 
@@ -1523,27 +1595,9 @@ class EvilWinRM
               end
               $logger.info(output_logger)
             rescue => e
-              # Handle connection/timeout errors gracefully
-              error_msg = e.message.to_s.downcase
-              if error_msg.include?('timeout') || error_msg.include?('connection') ||
-                 error_msg.include?('closed') || error_msg.include?('broken') ||
-                 e.class.to_s.include?('Timeout') || e.class.to_s.include?('Connection')
-                puts
-                print_message("Connection timeout or error occurred: #{e.class} - #{e.message}", TYPE_ERROR, true, $logger)
-                print_message("Cleaning up and exiting...", TYPE_WARNING, true, $logger)
-                # Clean up KRB5CCNAME before exiting
-                begin
-                  if defined?($original_krb5ccname) && !$original_krb5ccname.nil?
-                    ENV['KRB5CCNAME'] = $original_krb5ccname
-                  elsif defined?($original_krb5ccname) && $original_krb5ccname.nil?
-                    ENV.delete('KRB5CCNAME') if ENV.key?('KRB5CCNAME')
-                  end
-                rescue => cleanup_error
-                  # Ignore cleanup errors
-                end
-                custom_exit(1, false)
+              if connection_error?(e)
+                handle_lost_connection(e)
               else
-                # Re-raise other errors
                 raise
               end
             end
@@ -1559,6 +1613,11 @@ class EvilWinRM
             custom_exit(130)
           else
             retry
+          end
+        ensure
+          if stop_keepalive
+            stop_keepalive.call
+            stop_keepalive = nil
           end
         end
 
