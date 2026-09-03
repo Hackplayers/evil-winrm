@@ -1,12 +1,10 @@
 ### AI features
- - Same features as standard Evil-WinRM (same version number) and the following AI stuff
  - Integrated AI LLM support
  - Added support for different LLM providers: Ollama, OpenAI, Anthropic, Mistral-AI, AzureOpenAI and Gemini
  - Added AI LLM suggested commands history
  - Added AI LLM debug mode
- - Created separated ruby gem for AI version
+ - Created separated ruby gem for AI version (evil-winrm-ai)
  - Created Docker ai tagged autobuild image
- - Updated documentation
 
 ### 4.1
  - Enhanced compatibility with new bundler version
