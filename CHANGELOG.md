@@ -1,3 +1,6 @@
+### 4.2
+ - TODO
+
 ### 4.1
  - Enhanced compatibility with new bundler version
  - Added Ruby 4.0 support
