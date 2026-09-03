@@ -1,0 +1,141 @@
+# Workflow for automatic RubyGems releases
+
+name: 'RubyGems'
+
+on:
+  workflow_run:
+    workflows: ['Release']
+    types: [completed]
+
+jobs:
+  prepare:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.release_data.outputs.version }}
+      tag: ${{ steps.release_data.outputs.tag }}
+      ai_ready: ${{ steps.release_data.outputs.ai_ready }}
+    steps:
+      - name: Check out master
+        uses: actions/checkout@v5
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Validate release and AI branch
+        id: release_data
+        shell: bash
+        run: |
+          version="$(sed -nE "s/^VERSION = '([0-9]+\.[0-9]{1,2})'$/\1/p" evil-winrm.rb)"
+          gemspec_version="$(sed -nE "s/^  spec\.version = '([0-9]+\.[0-9]{1,2})'$/\1/p" evil-winrm.gemspec)"
+
+          if [[ ! "${version}" =~ ^[0-9]+\.[0-9]{1,2}$ ]] || [ "${gemspec_version}" != "${version}" ]; then
+            echo "Evil-WinRM script and gemspec versions are invalid or do not match"
+            exit 1
+          fi
+
+          tag="v${version}"
+          head_commit="$(git rev-parse HEAD)"
+          tag_commit="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
+
+          if [ -z "${tag_commit}" ] || [ "${tag_commit}" != "${head_commit}" ]; then
+            echo "Tag ${tag} does not exist or does not point to the current master commit"
+            exit 1
+          fi
+
+          git fetch origin dev:refs/remotes/origin/dev ai:refs/remotes/origin/ai
+
+          ai_version="$(git show origin/ai:evil-winrm-ai.rb | sed -nE "s/^VERSION = '([0-9]+\.[0-9]{1,2})'$/\1/p")"
+          ai_gemspec_version="$(git show origin/ai:evil-winrm-ai.gemspec | sed -nE "s/^  spec\.version = '([0-9]+\.[0-9]{1,2})'$/\1/p")"
+          ai_ready=false
+
+          if [ "${ai_version}" = "${version}" ] && [ "${ai_gemspec_version}" = "${version}" ] && git merge-base --is-ancestor origin/dev origin/ai; then
+            ai_ready=true
+          else
+            echo "::warning::evil-winrm-ai ${version} will not be published because the AI branch is not up to date with dev or its versions do not match"
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+          echo "ai_ready=${ai_ready}" >> "${GITHUB_OUTPUT}"
+
+  publish:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out released code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Check evil-winrm version on RubyGems
+        id: standard_status
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        shell: bash
+        run: |
+          versions="$(curl --fail --silent --show-error "https://rubygems.org/api/v1/versions/evil-winrm.json")"
+
+          if jq -e --arg version "${VERSION}" 'any(.[]; .number == $version)' <<< "${versions}" > /dev/null; then
+            echo "evil-winrm ${VERSION} is already published"
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+          else
+            echo "publish=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Configure RubyGems credentials
+        if: steps.standard_status.outputs.publish == 'true' || needs.prepare.outputs.ai_ready == 'true'
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+
+      - name: Build and publish evil-winrm
+        if: steps.standard_status.outputs.publish == 'true'
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        shell: bash
+        run: |
+          gem build evil-winrm.gemspec
+          gem push "evil-winrm-${VERSION}.gem"
+
+      - name: Check out AI branch
+        if: needs.prepare.outputs.ai_ready == 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: ai
+          persist-credentials: false
+
+      - name: Check evil-winrm-ai version on RubyGems
+        if: needs.prepare.outputs.ai_ready == 'true'
+        id: ai_status
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        shell: bash
+        run: |
+          versions="$(curl --fail --silent --show-error "https://rubygems.org/api/v1/versions/evil-winrm-ai.json")"
+
+          if jq -e --arg version "${VERSION}" 'any(.[]; .number == $version)' <<< "${versions}" > /dev/null; then
+            echo "evil-winrm-ai ${VERSION} is already published"
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+          else
+            echo "publish=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Build and publish evil-winrm-ai
+        if: needs.prepare.outputs.ai_ready == 'true' && steps.ai_status.outputs.publish == 'true'
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        shell: bash
+        run: |
+          gem build evil-winrm-ai.gemspec
+          gem push "evil-winrm-ai-${VERSION}.gem"
