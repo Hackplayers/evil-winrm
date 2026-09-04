@@ -7,7 +7,8 @@
  - Created Docker ai tagged autobuild image
 
 ### 4.2
- - TODO
+ - Fixed custom LLM model selection
+ - Added HTTP response details to LLM debug errors
 
 ### 4.1
  - Enhanced compatibility with new bundler version
