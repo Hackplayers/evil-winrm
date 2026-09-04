@@ -407,6 +407,11 @@ class EvilWinRM
     rescue StandardError => e
       command = ""
       print_message("Error in LLM: #{e.class} -> #{e}.\nPlease refer to the --help option to find the required parameters for using LLM", TYPE_ERROR)
+      if $llm_log_level == Logger::DEBUG && e.respond_to?(:response) && e.response
+        response_status = e.response[:status]
+        response_body = e.response[:body]
+        print_message("LLM HTTP response: status #{response_status}, body: #{response_body}", TYPE_ERROR)
+      end
     end
     command
   end
