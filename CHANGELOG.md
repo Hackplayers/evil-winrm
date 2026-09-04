@@ -6,6 +6,9 @@
  - Created separated ruby gem for AI version (evil-winrm-ai)
  - Created Docker ai tagged autobuild image
 
+### 4.2
+ - TODO
+
 ### 4.1
  - Enhanced compatibility with new bundler version
  - Added Ruby 4.0 support

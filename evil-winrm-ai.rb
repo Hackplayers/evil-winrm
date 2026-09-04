@@ -23,7 +23,7 @@ require 'thread'
 # Constants
 
 # Version
-VERSION = '4.1'
+VERSION = '4.2'
 
 # Msg types
 TYPE_INFO = 0
