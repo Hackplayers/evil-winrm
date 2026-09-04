@@ -362,7 +362,7 @@ class EvilWinRM
       }
     end
     if is_llm_model_defined
-      params["model"] = $llm_model
+      params[:model] = $llm_model
     end
     return params
   end
