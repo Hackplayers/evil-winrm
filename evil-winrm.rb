@@ -1570,9 +1570,9 @@ class EvilWinRM
                 sleep(timeToWait)
               end
               unless @Bypass_4MSI_loaded
-                load_Bypass_4MSI(shell)
-                load_ETW_patch(shell)
-                @Bypass_4MSI_loaded = true
+                if load_Bypass_4MSI(shell) && load_ETW_patch(shell)
+                  @Bypass_4MSI_loaded = true
+                end
               end
             elsif command.strip.downcase == 'clear' || command.strip.downcase == 'cls'
               command = ''
@@ -1816,7 +1816,7 @@ class EvilWinRM
     thread.join
   end
 
-  def load_powershell(shell, powershell_script, sleep_for = 2)
+  def load_powershell(shell, powershell_script, sleep_for = 2, stop_on_output = false)
     outputs = []
     num_jumps = powershell_script.scan(/#jump/).size + 1
     current_jump = 1
@@ -1826,6 +1826,7 @@ class EvilWinRM
         output = shell.run(item)
         if !output.output.nil? && !output.output.empty? && !output.output.chomp.empty?
           outputs << output.output
+          break if stop_on_output
         end
         current_jump += 1
         wait_for(sleep_for)
@@ -1842,11 +1843,20 @@ class EvilWinRM
   def load_Bypass_4MSI(shell)
     bypass = get_Bypass_4MSI
     print_message('Patching 4MSI, please be patient...', TYPE_INFO, true)
-    outputs = load_powershell(shell, bypass, 2)
+    outputs = load_powershell(shell, bypass, 2, true)
     if outputs.empty?
       print_message('[+] Success!', TYPE_SUCCESS, false)
+      true
     else
-      puts(outputs.join("\n"))
+      error_output = outputs.join("\n")
+      if error_output.match?(/malicious content and has been blocked by your antivirus software/i)
+        print_message('AMSI bypass was detected and blocked by the antivirus', TYPE_ERROR, true)
+      else
+        print_message('AMSI bypass failed', TYPE_ERROR, true)
+      end
+      print_message('Original output:', TYPE_WARNING, false)
+      puts(error_output)
+      false
     end
   end
 
@@ -1860,8 +1870,10 @@ class EvilWinRM
     outputs = load_powershell(shell, result)
     if outputs.empty?
       print_message('[+] Success!', TYPE_SUCCESS, false)
+      true
     else
       puts("Error #{outputs.join("\n")}")
+      false
     end
   end
 
