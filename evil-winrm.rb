@@ -1543,10 +1543,9 @@ class EvilWinRM
                 puts
                 output = shell.run($MENU_CMD)
                 autocomplete = output.output || ""
-                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-                autocomplete = autocomplete || ""
+                autocomplete = autocomplete.gsub(/\r\n?/, "\n")
                 assemblyautocomplete = shell.run($SHOW_GLOBAL_METHODS_CMD).output.chomp
-                assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
+                assemblyautocomplete = assemblyautocomplete.gsub(/\r\n?/, "\n")
                 unless assemblyautocomplete.to_s.empty?
                   $LISTASSEMNOW = assemblyautocomplete.split("\n")
                   $LISTASSEM = $LISTASSEM + $LISTASSEMNOW

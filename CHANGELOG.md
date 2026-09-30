@@ -1,5 +1,5 @@
 ### 4.2
- - TODO
+ - Fixed menu output normalization when PowerShell output already uses LF line endings
 
 ### 4.1
  - Enhanced compatibility with new bundler version
