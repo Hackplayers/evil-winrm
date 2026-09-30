@@ -37,7 +37,7 @@ TYPE_SUCCESS = 4
 # Available commands
 $LIST = %w[Bypass-4MSI services upload download clear cls menu exit quit]
 $COMMANDS = $LIST.dup
-$CMDS = $COMMANDS.clone
+$CMDS = ['Bypass-4MSI', 'services', 'upload', 'download', 'clear / cls', 'menu', 'exit / quit']
 $LISTASSEM = [''].sort
 $DONUTPARAM1 = ['-process_id']
 $DONUTPARAM2 = ['-donutfile']

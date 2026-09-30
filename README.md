@@ -156,10 +156,9 @@ _".,_,.__).,) (.._( ._),     )  , (._..( '.._"._, . '._)_(..,_(_".) _( _')
 [+] services
 [+] upload
 [+] download
-[+] clear
-[+] cls
+[+] clear / cls
 [+] menu
-[+] exit
+[+] exit / quit
 
 ```
 
