@@ -1529,24 +1529,21 @@ class EvilWinRM
             elsif command.start_with?('menu')
               command = ''
               silent_warnings do
-                if @Bypass_4MSI_loaded
-                  unless @psLoaded
-                      print_message("Bypass-4MSI is loaded. Trying to load utilities", TYPE_INFO, true, $logger)
-                      shell.run(donuts)
-                      shell.run(invokeBin)
-                      shell.run(dllloader)
-                      @psLoaded = true
-                  end
+                unless @psLoaded
+                  print_message('Trying to load utilities', TYPE_INFO, true, $logger)
+                  shell.run(donuts)
+                  shell.run(invokeBin)
+                  shell.run(dllloader)
+                  @psLoaded = true
                 end
                 outputs = load_powershell(shell, menu, 2)
                 puts(get_banner)
                 puts
                 output = shell.run($MENU_CMD)
                 autocomplete = output.output || ""
-                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-                autocomplete = autocomplete || ""
+                autocomplete = autocomplete.gsub(/\r\n?/, "\n")
                 assemblyautocomplete = shell.run($SHOW_GLOBAL_METHODS_CMD).output.chomp
-                assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
+                assemblyautocomplete = assemblyautocomplete.gsub(/\r\n?/, "\n")
                 unless assemblyautocomplete.to_s.empty?
                   $LISTASSEMNOW = assemblyautocomplete.split("\n")
                   $LISTASSEM = $LISTASSEM + $LISTASSEMNOW

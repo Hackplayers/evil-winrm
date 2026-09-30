@@ -1,5 +1,5 @@
 ### 4.2
- - TODO
+ - Fixed built-in utility loading and menu output normalization
 
 ### 4.1
  - Enhanced compatibility with new bundler version
