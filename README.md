@@ -126,7 +126,7 @@ To use IPv6, the address must be added to /etc/hosts. Just put the already set n
    If you are using Evil-WinRM in a docker environment, bear in mind that all local paths should be at `/data` and be pretty sure that you mapped it as a volume in order to be able to access to downloaded files or to be able to upload files from your local host O.S.
 
  - **services**: list all services showing if there your account has permissions over each one. No administrator permissions needed to use this feature.
- - **menu**: list the available commands and loaded PowerShell functions. The built-in `Invoke-Binary`, `Dll-Loader` and `Donut-Loader` functions are loaded only after running `Bypass-4MSI`. Run `menu` again afterwards to load and display them.
+ - **menu**: list the available commands and loaded PowerShell functions. Before `Bypass-4MSI` succeeds, `menu` only displays the standard commands and any previously loaded PowerShell functions. After it succeeds, run `menu` to load and display the built-in `Invoke-Binary`, `Dll-Loader` and `Donut-Loader` functions.
  - **clear** or **cls**: clear the terminal screen. You can also use `Ctrl+L` keyboard shortcut to clear the screen.
  - **exit** or **quit**: close the Evil-WinRM session. You can also use the `Ctrl+D` keyboard shortcut.
 
