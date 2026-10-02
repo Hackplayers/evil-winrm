@@ -139,7 +139,7 @@ module WinRM
               out = _write_file(fd, output)
               index += out.length
             end
-          rescue EstandardError => err
+          rescue StandardError => err
             @logger.debug("IO Failed: " + err.to_s)
             raise
           end
