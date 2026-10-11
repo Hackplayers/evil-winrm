@@ -1,5 +1,6 @@
 ### 4.2
  - Fixed menu output normalization when PowerShell output already uses LF line endings
+ - AMSI bypass refactor
 
 ### 4.1
  - Enhanced compatibility with new bundler version
