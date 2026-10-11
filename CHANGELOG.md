@@ -7,6 +7,8 @@
  - Created Docker ai tagged autobuild image
 
 ### 4.2
+ - Fixed menu output normalization when PowerShell output already uses LF line endings
+ - AMSI bypass refactor
  - Fixed custom LLM model selection
  - Added HTTP response details to LLM debug errors
 
