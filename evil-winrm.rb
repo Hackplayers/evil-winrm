@@ -17,6 +17,7 @@ require 'io/console'
 require 'time'
 require 'fileutils'
 require 'logger'
+require 'open3'
 require 'shellwords'
 require 'thread'
 
@@ -1022,17 +1023,17 @@ class EvilWinRM
         custom_exit(1, false)
       end
 
-      cmd = "#{python_cmd} #{converter_found} #{expanded_kirbi} #{ccache_path} 2>&1"
+      cmd = [python_cmd, converter_found, expanded_kirbi, ccache_path]
     else
       # It's a shell script or executable, run it directly
-      cmd = "#{converter_found} #{expanded_kirbi} #{ccache_path} 2>&1"
+      cmd = [converter_found, expanded_kirbi, ccache_path]
     end
 
     # Run conversion
     print_message("Converting kirbi ticket to ccache format...", TYPE_INFO, true, $logger)
-    result = `#{cmd}`
+    result, status = Open3.capture2e(*cmd)
 
-    unless $?.success?
+    unless status.success?
       # Parse error output to provide a clearer message
       error_lines = result.split("\n")
 
