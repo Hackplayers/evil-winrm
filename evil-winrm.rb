@@ -320,14 +320,15 @@ class EvilWinRM
     $user_agent = options[:user_agent]
     $ccache_file = options[:ccache]
     unless $log.nil?
+      safe_host = ($host || 'unknown').gsub(/[^a-zA-Z0-9._-]/, '_')
+      safe_host = 'unknown' if safe_host.empty? || %w[. ..].include?(safe_host)
+      if Gem.win_platform? && safe_host.match?(/\A(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|\z)/i)
+        safe_host = "_#{safe_host}"
+      end
+      log_dir = File.join($full_logging_path, Time.now.strftime('%Y%d%m'), safe_host)
 
-      FileUtils.mkdir_p $full_logging_path
-
-      FileUtils.mkdir_p "#{$full_logging_path}/#{Time.now.strftime('%Y%d%m')}"
-
-      FileUtils.mkdir_p "#{$full_logging_path}/#{Time.now.strftime('%Y%d%m')}/#{$host}"
-
-      $filepath = "#{$full_logging_path}/#{Time.now.strftime('%Y%d%m')}/#{$host}/#{Time.now.strftime('%H%M%S')}"
+      FileUtils.mkdir_p log_dir
+      $filepath = File.join(log_dir, Time.now.strftime('%H%M%S'))
       $logger = Logger.new($filepath)
       $logger.formatter = proc do |_severity, datetime, _progname, msg|
         "#{datetime}: #{msg}\n"
