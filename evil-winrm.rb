@@ -157,13 +157,25 @@ module WinRM
         end
 
         FileUtils.mkdir_p(local_path) unless File.directory?(local_path)
+        local_root = File.expand_path(local_path)
+        local_root_prefix = local_root.end_with?(File::SEPARATOR) ? local_root : "#{local_root}#{File::SEPARATOR}"
+        comparable_root = Gem.win_platform? ? local_root_prefix.downcase : local_root_prefix
+        downloaded_paths = {}
         command = "Get-ChildItem #{remote_path} | Select-Object Name"
 
         @connection.shell(:powershell) { |e| e.run(command) }.stdout.strip.split(/\n/).drop(2).each do |file|
-          sanitized_path = File.basename(file.strip)
-          next if sanitized_path.empty? || sanitized_path == '.' || sanitized_path == '..'
+          filename = file.strip
+          next if filename.empty? || filename == '.' || filename == '..'
+          raise "Unsafe remote filename: #{filename.inspect}" if filename.include?("\0") || filename.match?(/[\\\/]/)
 
-          download(File.join(remote_file_path.to_s, file.strip), File.join(local_path, sanitized_path), chunk_size, false)
+          local_file_path = File.expand_path(File.join(local_root, filename))
+          comparable_path = Gem.win_platform? ? local_file_path.downcase : local_file_path
+          raise "Unsafe local download path: #{local_file_path}" unless comparable_path.start_with?(comparable_root)
+          raise "Refusing to overwrite symbolic link: #{local_file_path}" if File.symlink?(local_file_path)
+          raise "Duplicate remote filename: #{filename.inspect}" if downloaded_paths.key?(comparable_path)
+
+          downloaded_paths[comparable_path] = true
+          download(File.join(remote_file_path.to_s, filename), local_file_path, chunk_size, false)
         end
       end
 

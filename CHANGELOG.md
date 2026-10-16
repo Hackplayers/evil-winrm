@@ -2,6 +2,7 @@
  - Fixed menu output normalization when PowerShell output already uses LF line endings
  - AMSI bypass refactor
  - Fixed security vulnerability - [GHSA-5h8j-w75g-x84x](https://github.com/Hackplayers/evil-winrm/security/advisories/GHSA-5h8j-w75g-x84x)
+ - Hardened recursive downloads against unsafe remote filenames, duplicate paths, and symbolic link targets
 
 ### 4.1
  - Enhanced compatibility with new bundler version
