@@ -17,6 +17,7 @@ require 'io/console'
 require 'time'
 require 'fileutils'
 require 'logger'
+require 'open3'
 require 'shellwords'
 require 'thread'
 
@@ -185,13 +186,25 @@ module WinRM
         end
 
         FileUtils.mkdir_p(local_path) unless File.directory?(local_path)
+        local_root = File.expand_path(local_path)
+        local_root_prefix = local_root.end_with?(File::SEPARATOR) ? local_root : "#{local_root}#{File::SEPARATOR}"
+        comparable_root = Gem.win_platform? ? local_root_prefix.downcase : local_root_prefix
+        downloaded_paths = {}
         command = "Get-ChildItem #{remote_path} | Select-Object Name"
 
         @connection.shell(:powershell) { |e| e.run(command) }.stdout.strip.split(/\n/).drop(2).each do |file|
-          sanitized_path = File.basename(file.strip)
-          next if sanitized_path.empty? || sanitized_path == '.' || sanitized_path == '..'
+          filename = file.strip
+          next if filename.empty? || filename == '.' || filename == '..'
+          raise "Unsafe remote filename: #{filename.inspect}" if filename.include?("\0") || filename.match?(/[\\\/]/)
 
-          download(File.join(remote_file_path.to_s, file.strip), File.join(local_path, sanitized_path), chunk_size, false)
+          local_file_path = File.expand_path(File.join(local_root, filename))
+          comparable_path = Gem.win_platform? ? local_file_path.downcase : local_file_path
+          raise "Unsafe local download path: #{local_file_path}" unless comparable_path.start_with?(comparable_root)
+          raise "Refusing to overwrite symbolic link: #{local_file_path}" if File.symlink?(local_file_path)
+          raise "Duplicate remote filename: #{filename.inspect}" if downloaded_paths.key?(comparable_path)
+
+          downloaded_paths[comparable_path] = true
+          download(File.join(remote_file_path.to_s, filename), local_file_path, chunk_size, false)
         end
       end
 
@@ -564,14 +577,15 @@ class EvilWinRM
     $llm_log_level = options[:llm_log_errors] || Logger::ERROR
     $ccache_file = options[:ccache]
     unless $log.nil?
+      safe_host = ($host || 'unknown').gsub(/[^a-zA-Z0-9._-]/, '_')
+      safe_host = 'unknown' if safe_host.empty? || %w[. ..].include?(safe_host)
+      if Gem.win_platform? && safe_host.match?(/\A(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|\z)/i)
+        safe_host = "_#{safe_host}"
+      end
+      log_dir = File.join($full_logging_path, Time.now.strftime('%Y%d%m'), safe_host)
 
-      FileUtils.mkdir_p $full_logging_path
-
-      FileUtils.mkdir_p "#{$full_logging_path}/#{Time.now.strftime('%Y%d%m')}"
-
-      FileUtils.mkdir_p "#{$full_logging_path}/#{Time.now.strftime('%Y%d%m')}/#{$host}"
-
-      $filepath = "#{$full_logging_path}/#{Time.now.strftime('%Y%d%m')}/#{$host}/#{Time.now.strftime('%H%M%S')}"
+      FileUtils.mkdir_p log_dir
+      $filepath = File.join(log_dir, Time.now.strftime('%H%M%S'))
       $logger = Logger.new($filepath)
       $logger.formatter = proc do |_severity, datetime, _progname, msg|
         "#{datetime}: #{msg}\n"
@@ -1205,21 +1219,13 @@ class EvilWinRM
       'ticketConverter'
     ]
 
-    converter_paths = []
-
-    # Check in PATH for each name
-    converter_names.each do |name|
-      cmd = `which #{name} 2>/dev/null`.strip
-      converter_paths << cmd unless cmd.empty?
-    end
+    converter_paths = find_executables(converter_names)
 
     # Also check common installation paths
     converter_names.each do |name|
-      converter_paths << name  # Current directory
       converter_paths << "/usr/local/bin/#{name}"
       converter_paths << "/usr/bin/#{name}"
       converter_paths << File.join(Dir.home, '.local', 'bin', name)
-      converter_paths << File.join(Dir.home, name)
     end
 
     # Remove duplicates and empty strings
@@ -1265,30 +1271,24 @@ class EvilWinRM
 
     if is_python
       # It's a Python script, need to run with python/python3
-      python_cmd = nil
-      ['python3', 'python'].each do |py|
-        if system("which #{py} > /dev/null 2>&1")
-          python_cmd = py
-          break
-        end
-      end
+      python_cmd = find_executables(['python3', 'python']).first
 
       unless python_cmd
         print_message("Python not found. Please install Python 3 to convert kirbi tickets.", TYPE_ERROR, true, $logger)
         custom_exit(1, false)
       end
 
-      cmd = "#{python_cmd} #{converter_found} #{expanded_kirbi} #{ccache_path} 2>&1"
+      cmd = [python_cmd, converter_found, expanded_kirbi, ccache_path]
     else
       # It's a shell script or executable, run it directly
-      cmd = "#{converter_found} #{expanded_kirbi} #{ccache_path} 2>&1"
+      cmd = [converter_found, expanded_kirbi, ccache_path]
     end
 
     # Run conversion
     print_message("Converting kirbi ticket to ccache format...", TYPE_INFO, true, $logger)
-    result = `#{cmd}`
+    result, status = Open3.capture2e(*cmd)
 
-    unless $?.success?
+    unless status.success?
       # Parse error output to provide a clearer message
       error_lines = result.split("\n")
 
@@ -1334,6 +1334,34 @@ class EvilWinRM
 
     print_message("[+] Successfully converted to: #{ccache_path}", TYPE_SUCCESS, true, $logger)
     ccache_path
+  end
+
+  def find_executables(names)
+    path_dirs = ENV.fetch('PATH', '').split(File::PATH_SEPARATOR).map do |path|
+      path.gsub(/\A"|"\z/, '')
+    end.select do |path|
+      path.match?(%r{\A(?:[a-zA-Z]:[\\/]|[\\/]{2}|/)})
+    end
+    extensions = if Gem.win_platform?
+                   ENV.fetch('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(';')
+                 else
+                   ['']
+                 end
+
+    names.each_with_object([]) do |name, executables|
+      candidates = if Gem.win_platform? && File.extname(name).empty?
+                     extensions.map { |extension| "#{name}#{extension.downcase}" }
+                   else
+                     [name]
+                   end
+
+      path_dirs.each do |path|
+        candidates.each do |candidate|
+          executable = File.join(path, candidate)
+          executables << executable if File.file?(executable) && File.executable?(executable)
+        end
+      end
+    end.uniq
   end
 
   # True when the exception indicates the WinRM session is dead or was never established
