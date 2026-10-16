@@ -950,21 +950,13 @@ class EvilWinRM
       'ticketConverter'
     ]
 
-    converter_paths = []
-
-    # Check in PATH for each name
-    converter_names.each do |name|
-      cmd = `which #{name} 2>/dev/null`.strip
-      converter_paths << cmd unless cmd.empty?
-    end
+    converter_paths = find_executables(converter_names)
 
     # Also check common installation paths
     converter_names.each do |name|
-      converter_paths << name  # Current directory
       converter_paths << "/usr/local/bin/#{name}"
       converter_paths << "/usr/bin/#{name}"
       converter_paths << File.join(Dir.home, '.local', 'bin', name)
-      converter_paths << File.join(Dir.home, name)
     end
 
     # Remove duplicates and empty strings
@@ -1010,13 +1002,7 @@ class EvilWinRM
 
     if is_python
       # It's a Python script, need to run with python/python3
-      python_cmd = nil
-      ['python3', 'python'].each do |py|
-        if system("which #{py} > /dev/null 2>&1")
-          python_cmd = py
-          break
-        end
-      end
+      python_cmd = find_executables(['python3', 'python']).first
 
       unless python_cmd
         print_message("Python not found. Please install Python 3 to convert kirbi tickets.", TYPE_ERROR, true, $logger)
@@ -1079,6 +1065,34 @@ class EvilWinRM
 
     print_message("[+] Successfully converted to: #{ccache_path}", TYPE_SUCCESS, true, $logger)
     ccache_path
+  end
+
+  def find_executables(names)
+    path_dirs = ENV.fetch('PATH', '').split(File::PATH_SEPARATOR).map do |path|
+      path.gsub(/\A"|"\z/, '')
+    end.select do |path|
+      path.match?(%r{\A(?:[a-zA-Z]:[\\/]|[\\/]{2}|/)})
+    end
+    extensions = if Gem.win_platform?
+                   ENV.fetch('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(';')
+                 else
+                   ['']
+                 end
+
+    names.each_with_object([]) do |name, executables|
+      candidates = if Gem.win_platform? && File.extname(name).empty?
+                     extensions.map { |extension| "#{name}#{extension.downcase}" }
+                   else
+                     [name]
+                   end
+
+      path_dirs.each do |path|
+        candidates.each do |candidate|
+          executable = File.join(path, candidate)
+          executables << executable if File.file?(executable) && File.executable?(executable)
+        end
+      end
+    end.uniq
   end
 
   # True when the exception indicates the WinRM session is dead or was never established
